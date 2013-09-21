@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>FORM MAILER v0.63 送信フォーム</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+<link type="text/css" rel="stylesheet" href="css/style_custom.css" />
+<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="js/charCount.js"></script>
+<script type="text/javascript" src="js/javascript.js"></script>
+<script type="text/javascript" src="js/zip2adr.js"></script>
+<script type="text/javascript">
+$(function () {
+	$("#pcode").bind("blur keyup", function() {
+		$.fn.zip2adr($(this).val(), function(resp) {
+			$("#pref").val(resp.pref);
+			$("#city").val(resp.below);
+		});
+	});
+});
+</script>
+</head>
+<body>
+<div id="header">
+&nbsp;
+</div>
+
+<div id="main">
+
+<h2>FORM MAILER v0.63 送信フォーム</h2>
+
+<!-- errmsg -->
+
+<form action="f_mailer.cgi" method="post" enctype="multipart/form-data">
+<fieldset>
+
+<input type="hidden" name="GETCODE" value="文字コード" />
+<input type="hidden" name="CONFID" value="sample" />
+
+<table class="tbl">
+<tr>
+<td class="bg_eef">お名前<span class="required">*</span></td>
+<td><input type="text" name="name" size="30" style="ime-mode:active" /></td>
+</tr>
+<tr>
+<td class="bg_eef">フリガナ<span class="required">*</span></td>
+<td>
+<input type="text" name="kana" size="30" style="ime-mode:active" /> <span class="caption">※全角カタカナのみ</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">性別<span class="required">*</span></td>
+<td>
+<input type="radio" name="sex" value="男性" />男性　
+<input type="radio" name="sex" value="女性" />女性
+</td>
+</tr>
+<tr>
+<td class="bg_eef">メールアドレス<span class="required">*</span></td>
+<td><input type="text" name="EMAIL" size="60" style="ime-mode:inactive" /></td>
+</tr>
+<tr>
+<td class="bg_eef">メールアドレス(確認)<span class="required">*</span></td>
+<td><input type="text" name="EMAIL2" size="60" style="ime-mode:inactive" /></td>
+</tr>
+<tr>
+<td class="bg_eef">住所<span class="required">*</span></td>
+<td>
+<table class="tbl">
+<tr>
+<td class="bg_eef">郵便番号</td>
+<td>
+<input type="text" name="pcode" id="pcode" size="8" style="ime-mode:inactive" /> <span class="caption">※XXX-XXXXの形式</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">都道府県</td>
+<td>
+<select name="pref" id="pref">
+<option value="">&nbsp;</option>
+<option value="北海道">北海道</option>
+<option value="青森県">青森県</option>
+<option value="岩手県">岩手県</option>
+<option value="宮城県">宮城県</option>
+<option value="秋田県">秋田県</option>
+<option value="山形県">山形県</option>
+<option value="福島県">福島県</option>
+<option value="茨城県">茨城県</option>
+<option value="栃木県">栃木県</option>
+<option value="群馬県">群馬県</option>
+<option value="埼玉県">埼玉県</option>
+<option value="千葉県">千葉県</option>
+<option value="東京都">東京都</option>
+<option value="神奈川県">神奈川県</option>
+<option value="山梨県">山梨県</option>
+<option value="長野県">長野県</option>
+<option value="新潟県">新潟県</option>
+<option value="富山県">富山県</option>
+<option value="石川県">石川県</option>
+<option value="福井県">福井県</option>
+<option value="岐阜県">岐阜県</option>
+<option value="静岡県">静岡県</option>
+<option value="愛知県">愛知県</option>
+<option value="三重県">三重県</option>
+<option value="滋賀県">滋賀県</option>
+<option value="京都府">京都府</option>
+<option value="大阪府">大阪府</option>
+<option value="兵庫県">兵庫県</option>
+<option value="奈良県">奈良県</option>
+<option value="和歌山県">和歌山県</option>
+<option value="鳥取県">鳥取県</option>
+<option value="島根県">島根県</option>
+<option value="岡山県">岡山県</option>
+<option value="広島県">広島県</option>
+<option value="山口県">山口県</option>
+<option value="徳島県">徳島県</option>
+<option value="香川県">香川県</option>
+<option value="愛媛県">愛媛県</option>
+<option value="高知県">高知県</option>
+<option value="福岡県">福岡県</option>
+<option value="佐賀県">佐賀県</option>
+<option value="長崎県">長崎県</option>
+<option value="熊本県">熊本県</option>
+<option value="大分県">大分県</option>
+<option value="宮崎県">宮崎県</option>
+<option value="鹿児島県">鹿児島県</option>
+<option value="沖縄県">沖縄県</option>
+</select>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">市区名等</td>
+<td>
+<input type="text" name="city" id="city" size="50" /> <span class="caption">※××市××町</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">住所/マンション等</td>
+<td>
+<input type="text" name="addr" id="addr" size="50" /> <span class="caption">※X-X-X ××マンションXXX</span>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">電話番号<span class="required">*</span></td>
+<td>
+<input type="text" name="tel" size="16" /> <span class="caption">※XXX-XXXX-XXXXの形式</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">機種依存文字判定</td>
+<td>
+<input type="text" name="rel" size="50" /> <span class="caption">※機種依存文字不可</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">URL判定</td>
+<td>
+<input type="text" name="url" size="60" /> <span class="caption">※URLの形式</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">複数回答</td>
+<td>
+<input type="checkbox" id="q1_1" name="q1" value="りんご" /><label for="q1_1">りんご</label>　
+<input type="checkbox" id="q1_2" name="q1" value="もも" /><label for="q1_2">もも</label>　
+<input type="checkbox" id="q1_3" name="q1" value="みかん" /><label for="q1_3">みかん</label>　
+<input type="checkbox" id="q1_4" name="q1" value="バナナ" /><label for="q1_4">バナナ</label>　
+<input type="checkbox" id="q1_5" name="q1" value="梨" /><label for="q1_5">梨</label>　
+<input type="checkbox" id="q1_6" name="q1" value="ぶどう" /><label for="q1_6">ぶどう</label><br />
+<span class="caption">※3つまで選択可</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">数値範囲</td>
+<td>
+<input type="text" name="pts" size="4" style="ime-mode:inactive" /> <span class="caption">※半角数字、25以上75以下</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">メッセージ</td>
+<td>
+<textarea name="message" cols="70" rows="5" style="ime-mode:active" class="charcnt_1000"></textarea>
+<span class="caption">※1000文字以内</span>
+</td>
+</tr>
+<tr>
+<td class="bg_eef">ファイル</td>
+<td>
+<input type="file" name="att1" size="60" /><br />
+<input type="file" name="att2" size="60" /><br />
+<input type="file" name="att3" size="60" /><br />
+<span class="caption">※1ファイル最大512kb、合計1536kb</span>
+</td>
+</tr>
+</table>
+
+
+<input type="checkbox" name="SEND_FORCED" value="1" />確認画面を出さずに送信<br />
+<input type="submit" value="送　信" />
+<input type="button" value="クリア" class="reset" />
+</fieldset>
+</form>
+
+</div>
+<div id="footer">
+<strong>FORM MAILER v0.63</strong>
+&copy;1997-2013 <a href="http://www.psl.ne.jp/" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
+</div>
+</body>
+</html>

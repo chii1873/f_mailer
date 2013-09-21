@@ -1,0 +1,103 @@
+<!-- header -->
+
+<script type="text/javascript">
+$(function() {
+	$("#tabs").tabs({ active: 1 });
+//	$("#tabs").tabs("option", "selected", 1);
+	$(".tooltip").tooltip();
+});
+function to_confform () {
+	$("#confform").val("1");
+	$("#confpanel_import").val("");
+	$("#form0").submit();
+}
+function to_confpanel_import () {
+	$("#confform").val("");
+	$("#confpanel_import").val("1");
+	$("#form0").submit();
+}
+</script>
+
+<h2>フォーム入力条件設定</h2>
+
+<p><a href="#" onclick="if(confirm('設定内容を更新せずに管理メニューに戻ります。よろしいですか?')){location.href='f_mailer_admin.cgi'}">管理メニューへ</a></p>
+
+
+<!-- errmsg -->
+
+<form action="f_mailer_admin.cgi" method="post" id="form0">
+<fieldset>
+<input type="hidden" name="conf_id" value="##conf_id##" />
+<input type="hidden" name="formcheck" value="confpanel" />
+<input type="hidden" name="temp" value="##temp##" />
+<input type="hidden" name="cond" value="##cond##" />
+<input type="hidden" name="tmp" value="##order_max##" />
+<input type="hidden" id="confform" name="confform" />
+<input type="hidden" id="confpanel_import" name="confpanel_import" />
+
+
+<p class="r"><input type="button" value="入力条件設定対象フォームの読み込み" onclick="to_confpanel_import()" /></p>
+
+
+<table class="tbl">
+<tr>
+<th class="bg_eef">設定対象ファイル</th>
+<td class="bg_eef">&nbsp;CONFID: ##conf_id_dsp## / ファイル名: ##conffile_dsp##&nbsp;</td></tr>
+</table>
+
+<div id="tabs">
+<ul>
+<li><a href="#tabs-1"><span onclick="to_confform();">パラメータ設定</span></a></li>
+<li><a href="#tabs-2"><span>フォーム入力条件設定</span></a></li>
+</ul>
+
+<div id="tabs-2">
+
+<table class="tbl">
+<tr class="bg_eef"><td rowspan="2" class="c">順</td>
+<td rowspan="2" class="c">項目名</td>
+<td rowspan="2" class="c">型</td>
+<td colspan="##colspan_s##" class="c">制限項目</td></tr>
+<tr class="bg_eef">
+##fields_dsp##
+</tr>
+
+<!-- tr><td>　</td><td>CONFID</td><th>-</th><td colspan=18>##confstr##</th></tr -->
+
+##liststr##
+
+<tr><td><input name="order_SERIAL" size="2" value="##order_SERIAL##" class="r" /></td>
+<td><a href="javascript:order('SERIAL')">SERIAL</a></td>
+<td colspan="##colspan##">別名：<input name="_cond_alt_SERIAL" value="##_cond_alt_SERIAL##" size="16" />&nbsp;<span class="caption">シリアル番号の値。フォーム送信ごとに1ずつ増えていきます。</span></td>
+</tr>
+<tr><td><input name="order_REMOTE_HOST" size="2" value="##order_REMOTE_HOST##" class="r" /></td>
+<td><a href="javascript:order('REMOTE_HOST')">REMOTE_HOST</a></td>
+<td colspan="##colspan##">別名：<input name="_cond_alt_REMOTE_HOST" value="##_cond_alt_REMOTE_HOST##" size="16" />&nbsp;<span class="caption">環境変数 REMOTE_HOST の値。接続元ホスト名。</span></td>
+</tr>
+<tr><td><input name="order_REMOTE_ADDR" size="2" value="##order_REMOTE_ADDR##" class="r" /></td>
+<td><a href="javascript:order('REMOTE_ADDR')">REMOTE_ADDR</a></td>
+<td colspan="##colspan##">別名：<input name="_cond_alt_REMOTE_ADDR" value="##_cond_alt_REMOTE_ADDR##" size="16" />&nbsp;<span class="caption">環境変数 REMOTE_ADDR の値。接続元のIPアドレス。</span></td></tr>
+<tr><td><input name="order_USER_AGENT" size="2" value="##order_USER_AGENT##" class="r" /></td>
+<td><a href="javascript:order('USER_AGENT')">USER_AGENT</a></td>
+<td colspan="##colspan##">別名：<input name="_cond_alt_USER_AGENT" value="##_cond_alt_USER_AGENT##" size="16" />&nbsp;<span class="caption">環境変数 HTTP_USER_AGENT の値。ブラウザ名。</span></td>
+</tr>
+<tr><td><input name="order_NOW_DATE" size="2" value="##order_NOW_DATE##" class="r" /></td>
+<td><a href="javascript:order('NOW_DATE')">NOW_DATE</a></td>
+<td colspan="##colspan##">別名：<input name="_cond_alt_NOW_DATE" value="##_cond_alt_NOW_DATE##" size="16" />&nbsp;<span class="caption">送信時の日付。</span></td></tr>
+
+</table>
+
+&nbsp;↑<a href="javascript:order_clear()">並び順のクリア</a>
+
+<div class="caption">
+※フォームフィールドごとの入力条件設定をします。<br />
+※項目名は、<tt>&lt;input&gt;</tt>タグや<tt>&lt;select&gt;</tt>タグの<tt>name=""</tt>属性のことです。<tt>name=""</tt>属性には極力英数字のみを使うようにし、表示用の名称として別名指定することをお勧めします。<br />
+※「順」の欄には、ファイル書き出し時のフィールド並び順を設定します。項目名のリンクをクリックすると、クリックした順序で連番が入っていきます。解除するには、下の「並び順のクリア」をクリックして全消去するか、連番の逆順にクリックして1つずつ消していってください。なお、直接数字を入力することもできます。
+</div>
+</div><!-- /tab-2 -->
+</div><!-- /tabs -->
+
+</fieldset>
+</form>
+
+<!-- footer -->

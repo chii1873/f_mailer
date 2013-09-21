@@ -1,0 +1,47 @@
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html;charset=Shift_JIS">
+<title>住所自動入力</title>
+<style>
+body,td {
+	font-size: 9pt;
+}
+th {
+	font-size: 9pt;
+	background-color:#d6ede5;
+}
+</style>
+<script language=javascript>
+function datainput(mode,f_pcode,f_pref,f_city,f_addr,i) {
+    if (i == 0) i = 0;
+    if (mode == 2) {
+        opener.document.forms[i].pcode2.value = f_pcode;
+        opener.document.forms[i].pref2.selectedIndex = f_pref;
+        opener.document.forms[i].city2.value = f_city + f_addr;
+        opener.document.forms[v].addr2.focus();
+//        opener.document.forms[i].addr2.value = f_addr;
+    } else {
+        opener.document.forms[i].pcode.value = f_pcode;
+        opener.document.forms[i].pref.selectedIndex = f_pref;
+        opener.document.forms[i].city.value = f_city + f_addr;
+        opener.document.forms[i].addr.focus();
+//        opener.document.forms[i].addr.value = f_addr;
+    }
+    window.close();
+}
+</script>
+</head>
+<body onload="##onload##">
+
+以下のリストから住所を選択してください。<p>
+
+<table border cellspacing="0" style="border-collapse:collapse;">
+<tr><th>郵便番号</th><th>住所</th></tr>
+##list##
+</table>
+
+<a href="javascript:window.close()">ウィンドウを閉じる</a>
+</div>
+</body>
+</html>

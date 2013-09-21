@@ -1,0 +1,225 @@
+body {
+	margin-top: 0;
+	margin: 0;
+	padding: 0;
+	font-size: 9.5pt;
+	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif;
+}
+hr {
+	border: 0px;
+	height: 1px;
+	background-color: #999;
+	color: #999;
+	width: 100%;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+a {
+	text-decoration: underline;
+}
+a:hover {
+	color: red;
+}
+
+select {
+	font-size: 9.5pt;
+}
+small {
+	font-size: 8.5pt;
+}
+tr,td,th {
+	font-size: 9.5pt;
+}
+tt,pre {
+	font-family: Courier New, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif;
+	color:brown;
+	font-size: 9.5pt;
+}
+button,
+input[type="submit"],
+input[type="button"] {
+	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif; */
+}
+input {
+	font-family: Osaka, "ＭＳ ゴシック", "MS Gothic", sans-serif; */
+	font-size: 9.5pt;
+}
+textarea {
+	font-family: Osaka, "ＭＳ ゴシック", "MS Gothic", sans-serif; */
+	font-size: 9.5pt;
+}
+
+form,
+fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+#header {
+	margin: 0;
+	padding: 0;
+	background-color: #669;
+}
+#header_navi {
+	float: left;
+	color:#fff;
+	margin: 3px 3px 3px 30px;
+}
+#header_navi a {
+	text-decoration: none;
+	color:#fff;
+/*	border-bottom: 1px white solid; */
+}
+
+#header_navi a:hover {
+	color:#f66;
+}
+
+#header_sysname {
+	float: right;
+	color: #fff;
+	font-weight:bold;
+	margin: 3px 30px 3px 3px;
+}
+
+#main {
+	margin: 30px;
+}
+
+#footer {
+	background: #ddd;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8.5pt;
+	color: #333;
+	border-top: 0px dotted #999;
+	border-bottom: 0px dotted #999;
+	margin: 0px;
+	padding-left: 30px;
+}
+
+.l {
+	text-align: left;
+}
+.r {
+	text-align: right;
+}
+.c {
+	text-align: center;
+}
+
+.t {
+	text-align: top;
+}
+.b {
+	text-align: bottom;
+}
+.red {
+	color: red;
+}
+.brown {
+	color: brown;
+}
+.white {
+	color: white;
+}
+.bg_eef {
+	background-color: #eef;
+}
+.border0 {
+	border: 0px;
+}
+.border1 {
+	border: 1px;
+}
+.required {
+	font-weight: bold;
+	color: red;
+/*	vertical-align: super;  */
+}
+.nowrap {
+	white-space: nowrap;
+}
+.tbl,
+.tbl0
+ {
+	margin: 5px 0 5px 0;
+}
+.tbl,
+.tbl td,
+.tbl th {
+	padding: 3px;
+	border: solid 1px #999;
+	border-collapse: collapse;
+	vertical-align: top;
+}
+.tbl0,
+.tbl0 td,
+.tbl0 th {
+	padding: 3px;
+	border: 0;
+	border-collapse: collapse;
+	vertical-align: top;
+}
+
+.display {
+	margin: 0 1em 0 1em;
+	padding: .5em 1em .5em 1em;
+	border: #ccff99 1px solid;
+	background-color: #ffffcc;
+	color: black;
+}
+.fn {
+	font-size: 8.5pt;
+	font-family: Courier New;
+	color: brown;
+}
+.caption {
+	margin-top: 3px;
+	color: purple;
+}
+
+.errmsg {
+	border: 1px red solid;
+	color: red;
+	background-color:#ffc;
+}
+.auto_height {
+	overflow : hidden;
+	height : 1.2em;
+}
+
+/* charCount.js ここから */
+form .counter {
+/*	position: absolute;
+	right: 0;
+	top: 0;
+	font-size:20px;
+	font-weight:bold; */
+	display: block;
+	color: #999;
+}
+form .warning {
+	color:#600;
+}
+form .exceeded {
+	color:#e00;
+}
+/*
+form div {
+	position:relative;
+	margin: 1em 0 0;
+}
+*/
+/* charCount.js ここまで */
+
+.clearfix {
+	width:100%
+}
+.clearfix:after {
+	content: ""; 
+	display: block; 
+	clear: both;
+	height:0.01px; /* for firefox-bug */
+}

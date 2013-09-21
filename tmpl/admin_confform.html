@@ -1,0 +1,630 @@
+<!-- header -->
+
+<script type="text/javascript">
+$(function() {
+	$('#tabs').tabs();
+});
+function to_confform_done () {
+	$("#confform_done").val("1");
+	$("#confpanel").val("");
+	$("#form0").submit();
+}
+function to_confpanel () {
+	$("#confform_done").val("");
+	$("#confpanel").val("1");
+	$("#form0").submit();
+}
+</script>
+
+<h2>パラメータ設定</h2>
+
+<p><a href="#" onclick="if(confirm('設定内容を更新せずに管理メニューに戻ります。よろしいですか?')){location.href='f_mailer_admin.cgi'}">管理メニューへ</a></p>
+
+<!-- errmsg -->
+
+<form action="f_mailer_admin.cgi" method="post" id="form0">
+<fieldset>
+<input type="hidden" name="conf_id" value="##conf_id##" />
+<input type="hidden" name="temp" value="##temp##" />
+<input type="hidden" name="formcheck" value="confform" />
+<input type="hidden" id="confform_done" name="confform_done" />
+<input type="hidden" id="confpanel" name="confpanel" />
+
+<p class="r"><input type="button" value="下記の内容で更新" onclick="to_confform_done()" /></p>
+
+<table class="tbl">
+<tr>
+<th class="bg_eef">設定対象ファイル</th>
+<td class="bg_eef">&nbsp;CONFID: ##conf_id_dsp## / ファイル名: ##conffile_dsp##&nbsp;</td></tr>
+</table>
+
+
+<div id="tabs">
+<ul>
+<li><a href="#tabs-1">パラメータ設定</a></li>
+<li><a href="#tabs-2"><span onclick="to_confpanel();">フォーム入力条件設定</span></a></li>
+</ul>
+
+<div id="tabs-1">
+
+<table class="tbl">
+<tr><td class="bg_eef">(0)言語モード<span class="fn">(LANG)</span></td>
+<td>
+<select name="LANG">
+##langlist##
+</select>
+<div class="caption">
+※エラーメッセージの言語を選択します。<br />
+※エラーメッセージデータは./data/errmsg_**.txtに設置してあるものの中から選択できます。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef">(1)この設定ファイルの設定名<span class="fn">(label)</span></td>
+<td>
+<input name="label" value="##label##" size="60" />
+<div class="caption">
+※管理メニューで設定ファイルを区別するためにつけておく名前です。
+</div>
+</td></tr>
+
+
+<tr><td class="bg_eef">(2)このシステムのタイトル<span class="fn">(TITLE)</span></td>
+<td>
+<input name="TITLE" value="##TITLE##" size="60" />
+<div class="caption">
+※システムが表示する確認画面、エラー画面、送信完了画面のタイトルに使用されます。<br />
+※空文字列を指定しておくと、「(8-a)メールのタイトル(件名)」で指定した値(SUBJECT)がセットされます。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef nowrap">(3)入力確認画面<span class="fn">(CONFIRM_FLAG)</span></td>
+
+<td>
+<input type="radio" name="CONFIRM_FLAG" value="0" ##CONFIRM_FLAG:0## />[0]省略する ( 直接送信 )<br />
+<input type="radio" name="CONFIRM_FLAG" value="1" ##CONFIRM_FLAG:1## />[1]確認する ( システム内蔵ページ使用 )<br />
+<input type="radio" name="CONFIRM_FLAG" value="2" ##CONFIRM_FLAG:2## />[2]確認する ( ↓以下に指定 )<br />
+<table class="tbl">
+<tr><td class="bg_eef">テンプレート<span class="fn">(CONFIRM_TMPL)</span></td>
+<td><input name="CONFIRM_TMPL" value="##CONFIRM_TMPL##" size="50" /></td></tr>
+<tr><td class="bg_eef">文字コード<span class="fn">(CONFIRM_TMPL_CHARSET)</span></td>
+<td><select name="CONFIRM_TMPL_CHARSET">
+<!-- option value="auto" ##CONFIRM_TMPL_CHARSET:auto##>自動認識</option -->
+<option value="utf8" ##CONFIRM_TMPL_CHARSET:utf8##>UTF-8</option>
+<option value="sjis" ##CONFIRM_TMPL_CHARSET:sjis##>SJIS</option>
+<option value="euc" ##CONFIRM_TMPL_CHARSET:euc##>EUC</option>
+</select></td></tr>
+<tr><td class="bg_eef">付加URL<span class="fn">(CONFIRM_TMPL_BASE_URL)</span></td>
+<td><input name="CONFIRM_TMPL_BASE_URL" value="##CONFIRM_TMPL_BASE_URL##" size="50" />
+</td></tr>
+</table>
+<div class="caption">
+※確認画面を出すかどうかを指定してください。<br />
+※システム内蔵ページとは、<tt>./tmpl/default/confirm.html</tt>のことです。<br />
+※テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。置き場所は<tt>./tmpl/custom/</tt>を推奨します。<br />
+※テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。<br />
+※指定したテンプレートの文字コードを指定できるようになりました。<br />
+※付加URLとは、f_mailer.cgi経由でページを表示した際、相対パスで指定されているstyle/script/img/inputタグのsrc属性、aタグのhref属性が相対パスであった際に冒頭に付加するURLです。リンクや外部ファイルの参照ができなくなるのを防ぎます。なお、cssファイル内で呼び出しているimg()プロパティのパスは書き換わりませんのでご注意ください。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef">(4-1)エラー画面<span class="fn">(ERROR_FLAG)</span></td>
+
+<td>
+<input type="radio" name="ERROR_FLAG" value="0" ##ERROR_FLAG:0## />[0]システム内蔵ページ使用<br />
+<input type="radio" name="ERROR_FLAG" value="1" ##ERROR_FLAG:1## />[1]↓以下に指定<br />
+<table class="tbl">
+<tr><td class="bg_eef">テンプレート<span class="fn">(ERROR_TMPL)</span></td>
+<td><input name="ERROR_TMPL" value="##ERROR_TMPL##" size="50" /></td></tr>
+<tr><td class="bg_eef">文字コード<span class="fn">(ERROR_TMPL_CHARSET)</span></td>
+<td><select name="ERROR_TMPL_CHARSET">
+<!-- option value="auto" ##CONFIRM_TMPL_CHARSET:auto##>自動認識</option -->
+<option value="utf8" ##ERROR_TMPL_CHARSET:utf8##>UTF-8</option>
+<option value="sjis" ##ERROR_TMPL_CHARSET:sjis##>SJIS</option>
+<option value="euc" ##ERROR_TMPL_CHARSET:euc##>EUC</option>
+</select></td></tr>
+<tr><td class="bg_eef">付加URL<span class="fn">(ERROR_TMPL_BASE_URL)</span></td>
+<td><input name="ERROR_TMPL_BASE_URL" value="##ERROR_TMPL_BASE_URL##" size="50" />
+</td></tr>
+</table>
+<div class="caption">
+※システム内蔵ページとは、<tt>./tmpl/default/error.html</tt>のことです。<br />
+※テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。<br />
+※テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。<br />
+※指定したテンプレートの文字コードを指定できるようになりました。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef">(4-2)入力エラー時のフォーム再表示<span class="fn">(FORM_FLAG)</span></td>
+<td>
+<input type="radio" name="FORM_FLAG" value="0" ##FORM_FLAG:0## />[0]入力エラーのとき、(4-1)で指定したエラー画面を表示する<br />
+<input type="radio" name="FORM_FLAG" value="1" ##FORM_FLAG:1## />[1]入力エラーのとき、フォームを再表示する ( ↓以下に指定 )<br />
+<table class="tbl">
+<tr><td class="bg_eef">テンプレート<span class="fn">(FORM_TMPL)</span></td>
+<td><input name="FORM_TMPL" value="##FORM_TMPL##" size="50" /></td></tr>
+<tr><td class="bg_eef">文字コード<span class="fn">(FORM_TMPL_CHARSET)</span></td>
+<td><select name="FORM_TMPL_CHARSET">
+<!-- option value="auto" ##FORM_TMPL_CHARSET:auto##>自動認識</option -->
+<option value="utf8" ##FORM_TMPL_CHARSET:utf8##>UTF-8</option>
+<option value="sjis" ##FORM_TMPL_CHARSET:sjis##>SJIS</option>
+<option value="euc" ##FORM_TMPL_CHARSET:euc##>EUC</option>
+</select></td></tr>
+<tr><td class="bg_eef">付加URL<span class="fn">(FORM_TMPL_BASE_URL)</span></td>
+<td><input name="FORM_TMPL_BASE_URL" value="##FORM_TMPL_BASE_URL##" size="50" />
+</td></tr>
+</table>
+<div class="caption">
+※フォーム入力後に送信ボタンを押したとき、入力フォームそのものを再表示し、入力内容をそのまま維持して、エラーメッセージを出すことができるようになりました。これにより、戻るボタンで戻ったときに入力内容が消えてしまう問題が回避できます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">(5)空欄のフィールドと置き換える文字列<span class="fn">(BLANK_STR)</span></td>
+<td>
+<input name="BLANK_STR" value="##BLANK_STR##" size="10" />
+<div class="caption">
+※空欄を空欄のままとしたい場合は、何も指定しないでください。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef">(6)各入力欄の制限・文字列処理<span class="fn">(COND)</span>
+</td>
+<td>
+→<input type="submit" name="confpanel" value="設定パネル" />
+</td></tr>
+
+<tr><td class="bg_eef">(7)完了画面<span class="fn">(THANKS_FLAG)</span>
+</td>
+<td>
+<input type="radio" name="THANKS_FLAG" value="0" ##THANKS_FLAG:0## />[0]指定したURLへジャンプ→<input name="THANKS" value="##THANKS##" size="60" />
+<br />
+<input type="radio" name="THANKS_FLAG" value="1" ##THANKS_FLAG:1## />[1]システム内蔵ページ使用<br />
+<input type="radio" name="THANKS_FLAG" value="2" ##THANKS_FLAG:2## />[2]↓以下に指定
+
+<table class="tbl">
+<tr><td class="bg_eef">テンプレート<span class="fn">(THANKS_TMPL)</span></td>
+<td><input name="THANKS_TMPL" value="##THANKS_TMPL##" size="50" /></td></tr>
+<tr><td class="bg_eef">文字コード<span class="fn">(THANKS_TMPL_CHARSET)</span></td>
+<td><select name="THANKS_TMPL_CHARSET">
+<!-- option value="auto" ##THANKS_TMPL_CHARSET:auto##>自動認識</option -->
+<option value="utf8" ##THANKS_TMPL_CHARSET:utf8##>UTF-8</option>
+<option value="sjis" ##THANKS_TMPL_CHARSET:sjis##>SJIS</option>
+<option value="euc" ##THANKS_TMPL_CHARSET:euc##>EUC</option>
+</select></td></tr>
+<tr><td class="bg_eef">付加URL<span class="fn">(THANKS_TMPL_BASE_URL)</span></td>
+<td><input name="THANKS_TMPL_BASE_URL" value="##THANKS_TMPL_BASE_URL##" size="50" />
+</td></tr>
+</table>
+<div class="caption">
+※システム内蔵ページとは、<tt>./tmpl/default/thanks.html</tt>のことです。<br />
+※テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。<br />
+※指定したテンプレートの文字コードを指定できるようになりました。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef">(7-a)連続送信防止機能<span class="fn">(DENY_DUPL_SEND)</span>
+</td>
+<td>
+<input type="radio" name="DENY_DUPL_SEND" value="1" ##DENY_DUPL_SEND:1## />[1]使用する ( 禁止期間<span class="fn">(DENY_DUPL_SEND_MIN)</span>→<input name="DENY_DUPL_SEND_MIN" value="##DENY_DUPL_SEND_MIN##" size="5" />分 )　　
+<input type="radio" name="DENY_DUPL_SEND" value="0" ##DENY_DUPL_SEND:0## />[0]使用しない
+<div class="caption">
+※通常は「使用する」にしておくことをおすすめします。<br />
+※連続送信禁止期間を「0」にすると、cookieの有効期限を設定しません(ブラウザ終了時まで有効)。<br />
+※「連続送信防止機能」は、cookie を使うため、送信者のブラウザの cookie 機能が無効になっている場合は機能しません。
+</div>
+</td></tr>
+<tr><td class="bg_eef">(8)管理者に送られるフォーム内容メール</td>
+<td>
+<table class="tbl">
+<tr><td class="bg_eef">送信先<span class="fn">(SENDTO)</span>
+</td><td><textarea name="SENDTO" cols="60" rows="1" class="auto_height">##SENDTO##</textarea>
+<br />
+<input type="checkbox" name="DO_NOT_SEND" value="1" ##DO_NOT_SEND:1## />管理者へメールを送らない<span class="fn">(DO_NOT_SEND)</span>
+<div class="caption">
+※フォームメールの送り先となります。改行区切りで複数指定すると、すべてのアドレスに送ります。<br />
+※同報送信先を指定する場合は、通常1つの送信先を指定してください。<br />
+※「管理者へメールを送らない」にチェックした場合は、(9)自動返信メール送信<span class="fn">(AUTO_REPLY)</span>を「[1]送る」に設定していなければなりません。
+</div>
+</td></tr>
+<tr><td class="bg_eef">同報送信先<span class="fn">(CC)</span>
+</td><td><textarea name="CC" cols="60" rows="1" class="auto_height">##CC##</textarea>
+<div class="caption">
+※フォームメールの送り先(CC)となります。改行区切りで複数指定できます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">送信元アドレス<span class="fn">(SENDFROM)</span></td>
+<td><input name="SENDFROM" value="##SENDFROM##" size="60" />
+<div class="caption">
+※フォームメールのFromヘッダとなります。ただし、フォーム中に name="EMAIL" の入力欄があって、その値がある場合は、EMAILの値が優先され Fromヘッダとなります。 
+</div>
+</td></tr>
+<tr><td class="bg_eef nowrap">エラー送信先<br /><span class="fn">(ENVELOPE_ADDR)</span>
+</td><td><input name="ENVELOPE_ADDR" value="##ENVELOPE_ADDR##" size="60" />
+<br />
+<input type="checkbox" name="ENVELOPE_ADDR_LINK" value="1" ##ENVELOPE_ADDR_LINK:1## />送信元アドレスを自動的に指定する<span class="fn">(ENVELOPE_ADDR_LINK)</span>
+<div class="caption">
+※メールが何らかの原因で届けられなかった場合に、エラーメールを届けるメールアドレスを指定します。管理者のメールアドレスを指定してください。<br />
+※「送信元アドレスを自動的に指定する」にチェックを入れると、フォーム中に name="EMAIL" の入力欄があって、その値がある場合は、EMAILの値が、ない場合は「送信元アドレス<span class="fn">(SENDFROM)</span>」の値が自動的に指定されます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">件名<span class="fn">(SUBJECT)</span>
+</td><td><input name="SUBJECT" value="##SUBJECT##" size="60" />
+<div class="caption">
+※フォームメールのSubjectヘッダとなります。 <br />
+<a href="javascript:display_sw('subject')">件名内で指定できる差し込み用文字列の一覧</a>
+
+<div id="subject" style="display:none">
+<table class="tbl">
+<tr>
+<td><tt>&#35;&#35;フィールド名&#35;&#35;</tt></td><td>フィールド値</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n&#35;&#35;</tt></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
+<tr><td class="nowrap"><tt>&#35;&#35;フィールド名::h&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n:v&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
+<tr><td><tt>&#35;&#35;SERIAL&#35;&#35;</tt></td><td>シリアル番号</td></tr>
+<tr><td><tt>&#35;&#35;NOW_DATE&#35;&#35;</tt></td><td>送信日時</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_HOST&#35;&#35;</tt></td><td>接続元ホスト名</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_ADDR&#35;&#35;</tt></td><td>接続元IPアドレス</td></tr>
+<tr><td><tt>&#35;&#35;USER_AGENT&#35;&#35;</tt></td><td>使用ブラウザ名</td></tr>
+</table>
+</div>
+</div>
+</td></tr>
+<tr><td class="bg_eef">添付を許可するファイル拡張子<span class="fn">(ATTACH_EXT)</span>
+</td><td><input name="ATTACH_EXT" value="##ATTACH_EXT##" size="60" />
+<div class="caption">
+※許可する拡張子を、半角スペース区切りで複数指定できます。<br />
+※拡張子は半角数小文字で指定してください。
+</div>
+</td></tr>
+<tr><td class="bg_eef">添付ファイルサイズ上限<span class="fn">(ATTACH_SIZE_MAX)</span>
+</td><td><input name="ATTACH_SIZE_MAX" value="##ATTACH_SIZE_MAX##" size="10" />キロバイトまで
+<div class="caption">
+※添付ファイル1つあたりのサイズ上限を指定します。
+</div>
+</td></tr>
+<tr><td class="bg_eef">添付ファイルサイズ合計上限<span class="fn">(ATTACH_TSIZE_MAX)</span>
+</td><td><input name="ATTACH_TSIZE_MAX" value="##ATTACH_TSIZE_MAX##" size="10" />キロバイトまで
+<div class="caption">
+※添付ファイル合計サイズ上限を指定します。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef">レイアウト<span class="fn">(MAIL_FORMAT_TYPE)</span>
+</td><td>
+
+<input type="radio" name="MAIL_FORMAT_TYPE" value="1" ##MAIL_FORMAT_TYPE:1## />[1]タイプ1&nbsp;<a href="javascript:display_sw('mail_format_type_1')">見本の表示</a><br />
+
+<div id="mail_format_type_1" style="display:none">
+<table class="tbl">
+
+<tr><td>
+<pre style="font-size:8pt">--------------------------------------
+●メールアドレス：
+  aaaaa@bbb.cc.dd
+  
+●好きな果物：
+  りんご
+  みかん
+  
+●感想：
+  りんごは紅玉がおいしいです。でも
+  食べられる季節が短いのが残念です。
+--------------------------------------</pre>
+</td></tr>
+</table>
+</div>
+
+<input type="radio" name="MAIL_FORMAT_TYPE" value="2" ##MAIL_FORMAT_TYPE:2## />[2]タイプ2&nbsp;<a href="javascript:display_sw('mail_format_type_2')">見本の表示</a><br />
+
+<div id="mail_format_type_2" style="display:none">
+<table class="tbl">
+<tr><td>
+<pre style="font-size:8pt">--------------------------------------
+●メールアドレス：aaaaa@bbb.cc.dd
+●好きな果物：りんご みかん
+●感想：りんごは紅玉がおいしいです。
+  でも食べられる季節が短いのが残念です。
+--------------------------------------</pre>
+</td></tr>
+</table>
+</div>
+
+<input type="radio" name="MAIL_FORMAT_TYPE" value="3" ##MAIL_FORMAT_TYPE:3## />[3]タイプ3&nbsp;<a href="javascript:display_sw('mail_format_type_3')">見本の表示</a><br />
+
+<div id="mail_format_type_3" style="display:none">
+<table class="tbl">
+
+<tr><td>
+<pre style="font-size:8pt">--------------------------------------------------------
+●メールアドレス    ：aaaaa@bbb.cc.dd
+●お名前            ：りんご みかん
+●感想              ：りんごは紅玉がおいしいです。でも
+                      食べられる季節が短いのが残念です。
+--------------------------------------------------------</pre>
+</td></tr>
+</table>
+</div>
+
+<input type="radio" name="MAIL_FORMAT_TYPE" value="0" ##MAIL_FORMAT_TYPE:0## />[0]以下に指定する
+<span class="fn">(FORMAT)</span><br />
+
+<textarea name="FORMAT" cols="66" rows="12">##FORMAT##</textarea><br />
+
+<a href="javascript:display_sw('mail_format_type_0')">フォーマット内で指定できる差し込み用文字列の一覧表示</a>
+
+<div id="mail_format_type_0" style="display:none">
+<table class="tbl">
+<tr>
+<td><tt>&#35;&#35;フィールド名&#35;&#35;</tt></td><td>フィールド値</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n&#35;&#35;</tt></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
+<tr><td class="nowrap"><tt>&#35;&#35;フィールド名::h&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n:v&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
+<tr><td><tt>&#35;&#35;SERIAL&#35;&#35;</tt></td><td>シリアル番号</td></tr>
+<tr><td><tt>&#35;&#35;NOW_DATE&#35;&#35;</tt></td><td>送信日時</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_HOST&#35;&#35;</tt></td><td>接続元ホスト名</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_ADDR&#35;&#35;</tt></td><td>接続元IPアドレス</td></tr>
+<tr><td><tt>&#35;&#35;USER_AGENT&#35;&#35;</tt></td><td>使用ブラウザ名</td></tr>
+</table>
+</div>
+
+</td></tr>
+
+<tr><td class="bg_eef">項目の前に付加する文字列<span class="fn">(MARK)</span>
+</td>
+<td><input name="MARK" value="##MARK##" size="6" />
+<div class="caption">
+※タイプ1～3の場合に反映されます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">項目と値の間のセパレータ<span class="fn">(SEPR)</span>
+</td>
+<td><input name="SEPR" value="##SEPR##" size="6" />
+<div class="caption">
+※タイプ1～3の場合に反映されます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">行頭からセパレータまでの文字数<span class="fn">(OFT)</span>
+</td>
+<td><input name="OFT" value="##OFT##" size="4" />
+<div class="caption">
+※タイプ3の場合に反映されます。
+</div>
+</td></tr>
+
+
+</table>
+
+</td></tr>
+
+<tr><td class="bg_eef">(9)自動返信メール送信<span class="fn">(AUTO_REPLY)</span>
+</td>
+<td>
+<input type="radio" name="AUTO_REPLY" value="1" ##AUTO_REPLY:1## />[1]送る　　　
+<input type="radio" name="AUTO_REPLY" value="0" ##AUTO_REPLY:0## />[0]送らない
+<div class="caption">
+※フォーム送信者に自動返信メールを送るかどうかを指定します。<br />
+※「[1]送る」の設定にしておいても、フォーム中のname="EMAIL"の欄がない場合、あっても入力がない場合は自動返信メールは送られません。
+</div>
+</td></tr>
+
+<tr><td class="bg_eef">(9-a)自動返信メール</td>
+<td>
+<table class="tbl">
+
+<tr><td class="bg_eef">送信先</td><td>フォーム中のname="EMAIL"の欄に入力されたアドレス
+<div class="caption">
+※フォーム中のname="EMAIL"の欄がない場合、あっても入力がない場合は、「(9)自動返信メール送信」を「[1]送る」の設定にしておいても自動返信メールは送られません。
+</div>
+</td></tr>
+<tr><td class="bg_eef">同報送信先<span class="fn">(REPLY_CC)</span>
+</td><td><textarea name="REPLY_CC" cols="60" rows="1" class="auto_height">##REPLY_CC##</textarea>
+<div class="caption">
+※自動返信メールの送り先(CC)となります。改行区切りで複数指定できます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">送信元</td>
+<td>送信元アドレス<span class="fn">(REPLY_SENDFROM)</span><br /><input name="REPLY_SENDFROM" value="##REPLY_SENDFROM##" size="60" />
+<br />
+送信元名<span class="fn">(REPLY_SENDFROMNAME)</span><br /><input name="REPLY_SENDFROMNAME" value="##REPLY_SENDFROMNAME##" size="60" />
+
+<div class="caption">
+※自動返信メールのFromヘッダとなります。空欄にしておくと「(8)管理者に送られるフォーム内容メール」の「送信元(SENDFROM)」の値が使われます。<br />
+※送信元名を指定すると、<tt>&quot;送信元名&quot; &lt;送信元アドレス&gt;</tt> というFromヘッダとなります。
+</div>
+</td></tr>
+<tr><td class="bg_eef nowrap">エラー送信先<br /><span class="fn">(REPLY_ENVELOPE_ADDR)</span>
+</td><td><input name="REPLY_ENVELOPE_ADDR" value="##REPLY_ENVELOPE_ADDR##" size="60" />
+<div class="caption">
+※自動返信メールがアドレス間違いなどで届かなかったときに、エラーメールの送り先となります。<br />
+※空欄にしておくと、管理者に送られるメールのエラー送信先(ENVELOPE_ADDR)が使われます。
+</div>
+</td></tr>
+<tr><td class="bg_eef nowrap">件名<span class="fn">(REPLY_SUBJECT)</span>
+</td><td><input name="REPLY_SUBJECT" value="##REPLY_SUBJECT##" size="60" />
+<div class="caption">
+※自動返信メールのSubjectヘッダとなります。<br />
+<a href="javascript:display_sw('reply_subject')">件名内で指定できる差し込み用文字列の一覧表示</a>
+
+<div id="reply_subject" style="display:none">
+<table class="tbl">
+
+<tr>
+<td><tt>&#35;&#35;フィールド名&#35;&#35;</tt></td><td>フィールド値</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n&#35;&#35;</tt></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
+<tr><td class="nowrap"><tt>&#35;&#35;フィールド名::h&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n:v&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
+<tr><td><tt>&#35;&#35;SERIAL&#35;&#35;</tt></td><td>シリアル番号</td></tr>
+<tr><td><tt>&#35;&#35;NOW_DATE&#35;&#35;</tt></td><td>送信日時</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_HOST&#35;&#35;</tt></td><td>接続元ホスト名</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_ADDR&#35;&#35;</tt></td><td>接続元IPアドレス</td></tr>
+<tr><td><tt>&#35;&#35;USER_AGENT&#35;&#35;</tt></td><td>使用ブラウザ名</td></tr>
+</table>
+</div>
+</div>
+
+</td></tr>
+<tr><td class="bg_eef">レイアウト<span class="fn">(REPLY_MAIL_FORMAT_TYPE)</span>
+</td><td>
+
+<input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="1" ##REPLY_MAIL_FORMAT_TYPE:1## />[1]タイプ1&nbsp;<a href="javascript:display_sw('reply_mail_format_type_1')">見本の表示</a><br />
+
+
+<div id="reply_mail_format_type_1" style="display:none">
+<table class="tbl">
+
+<tr>
+<td>
+<pre style="font-size:8pt">--------------------------------------
+●メールアドレス：
+  aaaaa@bbb.cc.dd
+  
+●好きな果物：
+  りんご
+  みかん
+  
+●感想：
+  りんごは紅玉がおいしいです。でも
+  食べられる季節が短いのが残念です。
+--------------------------------------</pre>
+</td></tr>
+</table>
+</div>
+
+<input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="2" ##REPLY_MAIL_FORMAT_TYPE:2## />[2]タイプ2&nbsp;<a href="javascript:display_sw('reply_mail_format_type_2')">見本の表示</a><br />
+
+<div id="reply_mail_format_type_2" style="display:none">
+<table class="tbl">
+
+<tr>
+<td>
+<pre style="font-size:8pt">--------------------------------------
+●メールアドレス：aaaaa@bbb.cc.dd
+●好きな果物：りんご みかん
+●感想：りんごは紅玉がおいしいです。
+  でも食べられる季節が短いのが残念です。
+--------------------------------------</pre>
+</td></tr>
+</table>
+</div>
+
+<input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="3" ##REPLY_MAIL_FORMAT_TYPE:3## />[3]タイプ3&nbsp;<a href="javascript:display_sw('reply_mail_format_type_3')">見本の表示</a><br />
+
+<div id="reply_mail_format_type_3" style="display:none">
+<table class="tbl">
+
+<tr>
+<td>
+<pre style="font-size:8pt">--------------------------------------------------------
+●メールアドレス    ：aaaaa@bbb.cc.dd
+●お名前            ：りんご みかん
+●感想              ：りんごは紅玉がおいしいです。でも
+                      食べられる季節が短いのが残念です。
+--------------------------------------------------------</pre>
+</td></tr>
+</table>
+</div>
+
+<input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="0" ##REPLY_MAIL_FORMAT_TYPE:0## />[0]以下に指定する
+<span class="fn">(REPLY_FORMAT)</span>
+<br />
+
+<textarea name="REPLY_FORMAT" cols="66" rows="12">##REPLY_FORMAT##</textarea><br />
+
+<a href="javascript:display_sw('reply_mail_format_type_0')">フォーマット内で指定できる差し込み用文字列の一覧表示</a>
+
+<div id="reply_mail_format_type_0" style="display:none">
+<table class="tbl">
+<tr>
+<td><tt>&#35;&#35;フィールド名&#35;&#35;</tt></td><td>フィールド値</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n&#35;&#35;</tt></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
+<tr><td class="nowrap"><tt>&#35;&#35;フィールド名::h&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
+<tr><td><tt>&#35;&#35;フィールド名:n:v&#35;&#35;</tt></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
+<tr><td><tt>&#35;&#35;SERIAL&#35;&#35;</tt></td><td>シリアル番号</td></tr>
+<tr><td><tt>&#35;&#35;NOW_DATE&#35;&#35;</tt></td><td>送信日時</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_HOST&#35;&#35;</tt></td><td>接続元ホスト名</td></tr>
+<tr><td><tt>&#35;&#35;REMOTE_ADDR&#35;&#35;</tt></td><td>接続元IPアドレス</td></tr>
+<tr><td><tt>&#35;&#35;USER_AGENT&#35;&#35;</tt></td><td>使用ブラウザ名</td></tr>
+</table>
+</div>
+
+</td></tr>
+
+<tr><td class="bg_eef">項目の前に付加する文字列<span class="fn">(REPLY_MARK)</span>
+</td>
+<td><input name="REPLY_MARK" value="##REPLY_MARK##" size="6" />
+<div class="caption">※タイプ1～3の場合に反映されます。</div>
+</td></tr>
+<tr><td class="bg_eef">項目と値の間のセパレータ<span class="fn">(REPLY_SEPR)</span>
+</td>
+<td><input name="REPLY_SEPR" value="##REPLY_SEPR##" size="6" />
+<div class="caption">※タイプ1～3の場合に反映されます。</div>
+</td></tr>
+<tr><td class="bg_eef">行頭からセパレータまでの文字数<span class="fn">(REPLY_OFT)</span>
+</td>
+<td><input name="REPLY_OFT" value="##REPLY_OFT##" size="4" />
+<div class="caption">※タイプ3の場合に反映されます。</div>
+</td></tr>
+
+</table>
+
+</td></tr>
+
+<tr><td class="bg_eef">(10)フォームデータのファイル書き出し<span class="fn">(FILE_OUTPUT)</span>
+</td>
+<td>
+<input type="radio" name="FILE_OUTPUT" value="1" ##FILE_OUTPUT:1## />[1]書き出す　　　
+<input type="radio" name="FILE_OUTPUT" value="0" ##FILE_OUTPUT:0## />[0]書き出さない
+</td></tr>
+
+<tr><td class="bg_eef">(10)ファイル書き出し設定</td>
+<td>
+<table class="tbl">
+
+<tr><td class="bg_eef">書き出すファイル名<span class="fn">(OUTPUT_FILENAME)</span>
+</td><td><input name="OUTPUT_FILENAME" value="##OUTPUT_FILENAME##" size="60" />
+<div class="caption">
+※<tt>./data/[CONFID]</tt>内にのみ書き出しできます。ファイル名のみを指定してください。パスは指定できません。<br />
+※ファイル名にフォーム値を<tt>##フィールド名##</tt>の形で指定できます。半角英数および&quot;-&quot;、&quot;_&quot;、&quot;.&quot;以外の文字はURIエスケープされます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">書き出すファイルの形式<span class="fn">(OUTPUT_SEPARATOR)</span>
+</td><td>
+<input type="radio" name="OUTPUT_SEPARATOR" value="1" ##OUTPUT_SEPARATOR:1## />[1]カンマ区切りファイル(CSV)　　　
+<input type="radio" name="OUTPUT_SEPARATOR" value="0" ##OUTPUT_SEPARATOR:0## />[0]タブ区切りファイル(TSV)</td></tr>
+<tr><td class="bg_eef">書き出すフィールドの並び順<span class="fn">(OUTPUT_FIELDS)</span>
+</td><td>
+→<input type="submit" name="confpanel" value="設定パネル" />
+</td></tr>
+<tr><td class="bg_eef">同じフィールド内に複数の値が入る際のセパレータ<span class="fn">(FIELD_SEPARATOR)</span>
+</td><td>
+<input name="FIELD_SEPARATOR" value="##FIELD_SEPARATOR##" size="60" />
+<div class="caption">
+※何も指定しない(または空文字列の)場合は半角スペース1つとなります(前バージョンとの互換性のため)。<br />
+※カンマ区切り形式での書き出しの場合も、カンマを指定できます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">フィールド内の改行コードを置き換える文字列<span class="fn">(NEWLINE_REPLACE)</span>
+</td><td><input name="NEWLINE_REPLACE" value="##NEWLINE_REPLACE##" size="10" />
+<div class="caption">
+※何も指定しない(または空文字列の)場合は、カンマ区切りファイル書き出しの場合はなにもせず(改行のまま)、タブ区切りファイル書き出しの場合は改行を取り除きます。
+</div>
+</td></tr>
+</table>
+</td></tr>
+<tr><td class="bg_eef">(11)入力値チェックの直後に実行したいコード<!--span class="fn">(EXT_SUB)</span--></td>
+<td>
+※このフォームでは設定できません。<tt>./data/confext/ext_******.pl</tt>(自動生成)にコードを追加してください。コードの書き方は説明ページをお読みください。
+</td></tr>
+<tr><td class="bg_eef">(12)メール送信の前に実行したいコード<!--span class="fn">(EXT_SUB2)</span--></td>
+<td>
+※このフォームでは設定できません。<tt>./data/confext/ext2_******.pl</tt>(自動生成)にコードを追加してください。コードの書き方は説明ページをお読みください。
+</td></tr>
+
+</table>
+
+</div><!-- /tab-1 -->
+</div><!-- /tabs -->
+
+
+<p class="r"><input type="button" value="上記の内容で更新" onclick="to_confform_done()" /></p>
+
+</fieldset>
+</form>
+<!-- footer -->

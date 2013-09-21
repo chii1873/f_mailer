@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>##TITLE##</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+<link type="text/css" rel="stylesheet" href="css/style_custom.css" />
+</head>
+<body>
+<div id="header">
+&nbsp;
+</div>
+
+<div id="main">
+
+<h2>##TITLE##</h2>
+
+<p>Please confirm the following.<br />
+Click <b>Send</b> button if okay.<br />
+Click <b>Back</b> button to make a correction.
+</p>
+
+<table class="tbl">
+##list##
+</table>
+
+<!-- ###### 以下のタグは必ず指定してください ###### -->
+<form action="f_mailer.cgi" method="post">
+<fieldset>
+<input type="hidden" name="CONFID" value="##CONFID##" />
+<input type="hidden" name="TEMP" value="##TEMP##" />
+<input type="hidden" name="SEND_FORCED" value="1" />
+
+<input type="submit" value="Send" />
+<input type="button" value="Back" onclick="history.back()" />
+</fieldset>
+</form>
+<!-- ###### ここまで ############################### -->
+
+</div>
+
+<div id="footer">
+##COPYRIGHT##
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+英語
+000	This program can not be started directly.
+001	Failed to load configuration files: <v1>
+002	This type of file could not be loaded: <v1>
+003	CONFID is not specified.
+004	<v2> file could not be loaded: <v1>
+100	Unable to send <v1>, Because Attached (<v2>) file extention is out of support.
+101	<v1> file Size is larger than <v2> kb.
+102	Total size of attached files is larger than <v1> kb.
+103	Could not open temp directory: <v1>
+110	You can not send the same form countinuely. You need to close the browser and try again.
+115	Data could not be saved to <v1>: <v2>
+116	Data output file could not be opened: <v1>
+120	Temp could not be opened: <v1>
+121	Failed to load the attachment: <v1>
+200	data/check.txt could not be opened: <v1>
+210	data/conflist.cgi could not be opened: <v1>
+211	The data of ID=<v1> is not exited.
+220	data/conflist.cgi could not be opened: <v1>
+230	Please specify Cookie Name.
+240	./temp/<v2>-<v3>_enc_clean could not be loaded: <v1>
+250	You can not use &quot;<v2>&quot; platform dependent characters in <v1> field.
+260	Unable to printhtml: use LWP::Simple: <v1>
+261	printhtml: <v2> could not be loaded: <v1>
+270	sendmail could not be opened: <v1>
+271	Mail could not be sent: <v1>
+280	Serial Number could not generated: <v1>
+281	Serial Number could not be load: <v1>
+290	<v1> is not match.
+291	<v1> should be entered in half-width number.
+292	Please enter <v1> correctly.
+293	<v1> should be entered in full-width Hiragana.
+294	<v1> should be entered in full-width Katagana.
+295	<v1> should be less than <v2> characters.
+296	Less than <v2>box should be checked in <v1>.
+297	<v1> should be less than <v2> digits.
+298	<v1> should be more than <v2> characters.
+299	More than <v2>box should be checked in <v1>.
+300	<v1> should be more than <v2> digits.
+301	<v1> regular expression is irregularity: <v2>
+302	Please <v2> "<v1>".
+303	select
+304	input
+310	Temp Directory could not be opened:<v1>
+320	temp/<v2>-<v3> could not be loaded: <v1>
+400	Please enter the new password.
+401	Please verify your password again.
+405	Access Denied.
+410	No configuration file specified.
+411	data/conf/<v2> could not be loaded: <v1>
+412	No configuration file specified.
+413	data/confold/<v2> could not be loaded: <v1>
+414	New
+420	Could not open data/confold directory: <v1>
+430	<font color=red>Not specified</font>
+431	New
+432	(New)
+440	Could not retrieve HTML source from inputted URL.
+441	Please enter URL or HTML source.
+450	Serial Number file could not opened: <v1>
+451	Failed to generate the serial number file.: <v1>
+460	Serial Number file could not opened: <v1>
+470	CONFID is not specified.
+471	data/conflist.cgi could not be opened.
+472	data/conflist.cgi could not be written.
+473	./data/conf/<v1> could not be deleted. Please remove it manually.
+480	Please set the text color code.
+481	Please set the background color.
+482	Please set the link color.
+483	Do you want to put the confirm page?
+484	Please set the confirm page's template file.
+485	Failed to use LWP::Simple: <v1>
+486	Can not retrive the confirm page's template URL: <v1>
+487	The confirm page's template file does not exit.
+488	Please set the error page's template file.
+489	Please set the error page's template file.
+490	Failed to use LWP::Simple: <v1>
+491	Can not retrive the confirm page's template URL: <v1>
+492	The error page's template file does not exit.
+493	The error page's template file could not be opened: <v1>
+494	Please put ##errmsg## or <!-- errmsg --> in error template file to show the error message: <v1>
+495	Please set completion page.
+496	Please set URL redirect for completion page.
+497	 Please set completion page's template file.
+498	Failed to use LWP::Simple: <v1>
+499	Can not retrive completation page's template URL: <v1>
+500	Complatation page's template file doesn't exit.
+501	Please set the minimum time for continuous transmission.
+502	Please type Half-width number for minimum time for continuous transmission.
+503	Please specify the destination address of the confirmation email to the administrator.
+504	Please specify origin address of the confirmation email to the admistrator.
+505	Please specify subject of the confirmation email to the admistrator.
+506	Please specify the maximm size for attach file of cofirmation email to the administrator.
+507	Please specify the maximm total size for attach files of cofirmation email to the administrator.
+508	Please specify the style of cofirmation email to the administrator.
+509	Please specify customized style of cofirmation email to the administrator.
+510	Please specify how many characters are between beginning og line and seperator in cofirmation email to the administrator.
+511	Please set it from 0-40 characters.
+512	Please specify subject of the auto-reply email.
+513	Please select the style of the auto-reply email.
+514	Please select customized style of the auto-reply email.
+515	Please specify how many characters are between beginning og line and seperator in auto-reply email.
+516	Please set it from 0-40 characters.
+517	Please specify the export file name.
+520	Please check the <v2> box of <v1>.
+521	Please check the <v2> box of <v1>.
+522	If the <v2> box of <v1> is checked, the other boxes except <v3> could not be checked.
+523	If the <v2> box of <v1> is checked, <v3> filed for confirmation is requried.
+524	There is a filed that filed type is not specified. It only happens when the older versions of the configuration file has been imported. Please do "Read the form to set the input conditions".
+530	Please select the sending mode.
+531	Please specify the sendmail path.
+532	The sendmail path doesn't exit.
+533	Net::SMTP module is not installed.
+534	Please specify the SMTP Host/IP address. 
+535	Con not connect to <v1> SMTP Host/IP address.
+536	Authen::SASL module is not installed.
+537	Please specify the ID/Password for SMTP AUTH.
+538	The SMTP_AUTH ID or password is not correct.
+539	SMTP Host/IP address(=<v1>) is not correct.
+540	Please specify the text color in admin page.
+541	Please specify the background color in admin page.
+542	Please specify the link color in admin page.
+543	Please specigy the IP address that allowd to access to admin page.
+550	Please enter the passsword.
+551	Password is incorrect.
+600	./data/conffields.txt could not be opened: <v1>
+610	./data/confext/ext_<v2> could not be loaded: <v1>
+611	data/conf/<v2> could not be loaded.
+620	./f_mailer_sysconf.pl could not be loaded: <v1>
+630	Password file could not be opened: <v1>
+640	Could not write to the password file: <v1>

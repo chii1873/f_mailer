@@ -1,0 +1,41 @@
+<!-- header -->
+
+<h2>シリアル番号設定</h2>
+
+<p><a href="#" onclick="if(confirm('設定内容を更新せずに管理メニューに戻ります。よろしいですか?')){location.href='f_mailer_admin.cgi'}">管理メニューへ</a></p>
+
+<!-- errmsg -->
+
+
+<form action="f_mailer_admin.cgi" method="post" id="form0">
+<fieldset>
+<input type="hidden" name="conf_id" value="##conf_id##" />
+<input type="hidden" name="formcheck" value="confserial" />
+<input type="hidden" name="temp" value="##temp##" />
+
+
+<table class="tbl">
+<tr>
+<th class="bg_eef">設定対象ファイル</th>
+<td class="bg_eef">&nbsp;CONFID: ##conf_id_dsp## / ファイル名: ##conffile_dsp##&nbsp;</td></tr>
+</table>
+
+<table class="tbl">
+<tr>
+<td>現在のシリアル番号：<tt class="bg_eef"><strong>&nbsp;##SERIAL##&nbsp;</strong></tt>　→　<input name="SERIAL" value="##SERIAL##" size="10" />
+<input type="submit" name="confserial_done" value="更新" />
+
+<div class="caption">
+※シリアル番号とは、フォーム送信を受け付けるたびに1ずつ繰り上がっていく受付番号のようなものです。この番号を送られるメールの件名/本文や書き出されるデータファイルに付けることができます。<br />
+※指定した数値の桁数に満たない場合、左側に0を付加して位を揃えます。指定した数値より実際のシリアル値の方が大きい場合はそのままの数値となります。<br />
+※このページを開いてから更新ボタンを押すまでの間にフォーム送信があった場合、現在のシリアル番号がずれますのでご注意ください。増減をさせたい場合は、指定する数値の手前に + あるいは - を付けてください。
+</div>
+</td>
+</tr>
+</table>
+
+
+</fieldset>
+</form>
+
+<!-- footer -->
