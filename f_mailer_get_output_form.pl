@@ -22,14 +22,13 @@ sub get_output_form {
     {
         my %d_;
         while (my($k, $v) = each %d) {
-#            $k = Unicode::Japanese->new($k, "sjis")->get;
-#            $v = Unicode::Japanese->new($v, "sjis")->get;
+            $k = Unicode::Japanese->new($k, "utf8")->getu;
+            $v = Unicode::Japanese->new($v, "utf8")->getu;
             $d_{$k} = $v;
         }
         %d = %d_;
     }
-#    $content = Unicode::Japanese->new($content, "sjis")->get;
-#die $content;
+
     my $p = new HTML::SimpleParse($content);
     my %is_formtag = map { $_ => 1 } qw(input select textarea);
     my $output;   ### 出力用htmlデータ
@@ -51,8 +50,6 @@ sub get_output_form {
                 if ($h{type} eq "" or $h{type} eq "text" or $h{type} eq "password") {
                     $h{value} = $d{$h{name}};
                 } elsif ($h{type} eq "checkbox" or $h{type} eq "radio") {
-#use Data::Dumper;
-#die $c{content_} if $h{value} =~ /\/1/;
                     if (exists $d{"$h{name}\0$h{value}"}) {
                         $h{checked} = q|checked="checked"|;
                     } else {
@@ -65,9 +62,6 @@ sub get_output_form {
                     unless (exists $h{value} and $d{$h{name}} eq "") {
                         $h{value} = $d{$h{name}};
                     }
-#                    if ($h{name} eq "TEMP") {
-#                        $h{value} = $d{TEMP};
-#                    }
                 }
                 $output .= get_output_form_remake_tag($c{tagname}, %h);
             } elsif ($c{tagname} eq "select") {
@@ -137,7 +131,6 @@ sub get_output_form {
     }
 
     return $output;
-#    return Unicode::Japanese->new($output, "utf8")->sjis;
 
 }
 

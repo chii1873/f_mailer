@@ -1,11 +1,13 @@
 #!/usr/bin/perl -Tw
 
 use strict;
+use lib qw(../lib);
 use vars qw(%CONF %FORM $dbh);
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use DBI;
-require "jcode.pl";
+use Unicode::Japanese;
+#require "jcode.pl";
 require "./lib.pl";
 umask 0;
 
@@ -19,18 +21,18 @@ $dbh = _init_db();
 $FORM{zip} = zen_to_han($FORM{zip});
 $FORM{zip} =~ s/\-//g;
 $FORM{i} ||= 0;
-error_close("—X•Ö”Ô†‚Í”¼Šp”š‚Åw’è‚µ‚Ä‚­‚¾‚³‚¢B") if $FORM{zip} =~ /\D/;
-error_close("—X•Ö”Ô†‚Í3ƒPƒ^ˆÈãw’è‚µ‚Ä‚­‚¾‚³‚¢B") if length($FORM{zip}) < 3;
+error_close("éƒµä¾¿ç•ªå·ã¯åŠè§’æ•°å­—ã§æŒ‡å®šã—ã¦ãã ã•ã„ã€‚") if $FORM{zip} =~ /\D/;
+error_close("éƒµä¾¿ç•ªå·ã¯3ã‚±ã‚¿ä»¥ä¸ŠæŒ‡å®šã—ã¦ãã ã•ã„ã€‚") if length($FORM{zip}) < 3;
 
 my $cnt = 0;
-my %prefcode = map { $_ => ++$cnt } qw(–kŠC“¹ ÂXŒ§ ŠâèŒ§ ‹{éŒ§ H“cŒ§ RŒ`Œ§ •Ÿ“‡Œ§ ˆïéŒ§ “È–ØŒ§ ŒQ”nŒ§ é‹ÊŒ§ ç—tŒ§ “Œ‹“s _“ŞìŒ§ R—œŒ§ ’·–ìŒ§ VŠƒŒ§ •xRŒ§ ÎìŒ§ •ŸˆäŒ§ Šò•ŒŒ§ Ã‰ªŒ§ ˆ¤’mŒ§ OdŒ§  ‰êŒ§ ‹“s•{ ‘åã•{ •ºŒÉŒ§ “Ş—ÇŒ§ ˜a‰ÌRŒ§ ’¹æŒ§ “‡ªŒ§ ‰ªRŒ§ L“‡Œ§ RŒûŒ§ “¿“‡Œ§ ìŒ§ ˆ¤•QŒ§ ‚’mŒ§ •Ÿ‰ªŒ§ ²‰êŒ§ ’·èŒ§ ŒF–{Œ§ ‘å•ªŒ§ ‹{èŒ§ ­™“‡Œ§ ‰«“êŒ§);
+my %prefcode = map { $_ => ++$cnt } qw(åŒ—æµ·é“ é’æ£®çœŒ å²©æ‰‹çœŒ å®®åŸçœŒ ç§‹ç”°çœŒ å±±å½¢çœŒ ç¦å³¶çœŒ èŒ¨åŸçœŒ æ ƒæœ¨çœŒ ç¾¤é¦¬çœŒ åŸ¼ç‰çœŒ åƒè‘‰çœŒ æ±äº¬éƒ½ ç¥å¥ˆå·çœŒ å±±æ¢¨çœŒ é•·é‡çœŒ æ–°æ½ŸçœŒ å¯Œå±±çœŒ çŸ³å·çœŒ ç¦äº•çœŒ å²é˜œçœŒ é™å²¡çœŒ æ„›çŸ¥çœŒ ä¸‰é‡çœŒ æ»‹è³€çœŒ äº¬éƒ½åºœ å¤§é˜ªåºœ å…µåº«çœŒ å¥ˆè‰¯çœŒ å’Œæ­Œå±±çœŒ é³¥å–çœŒ å³¶æ ¹çœŒ å²¡å±±çœŒ åºƒå³¶çœŒ å±±å£çœŒ å¾³å³¶çœŒ é¦™å·çœŒ æ„›åª›çœŒ é«˜çŸ¥çœŒ ç¦å²¡çœŒ ä½è³€çœŒ é•·å´çœŒ ç†Šæœ¬çœŒ å¤§åˆ†çœŒ å®®å´çœŒ é¹¿å…å³¶çœŒ æ²–ç¸„çœŒ);
 
 my $list;
 $cnt = 0;
 my $onload;
 foreach my $row(sql_selectall($dbh, "select zip,pref,city,addr from zip2 where " . (length($FORM{zip}) == 7 ? "zip='$FORM{zip}'" : "zip like '$FORM{zip}%'") . "order by zip")) {
     foreach (qw(pref city addr)) {
-        jcode::convert(\$row->{$_}, "sjis", "euc");
+#        jcode::convert(\$row->{$_}, "sjis", "euc");
     }
     $row->{zip} =~ s/(\d{3})(\d{4})/$1-$2/;
     $list .= <<STR;
@@ -40,7 +42,7 @@ STR
     $onload ||= $row;
 }
 
-$list = "<tr><th>ŠY“–‚·‚éƒf[ƒ^‚ª‚ ‚è‚Ü‚¹‚ñ</th></tr>" unless $cnt;
+$list = "<tr><th>è©²å½“ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚Šã¾ã›ã‚“</th></tr>" unless $cnt;
 if ($cnt == 1) {
     $onload = "datainput('$FORM{mode}','$onload->{zip}','$prefcode{$onload->{pref}}','$onload->{city}','$onload->{addr}','$FORM{i}')";
 } else {

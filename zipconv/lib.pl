@@ -2,7 +2,7 @@ sub _init_db {
 
     my $dbh = DBI->connect("dbi:Pg:dbname=zip", "postgres", "",
      { RaiseError => 0, AutoCommit => 0 });
-    error("ƒf[ƒ^ƒx[ƒX‚ÌÚ‘±‚ª‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B: $DBI::errstr")
+    error("ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã®æ¥ç¶šãŒã§ãã¾ã›ã‚“ã§ã—ãŸã€‚: $DBI::errstr")
      if $DBI::errstr;
     return $dbh;
 
@@ -14,7 +14,7 @@ sub decoding {
     my %FORM;
     foreach my $name($q->param()) {
         foreach my $each($q->param($name)) {
-            jcode::convert(\$each,'sjis');
+#            jcode::convert(\$each,'sjis');
             if (defined($FORM{$name})) {
                 $FORM{$name} = join('|||', $FORM{$name}, $each);
             } else {
@@ -59,34 +59,34 @@ sub get_datetime_for_cookie {
 sub printhtml {
 
     my($filename, @tr) = @_;
-    $filename or error("printhtml: g—p‚·‚éhtmlƒtƒ@ƒCƒ‹‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B");
+    $filename or error("printhtml: ä½¿ç”¨ã™ã‚‹htmlãƒ•ã‚¡ã‚¤ãƒ«ã‚’æŒ‡å®šã—ã¦ãã ã•ã„ã€‚");
 
     my $htmlstr;
     foreach my $file(split(/\s+/, $filename)) {
         open(R, $file)
-         or die("printhtml: $file ‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B $!");
+         or die("printhtml: $file ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚ $!");
         $htmlstr .= join("", <R>);
         close(R);
     }
     my $hf = sub {
         my $f = shift;
         open(R, "data/tmpl/__$f.html")
-         or error("printhtml: data/tmpl/__$f.html ‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B $!");
+         or error("printhtml: data/tmpl/__$f.html ãŒé–‹ã‘ã¾ã›ã‚“ã§ã—ãŸã€‚ $!");
         return join("", <R>);
     };
     $htmlstr =~ s/<!--\s*((?:head|foot)er)\s*-->/&{$hf}($1)/ieg;
     $htmlstr =~ s|##version##|$CONF{version}.($ENV{SERVER_NAME} =~ /t\./ ? " [Test Mode]" : "")|ieg;
-    jcode::convert(\$htmlstr, 'euc', 'sjis');
+#    jcode::convert(\$htmlstr, 'euc', 'sjis');
     while (my $pattern = shift(@tr)) {
         my $replace = shift(@tr);
-        jcode::convert(\$pattern, 'euc', 'sjis');
-        jcode::convert(\$replace, 'euc', 'sjis');
+#        jcode::convert(\$pattern, 'euc', 'sjis');
+#        jcode::convert(\$replace, 'euc', 'sjis');
         $htmlstr =~ s|##$pattern##|$replace|g;
 #        eval "\$htmlstr =~ s|##$pattern##|$replace|g;";
         error($@,$pattern,$replace) if $@;
     }
-    jcode::convert(\$htmlstr, 'sjis', 'euc');
-    print "Content-type: text/html;charset=Shift_JIS\n\n$htmlstr";
+#    jcode::convert(\$htmlstr, 'sjis', 'euc');
+    print "Content-type: text/html;charset=utf-8\n\n$htmlstr";
 
 }
 
@@ -94,7 +94,7 @@ sub sql_selectall {
 
     my($dbh, $sql) = @_;
     my $sql_euc = $sql;
-    jcode::convert(\$sql_euc,'euc','sjis');
+#    jcode::convert(\$sql_euc,'euc','sjis');
 
     (my $sql_euc_log = $sql_euc) =~ s/\s*\r?\n\s*/ /g;
 
@@ -117,10 +117,10 @@ sub sql_selectall {
 
 sub zen_to_han {
 
-     my($str, %mode) = @_;
-     jcode::tr(\$str, '‚O‚P‚Q‚R‚S‚T‚U‚V‚W‚X‚`‚a‚b‚c‚d‚e‚f‚g‚h‚i‚j‚k‚l‚m‚n‚o‚p‚q‚r‚s‚t‚u‚v‚w‚x‚y•‚‚‚‚ƒ‚„‚…‚†‚‡‚ˆ‚‰‚Š‚‹‚Œ‚‚‚‚‚‘‚’‚“‚”‚•‚–‚—‚˜‚™‚š|@ij', '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&abcdefghijklmnopqrstuvwxyz- ()');
-     $str =~ tr/\D//d if $mode{del};
-     $str;
+    my($str, %mode) = @_;
+    $str = Unicode::Japanese->new( $str )->z2h->get;
+    $str =~ tr/\D//d if $mode{del};
+    $str;
 }
 
 1;

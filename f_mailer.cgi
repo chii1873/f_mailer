@@ -19,7 +19,7 @@ use strict;
 use lib qw(./lib);
 use vars qw($q %FORM %CONF $name_list_ref %alt $conffile %ERRMSG);
 #use utf8;
-use Encode;
+#use Encode;
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Unicode::Japanese;
@@ -39,7 +39,6 @@ require "./f_mailer_sysconf.pl";
 $q = new CGI;
 $ENV{PATH} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
 %CONF = (setver(), conf::sysconf());
-#d(\%CONF);
 set_errmsg_init();
 umask 0;
 
@@ -324,7 +323,7 @@ sub output_form {
     $htmlstr =~ s/##list##/get_formdatalist()/e;
     $htmlstr = get_output_form($phase, $htmlstr, %d, TEMP=>$FORM{TEMP});
     foreach my $key(keys %d) {
-        eval { $htmlstr =~ s/##\Q$key\E##/($phase eq "CONFIRM" or $phase eq "THANKS") ? replace($key,'html',\%d) : $d{$key}/eg; };
+        eval { $htmlstr =~ s/##\Q$key\E##/Unicode::Japanese->new(($phase eq "CONFIRM" or $phase eq "THANKS") ? replace($key,'html',\%d) : $d{$key}, "utf8")->getu/eg; };
         error_("$key, $d{$key}, $@") if $@;
     }
     printhtml_output($code, $htmlstr);
@@ -457,7 +456,7 @@ sub sendmail_file_output {
         mkdir("data/output/$FORM{CONFID}", 0777)
          or error(get_errmsg("116", $CONF{"OUTPUT_FILENAME"}, $!));
     }
-    open(my $fh, ">>", qq|./data/$FORM{"CONFID"}/$CONF{"OUTPUT_FILENAME"}|)
+    open(my $fh, ">>", qq|./data/output/$FORM{"CONFID"}/$CONF{"OUTPUT_FILENAME"}|)
      or error(get_errmsg("115", $CONF{"OUTPUT_FILENAME"}, $!));
     flock($fh, LOCK_EX);
     seek($fh, 0, 2);

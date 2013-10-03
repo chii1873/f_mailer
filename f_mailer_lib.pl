@@ -54,23 +54,15 @@ sub data_convert {
     my $code = $CONF{FORM_TMPL_CHARSET} eq "auto"
      ? ($form{GETCODE} ? Unicode::Japanese->new($form{GETCODE})->getcode() : "utf8")
      : $CONF{FORM_TMPL_CHARSET};
-#use Data::Dumper;
-#die (Dumper(\%CONF));
-#die $code;
-
-#die($CONF{FORM_TMPL_CHARSET});
-
-    return %form if $code eq "utf8";
 
     my %form2;
     while (my($key, $value) = each %form) {
-        $key = Unicode::Japanese->new($key, $code)->get;
-        $value = Unicode::Japanese->new($value, $code)->get;
+        $key = Unicode::Japanese->new($key, $code)->getu;
+        $value = Unicode::Japanese->new($value, $code)->getu;
         $form2{$key} = $value;
     }
-    for (@$name_list_ref) { $_ = Unicode::Japanese->new($_, $code)->get }
+    for (@$name_list_ref) { $_ = Unicode::Japanese->new($_, $code)->getu }
     %form2;
-#die (Dumper(\%form2));
 
 }
 
@@ -231,7 +223,7 @@ sub h {
 sub h2z {
 
      my($str) = @_;
-     return Unicode::Japanese->new($str, "utf8")->h2zSym->h2zNum->h2zAlpha->get;
+     return Unicode::Japanese->new($str, "utf8")->h2zSym->h2zNum->h2zAlpha->getu;
 
 }
 
@@ -239,7 +231,7 @@ sub h2z {
 sub h2z_kana {
 
     my($str) = @_;
-    return Unicode::Japanese->new($str, "utf8")->h2zKana->get;
+    return Unicode::Japanese->new($str, "utf8")->h2zKana->getu;
 
 }
 
@@ -341,7 +333,7 @@ sub load_condcheck {
     $condcheck{email} = sub {
         my($f_name, $alt_name, $f_value, $cond) = @_;
         my @errmsg;
-        if ($f_value and is_email($f_value)) {
+        if ($f_value and ! is_email($f_value)) {
             push(@errmsg, set_errmsg(key=>"email", f_name=>($alt_name or $f_name)));
         }
         ($f_value, @errmsg);
@@ -356,11 +348,11 @@ sub load_condcheck {
     };
     $condcheck{hira2kata} = sub {
         my($f_name, $alt_name, $f_value) = @_;
-        return Unicode::Japanese->new($f_value, "utf8")->hira2kata->get;
+        return Unicode::Japanese->new($f_value, "utf8")->hira2kata->getu;
     };
     $condcheck{hira_only} = sub {
         my($f_name, $alt_name, $f_value) = @_;
-        my $f_value_ = decode("utf-8", $f_value);
+        my $f_value_ = Unicode::Japanese->new($f_value, "utf8")->getu;
         my @errmsg;
         unless ($f_value_ =~ /^[\p{InHiragana}\x{3000}\x{30fc}]*$/o) { # ひらがな、全角スペース(　)、長音記号(ー)
             push(@errmsg, set_errmsg(key=>"hira_only", f_name=>($alt_name or $f_name)));
@@ -369,11 +361,11 @@ sub load_condcheck {
     };
     $condcheck{kata2hira} = sub {
         my($f_name, $alt_name, $f_value) = @_;
-        return Unicode::Japanese->new($f_value, "utf8")->kata2hira->get;
+        return Unicode::Japanese->new($f_value, "utf8")->kata2hira->getu;
     };
     $condcheck{kata_only} = sub {
         my($f_name, $alt_name, $f_value) = @_;
-        my $f_value_ = decode("utf-8", $f_value);
+        my $f_value_ = Unicode::Japanese->new($f_value, "utf8")->getu;
         my @errmsg;
         unless ($f_value_ =~ /^[\p{InKatakana}\x{3000}\x{30a0}\x{30fc}]*$/o) { # カタカナ、全角スペース(　)、二重ハイフン(゠)、長音記号(ー)
             push(@errmsg, set_errmsg(key=>"kata_only", f_name=>($alt_name or $f_name)));
@@ -501,8 +493,7 @@ sub load_errmsg {
 sub mk_errmsg {
 
     my $errmsg_ref = shift || [];
-#die caller();
-#d($errmsg_ref);
+
     my $errmsg = join("\n", map { qq|<li>$_</li>| } map { h($_) } @$errmsg_ref);
     if ($errmsg ne "") {
         return qq|<ul class="errmsg">\n$errmsg\n</ul>|;
@@ -516,18 +507,18 @@ sub mojichk {
     my($str, $fname) = @_;
     my @error_char;
 #my @debug;
-    for my $char(decode("utf8", $str) =~ /./g) {
-        $char = encode("utf8", $char);
+    for my $char(Unicode::Japanese->new($str, "utf8")->getu =~ /./g) {
         my $code = lc(unpack("H*", Unicode::Japanese->new($char, "utf8")->sjis));
 #push(@debug, $code);
+        next if length($code) < 3;
         if ($code lt '8140' or $code gt '84be' and $code lt '889f' or $code gt '9872' and $code lt '989f' or $code gt 'eaa4') {
-            push(@error_char, $char);
+            push(@error_char, "$char");
         }
     }
 
 #die "@debug";
     @error_char
-     ? (get_errmsg("250", $fname, join(q|", "|, @error_char)))
+     ? (get_errmsg("250", $fname, join(q|", "|, map { Unicode::Japanese->new($_, "utf8")->getu } @error_char)))
      : "";
 
 }
@@ -591,7 +582,7 @@ sub printhtml_getpage {
         $code = "utf8" if $code =~ /utf/;
         $charset = $code if $charset eq "auto";
         if ($charset ne "utf8") {
-            $htmlstr = Unicode::Japanese->new($htmlstr, $charset)->get;
+            $htmlstr = Unicode::Japanese->new($htmlstr, $charset)->getu;
         }
     }
     $htmlstr =~ s/<!-- header -->/$opt{header}/;
@@ -604,8 +595,6 @@ sub printhtml_getpage {
     ### http://www.psl.ne.jp/lab/copyright.html                        ###
     ######################################################################
     $htmlstr =~ s/##COPYRIGHT##/$ENV{SCRIPT_FILENAME} =~ m#admin# ? $CONF{copyright_html_footer_admin} : $CONF{copyright_html_footer}/eg;
-#     or error_("$opt{filename}内に ##COPYRIGHT## という指定がありません。:$code:$htmlstr");
-
     $htmlstr =~ s/##prod_name##/$CONF{prod_name}/g;
     $htmlstr =~ s/##version##/$CONF{version}/g;
     ($charset, $htmlstr);
@@ -614,14 +603,14 @@ sub printhtml_getpage {
 sub printhtml_output {
 
     my ($code, $htmlstr) = @_;
-#d($code);
+
     print "Content-type: text/html; charset=";
     if ($code eq "sjis") {
         print "Shift_JIS\n\n", Unicode::Japanese->new($htmlstr, "utf8")->sjis;
     } elsif ($code eq "euc") {
         print "euc-jp\n\n", Unicode::Japanese->new($htmlstr, "utf8")->euc;
     } else {
-        print "utf-8\n\n$htmlstr";
+        print "utf-8\n\n", Unicode::Japanese->new($htmlstr, "utf8")->getu;
     }
 
 }
@@ -953,7 +942,7 @@ sub setver {
 ##############################################
     my %PROD = (
         prod_name => q{FORM MAILER},
-        version   => q{0.63},
+        version   => q{0.7},
         a_email   => q{info@psl.ne.jp},
         a_url     => q{http://www.psl.ne.jp/},
         copyright => q{&copy;1997-2013},
