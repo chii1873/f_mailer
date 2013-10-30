@@ -13,6 +13,7 @@
 #     http://www.psl.ne.jp/lab/copyright.html
 # ---------------------------------------------------------------
 use strict;
+use utf8;
 use vars qw(%CONF %FORM %alt $q);
 use HTML::SimpleParse;
 

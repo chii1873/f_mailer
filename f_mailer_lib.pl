@@ -13,6 +13,7 @@
 #     http://www.psl.ne.jp/lab/copyright.html
 # ---------------------------------------------------------------
 use strict;
+use utf8;
 use vars qw(%CONF %FORM %alt $q $name_list_ref %ERRMSG $smtp);
 use POSIX qw(SEEK_SET);
 
@@ -479,7 +480,7 @@ sub load_errmsg {
     my $lang = shift || "en";
     my %errmsg;
 
-    open(my $fh, "<", "data/errmsg_$lang.txt")
+    open(my $fh, "<:utf8", "data/errmsg_$lang.txt")
      or error_("Can't load errmsg data: $!");
     while (<$fh>) {
         chomp;
@@ -582,7 +583,7 @@ sub printhtml_getpage {
         $code = "utf8" if $code =~ /utf/;
         $charset = $code if $charset eq "auto";
 	### 2013-10-30 常にコード変換する(utf-8→utf-8の文字化け回避)
-        $htmlstr = Unicode::Japanese->new($htmlstr, $charset)->getu;
+        $htmlstr = Unicode::Japanese->new($htmlstr, $charset)->getu if $charset ne "utf8";
     }
     $htmlstr =~ s/<!-- header -->/$opt{header}/;
     $htmlstr =~ s/<!-- footer -->/$opt{footer}/;
@@ -609,7 +610,7 @@ sub printhtml_output {
     } elsif ($code eq "euc") {
         print "euc-jp\n\n", Unicode::Japanese->new($htmlstr, "utf8")->euc;
     } else {
-        print "utf-8\n\n", Unicode::Japanese->new($htmlstr, "utf8")->getu;
+        print "utf-8\n\n", $htmlstr;
     }
 
 }
@@ -984,7 +985,7 @@ sub temp_del {
 sub temp_read {
 
     my($page, $temp) = @_;
-    open(R, "temp/$temp-$page")
+    open(R, "<:utf8", "temp/$temp-$page")
 #     or error("temp/$temp-$pageを開けませんでした。: $!");
     ;
     my %form;
@@ -1011,7 +1012,7 @@ sub temp_write {
 
     ($form{$temp}) = $form{$temp} =~ /^(\d+)$/;
 #    ($page) = $page =~ /^(\w+)$/;
-    open(W, "> temp/$form{$temp}-$page")
+    open(W, ">:utf8",  "temp/$form{$temp}-$page")
      or error(get_errmsg("320", $!));
     foreach ($page eq "confform" ? ("label", get_conffields()) : keys %form) {
         $form{$_} =~ s/\r?\n/\x0b/g;
@@ -1035,7 +1036,7 @@ sub uuencode {
 sub z2h {
 
      my($str) = @_;
-     return Unicode::Japanese->new($str, "utf8")->z2h->h2zKana->get;
+     return Unicode::Japanese->new($str, "utf8")->z2h->h2zKana->getu;
 
 }
 

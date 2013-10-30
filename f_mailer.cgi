@@ -18,7 +18,7 @@
 use strict;
 use lib qw(./lib);
 use vars qw($q %FORM %CONF $name_list_ref %alt $conffile %ERRMSG);
-#use utf8;
+use utf8;
 #use Encode;
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
@@ -456,7 +456,7 @@ sub sendmail_file_output {
         mkdir("data/output/$FORM{CONFID}", 0777)
          or error(get_errmsg("116", $CONF{"OUTPUT_FILENAME"}, $!));
     }
-    open(my $fh, ">>", qq|./data/output/$FORM{"CONFID"}/$CONF{"OUTPUT_FILENAME"}|)
+    open(my $fh, ">>:utf8", qq|./data/output/$FORM{"CONFID"}/$CONF{"OUTPUT_FILENAME"}|)
      or error(get_errmsg("115", $CONF{"OUTPUT_FILENAME"}, $!));
     flock($fh, LOCK_EX);
     seek($fh, 0, 2);

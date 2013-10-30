@@ -8,6 +8,7 @@
 # 生成日時: 2013-05-07 00:13:37
 
 package conf;
+use utf8;
 
  sub conf {
 

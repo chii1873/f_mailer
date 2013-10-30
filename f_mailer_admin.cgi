@@ -18,6 +18,7 @@
 use strict;
 use lib qw(./lib);
 use vars qw($q %FORM %CONF %alt $name_list_ref);
+use utf8;
 use CGI;
 use Unicode::Japanese;
 #use Jcode;
@@ -26,6 +27,7 @@ use CGI::Carp qw(fatalsToBrowser);
 use HTML::SimpleParse;
 use LWP::Simple;
 use Data::Dump;
+use JSON;
 sub d { die Dumper($_[0]) }
 use Fcntl ':flock';
 $ENV{PATH} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
@@ -253,7 +255,7 @@ sub confform_done {
     unless ($conffile_exists) {
         push(@newlist, { id=>$conf_id, file=>$conffile, label=>$conf{label}, lang=>$conf{LANG}, date=>get_datetime(time) });
     }
-    open(W, "> data/conflist.cgi")
+    open(W, ">:utf8", "data/conflist.cgi")
      or error("data/conflist.cgiへ書き込みできませんでした。: $!");
     foreach my $ref(@newlist) {
         print W join("\t", map { $ref->{$_} } qw(id file label lang date)), "\n";
@@ -509,7 +511,7 @@ sub del {
     ($conffile) = $conffile =~ /^([\w\.\-\_]+)$/;
 
     my @data;
-    open(R, "data/conflist.cgi")
+    open(R, "<:utf8", "data/conflist.cgi")
      or error("data/conflist.cgiが開けませんでした。: $!");
     while (<R>) {
         my($conf_id) = split(/\t/);
@@ -517,7 +519,7 @@ sub del {
         push(@data, $_);
     }
 
-    open(W, ">data/conflist.cgi")
+    open(W, ">:utf8", "data/conflist.cgi")
      or error("data/conflist.cgiに書き込みできませんでした。: $!");
     print W @data;
     close(W);
@@ -601,7 +603,7 @@ sub form_check_confform {
         } elsif (! -e $FORM{ERROR_TMPL}) {
             push(@msg, "エラー画面のテンプレートファイルが存在しません。");
         } else {
-            if (open(my $fh, "<", $FORM{ERROR_TMPL})) {
+            if (open(my $fh, "<:utf8", $FORM{ERROR_TMPL})) {
                 $error_html = join("", <$fh>);
                 close($fh);
             } else {

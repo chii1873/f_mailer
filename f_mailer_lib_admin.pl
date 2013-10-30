@@ -13,6 +13,7 @@
 #     http://www.psl.ne.jp/lab/copyright.html
 # ---------------------------------------------------------------
 use strict;
+use utf8;
 use vars qw(%CONF %FORM %alt $q);
 
 sub conf_to_temp {
@@ -75,7 +76,7 @@ sub get_langlist {
     foreach (sort grep(/^errmsg_[a-z]{2}\.txt$/, readdir($dh))) {
         (my $lang) = /^errmsg_([a-z]{2})\.txt$/;
         next if $lang eq "ja";
-        open(my $fh, "<", "./data/$_") or error("エラーメッセージファイル($_)が開けませんでした。: $!");
+        open(my $fh, "<:utf8", "./data/$_") or error("エラーメッセージファイル($_)が開けませんでした。: $!");
         chomp(my $lang_dsp = <$fh>);
         push(@list, [$lang, $lang_dsp]);
     }
@@ -113,7 +114,7 @@ sub mk_conffile {
     ($conf{conffile}) = $conf{conffile} =~ /^([\w\.]+)$/;
 
     unless (-e "./data/confext/ext_$conf{conffile}") {
-        open(W, "> ./data/confext/ext_$conf{conffile}")
+        open(W, ">:utf8", "./data/confext/ext_$conf{conffile}")
          or error("./data/confext/ext_$conf{conffile}へ書き込みできませんでした。: $!");
         print W <<STR;
 #
@@ -125,6 +126,7 @@ sub mk_conffile {
 # このファイルはプログラムによって自動生成されました。
 # 生成日時: $date
 
+use utf8;
 #package ext;
 
 sub ext_sub0 { }
@@ -160,7 +162,7 @@ STR
         close(W);
     }
 
-    open(W, "> data/conf/$conf{conffile}")
+    open(W, ">:utf8", "data/conf/$conf{conffile}")
      or error("data/conf/$conf{conffile}へ書き込みできませんでした。: $!");
     print W <<STR;
 #
@@ -172,6 +174,7 @@ STR
 # このファイルはプログラムによって自動生成されました。
 # 生成日時: $date
 
+use utf8;
 package conf;
 
  sub conf {
@@ -231,7 +234,7 @@ sub mk_sysconffile {
     my %conf = @_;
 
     my $date = get_datetime(time);
-    open(W, "> ./f_mailer_sysconf.pl")
+    open(W, ">:utf8", "./f_mailer_sysconf.pl")
      or error("./f_mailer_sysconf.plへ書き込みできませんでした。: $!");
     print W <<STR;
 #
@@ -243,6 +246,7 @@ sub mk_sysconffile {
 # このファイルはプログラムによって自動生成されました。
 # 生成日時: $date
 
+use utf8;
 package conf;
 
  sub sysconf {
