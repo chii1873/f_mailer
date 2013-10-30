@@ -268,9 +268,9 @@ sub confirm {
 
 sub error {
 
-    my $errmsg = mk_errmsg(\@_);
+    output_form("ERROR", \@_) if $CONF{ERROR_FLAG};
 
-    output_form("ERROR", $errmsg) if $CONF{ERROR_FLAG};
+    my $errmsg = mk_errmsg(\@_);
 
     printhtml("./tmpl/default/@{[ $CONF{LANG} or $CONF{LANG_DEFAULT} ]}/error.html",
      CHARSET=>"sjis",

@@ -581,9 +581,8 @@ sub printhtml_getpage {
         my $code = $charset || Unicode::Japanese->new($htmlstr)->getcode() || "utf8";
         $code = "utf8" if $code =~ /utf/;
         $charset = $code if $charset eq "auto";
-        if ($charset ne "utf8") {
-            $htmlstr = Unicode::Japanese->new($htmlstr, $charset)->getu;
-        }
+	### 2013-10-30 常にコード変換する(utf-8→utf-8の文字化け回避)
+        $htmlstr = Unicode::Japanese->new($htmlstr, $charset)->getu;
     }
     $htmlstr =~ s/<!-- header -->/$opt{header}/;
     $htmlstr =~ s/<!-- footer -->/$opt{footer}/;
