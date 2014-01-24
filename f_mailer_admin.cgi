@@ -107,7 +107,7 @@ sub confform {
         my $conffile = get_conffile_by_id($FORM{_conf_id});
         ($conffile) = $conffile =~ /^([\w\_\-\.]+)$/;
         eval { require "./data/conf/$conffile"; };
-        error("data/conf/$conffileの読み込みができませんでした。: $@")
+        error("data/conf/${conffile}の読み込みができませんでした。: $@")
          if $@;
         %conf = conf_to_temp(conf::conf());
         $FORM{temp} = temp_write("confform", %conf, conflabel=>$conf{label});
@@ -438,18 +438,18 @@ sub confserial {
     my $serial;
     ($FORM{conf_id}) = $FORM{conf_id} =~ /^(\w+)$/;
     if (-e "./data/serial/$FORM{conf_id}") {
-        open(R, "./data/serial/$FORM{conf_id}")
+        open(my $fh, "<:utf8", "./data/serial/$FORM{conf_id}")
          or error("シリアル番号ファイルが開けませんでした。: $!");
-        flock(R, LOCK_EX);
-        chomp($serial = <R>);
-        close(R);
+        flock($fh, LOCK_EX);
+        chomp($serial = <$fh>);
+        close($fh);
     } else {
-        open(W, "> ./data/serial/$FORM{conf_id}")
+        open(my $fh, ">:utf8", "./data/serial/$FORM{conf_id}")
          or error("シリアル番号ファイルが生成できませんでした。: $!");
-        close(W);
+        close($fh);
     }
 
-    printhtml("tmpl/admin_confserial.html", errmsg => join("", map { "<li>$_\n" }
+    printhtml("tmpl/admin_confserial.html", errmsg => join("", map { "<li>$_</li>\n" }
      map { html_output_escape($_) } @$errmsg_ref),
      conflabel => ($conf{conflabel} ? $conf{conflabel} : "新規作成"),
      conf_id_dsp=>($FORM{conf_id} ? $FORM{conf_id} : "-"),
@@ -477,11 +477,11 @@ sub confserial_update {
 
     my $serial_input = shift;
     ($FORM{conf_id}) = $FORM{conf_id} =~ /^(\w+)$/;
-    open(RW, "+< ./data/serial/$FORM{conf_id}")
+    open(my $fh, "+<:utf8", "./data/serial/$FORM{conf_id}")
      or error("シリアル番号ファイルが開けませんでした。: $!");
-    flock(RW, LOCK_EX);
-    seek(RW, 0, 0);
-    chomp(my $serial = <RW>);
+    flock($fh, LOCK_EX);
+    seek($fh, 0, 0);
+    chomp(my $serial = <$fh>);
     if ($serial_input =~ /^([+-])(\d+)$/) {
         my $flag = $1;
         my $num = $2;
@@ -496,10 +496,10 @@ sub confserial_update {
     } elsif ($serial_input eq "") {
         $serial = "";
     }
-    truncate(RW, 0);
-    seek(RW, 0, 0);
-    print RW $serial;
-    close(RW);
+    truncate($fh, 0);
+    seek($fh, 0, 0);
+    print $fh $serial;
+    close($fh);
 
 }
 
@@ -511,23 +511,23 @@ sub del {
     ($conffile) = $conffile =~ /^([\w\.\-\_]+)$/;
 
     my @data;
-    open(R, "<:utf8", "data/conflist.cgi")
+    open(my $fh, "<:utf8", "data/conflist.cgi")
      or error("data/conflist.cgiが開けませんでした。: $!");
-    while (<R>) {
+    while (<$fh>) {
         my($conf_id) = split(/\t/);
         next if $FORM{conf_id} eq $conf_id;
         push(@data, $_);
     }
 
-    open(W, ">:utf8", "data/conflist.cgi")
+    open($fh, ">:utf8", "data/conflist.cgi")
      or error("data/conflist.cgiに書き込みできませんでした。: $!");
-    print W @data;
-    close(W);
+    print $fh @data;
+    close($fh);
 
-    unlink("./data/conf/$conffile") or error("./data/conf/$conffileを削除できませんでした。恐れ入りますが、手動で削除してください。");
+    unlink("./data/conf/$conffile") or error("./data/conf/${conffile}を削除できませんでした。恐れ入りますが、手動で削除してください。");
     if (-e "./data/confext/ext_$conffile") {
         unlink("./data/confext/ext_$conffile")
-         or error("./data/confext/ext_$conffileを削除できませんでした。恐れ入りますが、手動で削除してください。");
+         or error("./data/confext/ext_${conffile}を削除できませんでした。恐れ入りますが、手動で削除してください。");
     }
     if (-e "./data/serial/$FORM{conf_id}") {
         unlink("./data/serial/$FORM{conf_id}")

@@ -97,7 +97,7 @@ sub error_ {
 
 sub get_checklist {
 
-    open(my $fh, "<", "data/check.txt")
+    open(my $fh, "<:utf8", "data/check.txt")
      or error(get_errmsg("200", $!));
     my @list;
     while (<$fh>) {
@@ -113,7 +113,7 @@ sub get_checklist {
 sub get_conffile_by_id {
 
     my $conf_id = shift;
-    open(my $fh, "<", "data/conflist.cgi")
+    open(my $fh, "<:utf8", "data/conflist.cgi")
      or error_(get_errmsg("210", $!));
     while (<$fh>) {
         my($id, $file, $label) = split(/\t/);
@@ -126,7 +126,7 @@ sub get_conffile_by_id {
 
 sub get_conflist {
 
-    open(my $fh, "<", "data/conflist.cgi")
+    open(my $fh, "<:utf8", "data/conflist.cgi")
      or error(get_errmsg("220", $!));
     my $conflist;
     my @list;
@@ -282,10 +282,10 @@ sub imgsave {
         (my $filename_enc_clean) = $filename_enc =~ /^([\da-zA-Z_.,%-]+)$/;
         error("taint check error: $filename")
          unless $filename_enc_clean eq $filename_enc;
-        open(W, "> ./temp/$temp-$filename_enc_clean")
+        open(my $fh, ">:utf8 ./temp/$temp-$filename_enc_clean")
          or error(get_errmsg("240", $!));
-        print W $stream;
-        close(W);
+        print $fh $stream;
+        close($fh);
         ($temp, $filename, length($stream));
     } else {
         undef;
@@ -465,7 +465,7 @@ sub load_condcheck {
         my($f_name, $alt_name, $f_value) = @_;
         return z2h($f_value);
     };
-    open(my $fh, "<", "data/check.txt")
+    open(my $fh, "<:utf8", "data/check.txt")
      or error("Failed to open check.txt: $!");
     while (<$fh>) {
         my($f) = split(/\t/, $_, 2);
@@ -542,14 +542,14 @@ sub printhtml {
     }
     $charset ||= "auto";
 
-    open(R, "tmpl/_header.html");
-    my $header = join("", <R>);
+    open(my $fh, "<:utf8", "tmpl/_header.html");
+    my $header = join("", <$fh>);
     $header =~ s/##STYLESHEET##/$CONF{STYLESHEET}/g;
     map { $header =~ s/##$_##/$CONF{$_}/g } qw(TEXT BGCOLOR LINK VLINK ALINK BACKGROUND BORDER SYS_TEXT SYS_BGCOLOR SYS_LINK SYS_VLINK SYS_ALINK SYS_BACKGROUND SYS_BORDER);
-    close(R);
-    open(R, "tmpl/_footer.html");
-    my $footer = join("", <R>);
-    close(R);
+    close($fh);
+    open($fh, "<:utf8", "tmpl/_footer.html");
+    my $footer = join("", <$fh>);
+    close($fh);
     my($code, $htmlstr) = printhtml_getpage($charset, { filename=>$filename,
      header=>$header, footer=>$footer, errmsg=>$tr{"errmsg"} });
     foreach my $key(keys %tr) {
@@ -571,7 +571,7 @@ sub printhtml_getpage {
         error_(get_errmsg("260", $@)) if $@;
         $htmlstr = get($opt{filename});
     } else {
-        open(my $fh, "<", $opt{filename}) or error_(get_errmsg("261", $@, $opt{filename}));
+        open(my $fh, "<:utf8", $opt{filename}) or error_(get_errmsg("261", $@, $opt{filename}));
         $htmlstr = join("", <$fh>);
         close($fh);
     }
@@ -610,7 +610,7 @@ sub printhtml_output {
     } elsif ($code eq "euc") {
         print "euc-jp\n\n", Unicode::Japanese->new($htmlstr, "utf8")->euc;
     } else {
-        print "utf-8\n\n", $htmlstr;
+        print "utf-8\n\n", Unicode::Japanese->new($htmlstr, "utf8")->get;
     }
 
 }
@@ -730,17 +730,17 @@ sub sendmail {
     ### sendmailモード
     } else {
 
-        open(MAIL, "| $CONF{SENDMAIL} -t $opt{envelope}")
+        open(my $mail, "| $CONF{SENDMAIL} -t $opt{envelope}")
              or error(get_errmsg("270", $!));
-        print MAIL "Date: $date\n";
-        print MAIL "To: $opt{mailto}\n";
+        print $mail "Date: $date\n";
+        print $mail "To: $opt{mailto}\n";
         if ($opt{cc}) {
-            print MAIL "Cc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc})), "\n";
+            print $mail "Cc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc})), "\n";
         }
-        print MAIL "From: $opt{fromname}\n";
-        print MAIL "Subject: $subject_enc\n";
-        print MAIL $opt{mailstr};
-        close(MAIL) or error(get_errmsg("271", $!));
+        print $mail "From: $opt{fromname}\n";
+        print $mail "Subject: $subject_enc\n";
+        print $mail $opt{mailstr};
+        close($mail) or error(get_errmsg("271", $!));
 
     }
 
@@ -752,23 +752,23 @@ sub serial_increment {
     my $conf_id = shift;
     ($conf_id) = $conf_id =~ /^(\w+)$/;
     unless (-e "./data/serial/$conf_id") {
-        open(W, "> ./data/serial/$conf_id")
+        open(my $fh, ">:utf8", "./data/serial/$conf_id")
          or error(get_errmsg("280", $!));
-        close(W);
+        close($fh);
     }
-    open(RW, "+<./data/serial/$conf_id")
+    open(my $fh, "+<:utf8", "./data/serial/$conf_id")
      or error(get_errmsg("281", $!));
-    flock(RW, LOCK_EX);
-    seek(RW, 0, 0);
-    my $serial = <RW> || 0;
+    flock($fh, LOCK_EX);
+    seek($fh, 0, 0);
+    my $serial = <$fh> || 0;
     my $length = length($serial);
 #error($length,$serial);
     $serial = sprintf("%0${length}d", ++$serial);
 #error($serial);
-    truncate(RW, 0);
-    seek(RW, 0, 0);
-    print RW $serial;
-    close(RW);
+    truncate($fh, 0);
+    seek($fh, 0, 0);
+    print $fh $serial;
+    close($fh);
 
     return $serial;
 

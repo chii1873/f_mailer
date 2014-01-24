@@ -58,10 +58,10 @@ sub gen_conffilename {
 
 sub get_conffields {
 
-    open(R, "./data/conffields.txt")
+    open(my $fh, "<:utf8", "./data/conffields.txt")
      or error("./data/conffields.txtが開けませんでした。: $!");
-    chomp(my @fields = <R>);
-    close(R);
+    chomp(my @fields = <$fh>);
+    close($fh);
     @fields;
 
 }
@@ -114,9 +114,9 @@ sub mk_conffile {
     ($conf{conffile}) = $conf{conffile} =~ /^([\w\.]+)$/;
 
     unless (-e "./data/confext/ext_$conf{conffile}") {
-        open(W, ">:utf8", "./data/confext/ext_$conf{conffile}")
+        open(my $fh, ">:utf8", "./data/confext/ext_$conf{conffile}")
          or error("./data/confext/ext_$conf{conffile}へ書き込みできませんでした。: $!");
-        print W <<STR;
+        print $fh <<STR;
 #
 # $CONF{prod_name} v$CONF{version} 拡張設定ファイル
 # $CONF{copyright2} Perl Script Laboratory All rights reserved.
@@ -159,12 +159,12 @@ sub ext_sub2 {
 
 1;
 STR
-        close(W);
+        close($fh);
     }
 
-    open(W, ">:utf8", "data/conf/$conf{conffile}")
+    open(my $fh, ">:utf8", "data/conf/$conf{conffile}")
      or error("data/conf/$conf{conffile}へ書き込みできませんでした。: $!");
-    print W <<STR;
+    print $fh <<STR;
 #
 # $CONF{prod_name} v$CONF{version} 設定ファイル
 # $CONF{copyright2} Perl Script Laboratory All rights reserved.
@@ -204,26 +204,26 @@ STR
 
     foreach ("label", get_conffields()) {
         if ($_ eq "COND") {
-            print W $condstr;
+            print $fh $condstr;
         } elsif ($_ eq "ATTACH_FIELDNAME") {
-            print W q{    $conf{ATTACH_FIELDNAME} = [qw(},
+            print $fh q{    $conf{ATTACH_FIELDNAME} = [qw(},
              $conf{ATTACH_FIELDNAME}, qq{)];\n};
         } elsif ($_ eq "ATTACH_EXT") {
-            print W q{    $conf{ATTACH_EXT} = [qw(},
+            print $fh q{    $conf{ATTACH_EXT} = [qw(},
              join(" ", split(/,/, $conf{ATTACH_EXT})),
              qq{)];\n};
         } elsif ($_ eq "OUTPUT_FIELDS") {
-            print W q{    $conf{OUTPUT_FIELDS} = [qw(}, "\n",
+            print $fh q{    $conf{OUTPUT_FIELDS} = [qw(}, "\n",
              $conf{OUTPUT_FIELDS}, qq{)];\n};
 #        } elsif (/^EXT_SUB2?$/) {
-#            print W qq{    \$conf{$_} = sub \{}, "\n",
+#            print $fh qq{    \$conf{$_} = sub \{}, "\n",
 #             $conf{$_}, qq{\n\    \};\n};
         } else {
-            print W qq{    chomp(\$conf{$_} = <<'_STR_${_}_');\n$conf{$_}\n_STR_${_}_\n};
+            print $fh qq{    chomp(\$conf{$_} = <<'_STR_${_}_');\n$conf{$_}\n_STR_${_}_\n};
         }
     }
-    print W qq{\n    \%conf;\n\n\}\n\n1;\n};
-    close(W);
+    print $fh qq{\n    \%conf;\n\n\}\n\n1;\n};
+    close($fh);
 
     ($conf{conffile}, $conf{conf_id});
 
@@ -234,9 +234,9 @@ sub mk_sysconffile {
     my %conf = @_;
 
     my $date = get_datetime(time);
-    open(W, ">:utf8", "./f_mailer_sysconf.pl")
+    open(my $fh, ">:utf8", "./f_mailer_sysconf.pl")
      or error("./f_mailer_sysconf.plへ書き込みできませんでした。: $!");
-    print W <<STR;
+    print $fh <<STR;
 #
 # $CONF{prod_name} v$CONF{version} 設定ファイル
 # $CONF{copyright2} Perl Script Laboratory All rights reserved.
@@ -258,10 +258,10 @@ STR
     my $condstr;
 
     foreach (qw(LANG_DEFAULT SENDMAIL_FLAG SENDMAIL SMTP_HOST ALLOW_FROM)) {
-        print W qq{    chomp(\$conf{$_} = <<_STR_${_}_);\n$conf{$_}\n_STR_${_}_\n};
+        print $fh qq{    chomp(\$conf{$_} = <<_STR_${_}_);\n$conf{$_}\n_STR_${_}_\n};
     }
-    print W qq{\n    \%conf;\n\n\}\n\n1;\n};
-    close(W);
+    print $fh qq{\n    \%conf;\n\n\}\n\n1;\n};
+    close($fh);
 
 }
 
@@ -275,7 +275,7 @@ sub passwd_compare {
 
 sub passwd_read {
 
-    open(R, "data/passwd.cgi")
+    open(my $fh, "<:utf8", "./data/passwd.cgi")
      or error("パスワードファイルが開けませんでした。: $!");
     my $passwd = <R>;
     close(R);
@@ -286,11 +286,11 @@ sub passwd_read {
 sub passwd_write {
 
     my $passwd = shift || 12345;
-    open(W, "> data/passwd.cgi")
+    open(my $fh, ">:utf8", "./data/passwd.cgi")
      or error("パスワードファイルへ書き込みできませんでした。: $!");
     my $salt = join("", map { (0..9,"a".."z","A".."Z")[rand(62)] } (1..8));
-    print W crypt($passwd, index(crypt('a','$1$a$'),'$1$a$') == 0 ? "\$1\$$salt\$" : $salt);
-    close(W);
+    print $fh crypt($passwd, index(crypt('a','$1$a$'),'$1$a$') == 0 ? "\$1\$$salt\$" : $salt);
+    close($fh);
 
 }
 
