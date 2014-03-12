@@ -3,7 +3,7 @@ body {
 	margin: 0;
 	padding: 0;
 	font-size: 9.5pt;
-	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif;
+	font-family:'Lucida Grande','Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
 }
 hr {
 	border: 0px;
@@ -22,9 +22,6 @@ a:hover {
 	color: red;
 }
 
-select {
-	font-size: 9.5pt;
-}
 small {
 	font-size: 8.5pt;
 }
@@ -32,22 +29,15 @@ tr,td,th {
 	font-size: 9.5pt;
 }
 tt,pre {
-	font-family: Courier New, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif;
+	font-family:'Lucida Grande','Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
 	color:brown;
 	font-size: 9.5pt;
 }
 button,
-input[type="submit"],
-input[type="button"] {
-	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif; */
-}
-input {
-	font-family: Osaka, "ＭＳ ゴシック", "MS Gothic", sans-serif; */
-	font-size: 9.5pt;
-}
+input,
+select,
 textarea {
-	font-family: Osaka, "ＭＳ ゴシック", "MS Gothic", sans-serif; */
-	font-size: 9.5pt;
+	font-family:'Lucida Grande','Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
 }
 
 form,

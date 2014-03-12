@@ -495,9 +495,9 @@ sub mk_errmsg {
 
 	my $errmsg_ref = shift || [];
 
-	my $errmsg = join("\n", map { qq|<li>$_</li>| } map { h($_) } @$errmsg_ref);
+	my $errmsg = join("\n", map { qq|<li $CONF{"ERRMSG_STYLE_LI"}>$_</li>| } map { h($_) } @$errmsg_ref);
 	if ($errmsg ne "") {
-		return qq|<ul class="errmsg">\n$errmsg\n</ul>|;
+		return qq|<ul $CONF{"ERRMSG_STYLE_UL"}>\n$errmsg\n</ul>|;
 	}
 	return;
 
@@ -667,24 +667,7 @@ sub sendmail {
 
 	$opt{envelope} = "-f $opt{envelope}" if $opt{envelope};
 
-	my $subject_enc;
-	if (mojichk($opt{subject}) or $opt{charset} eq "UTF-8") {
-		$subject_enc = base64_subj("UTF-8", $opt{subject});
-	} elsif (! is_ascii($opt{subject})) {
-		$subject_enc = base64_subj("ISO-2022-JP", Unicode::Japanese->new($opt{subject}, "utf8")->jis);
-	} else {
-		$subject_enc = $opt{subject};
-	}
-
-	if ($opt{charset} eq "ISO-2022-JP") {
-		$opt{mailstr} = Unicode::Japanese->new($opt{mailstr}, "utf8")->jis;
-	}
 	if ($opt{fromname}) {
-		if (mojichk($opt{fromname}) or $opt{charset} eq "UTF-8") {
-			$opt{fromname} = base64_subj("UTF-8", $opt{fromname});
-		} elsif (! is_ascii($opt{fromname})) {
-			$opt{fromname} = base64_subj("ISO-2022-JP", Unicode::Japanese->new($opt{fromname}, "utf8")->jis);
-		}
 		$opt{fromname} = qq{"$opt{fromname}" <$opt{from}>};
 	} else {
 		$opt{fromname} = $opt{from};
@@ -716,14 +699,20 @@ sub sendmail {
 		if ($opt{cc}) {
 			$smtp->cc(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc}));
 		}
+		if ($opt{bcc}) {
+			$smtp->bcc(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{bcc}));
+		}
 		$smtp->data();
 		$smtp->datasend("Date: $date\n");
 		$smtp->datasend("To: $opt{mailto}\n");
 		if ($opt{cc}) {
 			$smtp->datasend("Cc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc})). "\n");
 		}
+		if ($opt{bcc}) {
+			$smtp->datasend("Bcc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{bcc})). "\n");
+		}
 		$smtp->datasend("From: $opt{fromname}\n");
-		$smtp->datasend("Subject: $subject_enc\n");
+		$smtp->datasend("Subject: $opt{subject}\n");
 		$smtp->datasend($opt{mailstr});
 		$smtp->dataend();
 
@@ -737,8 +726,11 @@ sub sendmail {
 		if ($opt{cc}) {
 			print $mail "Cc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc})), "\n";
 		}
+		if ($opt{bcc}) {
+			print $mail "Bcc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{bcc})), "\n";
+		}
 		print $mail "From: $opt{fromname}\n";
-		print $mail "Subject: $subject_enc\n";
+		print $mail "Subject: $opt{subject}\n";
 		print $mail $opt{mailstr};
 		close($mail) or error(get_errmsg("271", $!));
 
@@ -942,7 +934,7 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.7 beta140126},
+		version   => q{0.7 beta140304},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{http://www.psl.ne.jp/},
 		copyright => q{&copy;1997-2014},

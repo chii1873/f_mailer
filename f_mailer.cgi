@@ -369,9 +369,12 @@ sub sendmail_do {
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
 		my $subject = $CONF{SUBJECT};
 		$subject =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
-		my($str, $charset) = sendmail_mkstr(
-			str => $format, credit => $CONF{copyright_mail_footer},
-			charset=>"",
+		my %str = sendmail_mkstr(
+			subject => $subject,
+			fromname => $CONF{SENDFROMNAME},
+			mailstr => $format,
+			credit => $CONF{copyright_mail_footer},
+			charset=>$CONF{CHARSET},
 			attachdata => \%attachdata,
 		);
 		### 2007-10-7 エンベロープアドレス対応
@@ -379,14 +382,14 @@ sub sendmail_do {
 		 ? ($FORM{EMAIL} || $CONF{SENDFROM}) : $CONF{ENVELOPE_ADDR};
 		foreach my $mailto(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/,$CONF{SENDTO})) {
 			sendmail(
-				charset  => $charset,
+				charset  => $str{charset},
 				mailto   => $mailto,
 				cc       => $CONF{CC},
-#                bcc      => $CONF{BCC},
+		                bcc      => $CONF{BCC},
 				from     => ($FORM{EMAIL} || $CONF{SENDFROM}),
-				subject  => $subject,
-				mailstr  => $str,
-				fromname => "",
+				subject  => $str{subject},
+				mailstr  => $str{mailstr},
+				fromname => $str{fromname},
 				envelope => $envelope,
 			);
 		}
@@ -401,22 +404,25 @@ sub sendmail_do {
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
 		my $subject = $CONF{REPLY_SUBJECT};
 		$subject =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
-		my($str, $charset) = sendmail_mkstr(
-			str => $format, credit => $CONF{copyright_mail_footer},
-			charset=>"",
+		my %str = sendmail_mkstr(
+			subject => $subject,
+			fromname => $CONF{REPLY_SENDFROMNAME},
+			mailstr => $format,
+			credit => $CONF{copyright_mail_footer},
+			charset=>$CONF{REPLY_CHARSET},
 			attachdata => {},
 		);
 		### フォーム内容メールの送信処理
 		foreach my $mailto(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/,$FORM{EMAIL})) {
 			sendmail(
-				charset  => $charset,
+				charset  => $str{charset},
 				mailto   => $mailto,
 				cc       => $CONF{REPLY_CC},
-#                bcc      => $CONF{REPLY_BCC},
+		                bcc      => $CONF{REPLY_BCC},
 				from     => $CONF{REPLY_SENDFROM},
-				subject  => $subject,
-				mailstr  => $str,
-				fromname => $CONF{REPLY_SENDFROMNAME},
+				subject  => $str{subject},
+				mailstr  => $str{mailstr},
+				fromname => $str{fromname},
 				envelope => $CONF{REPLY_ENVELOPE_ADDR},
 			);
 		}
@@ -519,16 +525,69 @@ sub sendmail_get_attachdata {
 sub sendmail_mkstr {
 
 	my %opt = @_;
-	my $str;
 	my $boundary = "--".join("", map { ('0'..'9','a'..'f')[rand(16)] } 1..24);
+	my $str;
+	my %charset_conv = (
+		"us-ascii" => "US-ASCII",
+		"iso-8859-1" => "ISO-8859-1",
+		"jis" => "ISO-2022-JP",
+		"utf8" => "UTF-8",
+		"sjis" => "Shift_JIS",
+	);
 
-	if ($opt{charset} eq "UTF-8" or mojichk($opt{str}) or mojichk($opt{credit})) {
-		$opt{charset} = "UTF-8";
-		# utf-8のまま
-	} elsif (! is_ascii($opt{str}) or is_ascii($opt{credit})) {
-		$opt{charset} = "ISO-2022-JP";
-		$opt{str} = Unicode::Japanese->new($opt{str}, "utf8")->jis;
-		$opt{credit} = Unicode::Japanese->new($opt{credit}, "utf8")->jis;
+	### 文字コード	コード変換 subject/fromname変換
+	### -------------------------------------------
+	### us-ascii	－		－
+	### iso-8859-1	－		－
+	### utf-8	－		○
+	### sjis	○		○
+	### jis		○		○
+	### -------------------------------------------
+
+	### 自動判定
+	if ($opt{charset} eq "" or $opt{charset} eq "auto") {
+		if ($opt{subject} =~ /^[\r\n\x20-\x7e]*$/ and $opt{str} =~ /^[\r\n\x20-\x7e]*$/ and $opt{credit} =~ /^[\r\n\x20-\x7e]*$/) {
+			$opt{charset} = $charset_conv{"us-ascii"};
+		} elsif ($opt{subject} =~ /^[\r\n\x20-\x7e\xa0-\xff]*$/ and $opt{str} =~ /^[\r\n\x20-\x7e\xa0-\xff]*$/ and $opt{credit} =~ /^[\x20-\x7e\xa0-\xff]*$/) {
+			$opt{charset} = $charset_conv{"iso-8859-1"};
+		} elsif (mojichk($opt{subject}) or mojichk($opt{mailstr}) or mojichk($opt{credit})) {
+			$opt{charset} = $charset_conv{"utf8"};
+			$opt{subject} = base64_subj($opt{charset}, $opt{subject});
+			$opt{fromname} = base64_subj($opt{charset}, $opt{fromname})
+			 if $opt{fromname} ne "";
+		} else {
+			$opt{charset} = $charset_conv{"jis"};
+			$opt{mailstr} = Unicode::Japanese->new($opt{mailstr}, "utf8")->jis;
+			$opt{credit} = Unicode::Japanese->new($opt{credit}, "utf8")->jis;
+			$opt{subject} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{subject}, "utf8")->jis);
+			$opt{fromname} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{fromname}, "utf8")->jis)
+			 if $opt{fromname} ne "";
+		}
+
+	### 文字コード固定
+	} else {
+		if ($opt{charset} eq "utf8") {
+			$opt{charset} = $charset_conv{"utf8"};
+			$opt{subject} = base64_subj($opt{charset}, $opt{subject});
+			$opt{fromname} = base64_subj($opt{charset}, $opt{fromname})
+			 if $opt{fromname} ne "";
+		} elsif ($opt{charset} eq "jis") {
+			$opt{charset} = $charset_conv{"jis"};
+			$opt{mailstr} = Unicode::Japanese->new($opt{mailstr}, "utf8")->jis;
+			$opt{credit} = Unicode::Japanese->new($opt{credit}, "utf8")->jis;
+			$opt{subject} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{subject}, "utf8")->jis);
+			$opt{fromname} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{fromname}, "utf8")->jis)
+			 if $opt{fromname} ne "";
+		} elsif ($opt{charset} eq "sjis") {
+			$opt{charset} = $charset_conv{"sjis"};
+			$opt{mailstr} = Unicode::Japanese->new($opt{mailstr}, "utf8")->sjis;
+			$opt{credit} = Unicode::Japanese->new($opt{credit}, "utf8")->sjis;
+			$opt{subject} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{subject}, "utf8")->sjis);
+			$opt{fromname} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{fromname}, "utf8")->sjis)
+			 if $opt{fromname} ne "";
+		} else {
+			$opt{charset} = $charset_conv{$opt{charset}};
+		}
 	}
 
 	if (keys %{$opt{attachdata}}) {
@@ -540,7 +599,7 @@ Content-Type: multipart/mixed; boundary="$boundary"
 --$boundary
 Content-type: text/plain; charset=$opt{charset}
 
-$opt{str}
+$opt{mailstr}
 $opt{credit}
 STR
 	} else {
@@ -549,7 +608,7 @@ MIME-Version: 1.0
 Content-Transfer-Encording: 7bit
 Content-type: text/plain; charset=$opt{charset}
 
-$opt{str}
+$opt{mailstr}
 $opt{credit}
 STR
 	}
@@ -575,7 +634,7 @@ STR
 
 	$str .= "--$boundary--\n" if keys %{$opt{attachdata}};
 
-	return ($str, $opt{charset});
+	return %opt, "mailstr" => $str;
 
 }
 

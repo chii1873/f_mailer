@@ -338,7 +338,7 @@ sub confpanel {
 		$conf{"_cond_email_$f"} = 1 if $f eq "EMAIL";
 		$liststr .= <<STR;
 <tr>
-<td><input name="order_$f" size="2" value="$conf{"order_$f"}" class="r" /></td>
+<td><input name="order_$f" size="1" value="$conf{"order_$f"}" class="r" /></td>
 <td><a href="javascript:order('$f')">$f</a></td>
 <td>$type_dsp<input type="hidden" name="_cond_type_$f" value="$conf{"_cond_type_$f"}" /></td>
 STR
@@ -919,8 +919,7 @@ sub sysconfform {
 	 rh => remote_host(), ip => $ENV{"REMOTE_ADDR"},
 	 "USE_SMTP_AUTH:1" => ($conf{USE_SMTP_AUTH} ? q|checked="checked"| : ""),
 	 (map { "SENDMAIL_FLAG:".$_ => $conf{SENDMAIL_FLAG} eq $_ ? q|checked="checked"| : "" } (0,1)),
-	 (map { $_=>$conf{$_} } qw(SENDMAIL SMTP_HOST USE_SMTP_AUTH SMTP_AUTH_ID SMTP_AUTH_PASSWD ALLOW_FROM)),
-	 (map { $_=>h($conf{$_}) } qw(ERRMSG_STYLE_UL ERRMSG_STYLE_LI)),
+	 (map { $_=>h($conf{$_}) } qw(SENDMAIL SMTP_HOST USE_SMTP_AUTH SMTP_AUTH_ID SMTP_AUTH_PASSWD ALLOW_FROM)),
 	);
 	exit;
 }

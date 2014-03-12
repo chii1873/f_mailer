@@ -257,7 +257,7 @@ STR
 
 	my $condstr;
 
-	foreach (qw(LANG_DEFAULT SENDMAIL_FLAG SENDMAIL SMTP_HOST ALLOW_FROM ERRMSG_STYLE_UL ERRMSG_STYLE_LI)) {
+	foreach (qw(LANG_DEFAULT SENDMAIL_FLAG SENDMAIL SMTP_HOST ALLOW_FROM)) {
 		print $fh qq{    chomp(\$conf{$_} = <<_STR_${_}_);\n$conf{$_}\n_STR_${_}_\n};
 	}
 	print $fh qq{\n    \%conf;\n\n\}\n\n1;\n};

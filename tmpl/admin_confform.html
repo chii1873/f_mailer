@@ -85,7 +85,7 @@ function to_confpanel () {
 <input type="radio" name="CONFIRM_FLAG" value="2" ##CONFIRM_FLAG:2## />[2]確認する ( ↓以下に指定 )<br />
 <table class="tbl">
 <tr><td class="bg_eef">テンプレート<span class="fn">(CONFIRM_TMPL)</span></td>
-<td><input name="CONFIRM_TMPL" value="##CONFIRM_TMPL##" size="50" /></td></tr>
+<td><input name="CONFIRM_TMPL" value="##CONFIRM_TMPL##" size="40" /></td></tr>
 <tr><td class="bg_eef">文字コード<span class="fn">(CONFIRM_TMPL_CHARSET)</span></td>
 <td><select name="CONFIRM_TMPL_CHARSET">
 <!-- option value="auto" ##CONFIRM_TMPL_CHARSET:auto##>自動認識</option -->
@@ -94,7 +94,7 @@ function to_confpanel () {
 <option value="euc" ##CONFIRM_TMPL_CHARSET:euc##>EUC</option>
 </select></td></tr>
 <tr><td class="bg_eef">付加URL<span class="fn">(CONFIRM_TMPL_BASE_URL)</span></td>
-<td><input name="CONFIRM_TMPL_BASE_URL" value="##CONFIRM_TMPL_BASE_URL##" size="50" />
+<td><input name="CONFIRM_TMPL_BASE_URL" value="##CONFIRM_TMPL_BASE_URL##" size="40" />
 </td></tr>
 </table>
 <div class="caption">
@@ -114,7 +114,7 @@ function to_confpanel () {
 <input type="radio" name="ERROR_FLAG" value="1" ##ERROR_FLAG:1## />[1]↓以下に指定<br />
 <table class="tbl">
 <tr><td class="bg_eef">テンプレート<span class="fn">(ERROR_TMPL)</span></td>
-<td><input name="ERROR_TMPL" value="##ERROR_TMPL##" size="50" /></td></tr>
+<td><input name="ERROR_TMPL" value="##ERROR_TMPL##" size="40" /></td></tr>
 <tr><td class="bg_eef">文字コード<span class="fn">(ERROR_TMPL_CHARSET)</span></td>
 <td><select name="ERROR_TMPL_CHARSET">
 <!-- option value="auto" ##CONFIRM_TMPL_CHARSET:auto##>自動認識</option -->
@@ -123,7 +123,7 @@ function to_confpanel () {
 <option value="euc" ##ERROR_TMPL_CHARSET:euc##>EUC</option>
 </select></td></tr>
 <tr><td class="bg_eef">付加URL<span class="fn">(ERROR_TMPL_BASE_URL)</span></td>
-<td><input name="ERROR_TMPL_BASE_URL" value="##ERROR_TMPL_BASE_URL##" size="50" />
+<td><input name="ERROR_TMPL_BASE_URL" value="##ERROR_TMPL_BASE_URL##" size="40" />
 </td></tr>
 </table>
 <div class="caption">
@@ -140,7 +140,7 @@ function to_confpanel () {
 <input type="radio" name="FORM_FLAG" value="1" ##FORM_FLAG:1## />[1]入力エラーのとき、フォームを再表示する ( ↓以下に指定 )<br />
 <table class="tbl">
 <tr><td class="bg_eef">テンプレート<span class="fn">(FORM_TMPL)</span></td>
-<td><input name="FORM_TMPL" value="##FORM_TMPL##" size="50" /></td></tr>
+<td><input name="FORM_TMPL" value="##FORM_TMPL##" size="40" /></td></tr>
 <tr><td class="bg_eef">文字コード<span class="fn">(FORM_TMPL_CHARSET)</span></td>
 <td><select name="FORM_TMPL_CHARSET">
 <!-- option value="auto" ##FORM_TMPL_CHARSET:auto##>自動認識</option -->
@@ -149,11 +149,21 @@ function to_confpanel () {
 <option value="euc" ##FORM_TMPL_CHARSET:euc##>EUC</option>
 </select></td></tr>
 <tr><td class="bg_eef">付加URL<span class="fn">(FORM_TMPL_BASE_URL)</span></td>
-<td><input name="FORM_TMPL_BASE_URL" value="##FORM_TMPL_BASE_URL##" size="50" />
+<td><input name="FORM_TMPL_BASE_URL" value="##FORM_TMPL_BASE_URL##" size="40" />
 </td></tr>
 </table>
 <div class="caption">
 ※フォーム入力後に送信ボタンを押したとき、入力フォームそのものを再表示し、入力内容をそのまま維持して、エラーメッセージを出すことができるようになりました。これにより、戻るボタンで戻ったときに入力内容が消えてしまう問題が回避できます。
+</div>
+</td></tr>
+<tr><td class="bg_eef">(4-3)エラーメッセージのスタイル設定</td>
+<td>
+<table class="tbl">
+<tr><td class="bg_eef">&lt;ul&gt;タグに設定するスタイル<br /><span class="fn">(ERRMSG_STYLE_UL)</span></td><td><input name="ERRMSG_STYLE_UL" value="##ERRMSG_STYLE_UL##" size="50" /></td></tr>
+<tr><td class="bg_eef">&lt;li&gt;タグに設定するスタイル<br /><span class="fn">(ERRMSG_STYLE_LI)</span></td><td><input name="ERRMSG_STYLE_LI" value="##ERRMSG_STYLE_LI##" size="50" /></td></tr>
+</table>
+<div class="caption">
+※エラーメッセージを表示するul-liタグのスタイルを設定します。<br />
 </div>
 </td></tr>
 <tr><td class="bg_eef">(5)空欄のフィールドと置き換える文字列<span class="fn">(BLANK_STR)</span></td>
@@ -173,14 +183,14 @@ function to_confpanel () {
 <tr><td class="bg_eef">(7)完了画面<span class="fn">(THANKS_FLAG)</span>
 </td>
 <td>
-<input type="radio" name="THANKS_FLAG" value="0" ##THANKS_FLAG:0## />[0]指定したURLへジャンプ→<input name="THANKS" value="##THANKS##" size="60" />
+<input type="radio" name="THANKS_FLAG" value="0" ##THANKS_FLAG:0## />[0]指定したURLへジャンプ→<input name="THANKS" value="##THANKS##" size="40" />
 <br />
 <input type="radio" name="THANKS_FLAG" value="1" ##THANKS_FLAG:1## />[1]システム内蔵ページ使用<br />
 <input type="radio" name="THANKS_FLAG" value="2" ##THANKS_FLAG:2## />[2]↓以下に指定
 
 <table class="tbl">
 <tr><td class="bg_eef">テンプレート<span class="fn">(THANKS_TMPL)</span></td>
-<td><input name="THANKS_TMPL" value="##THANKS_TMPL##" size="50" /></td></tr>
+<td><input name="THANKS_TMPL" value="##THANKS_TMPL##" size="40" /></td></tr>
 <tr><td class="bg_eef">文字コード<span class="fn">(THANKS_TMPL_CHARSET)</span></td>
 <td><select name="THANKS_TMPL_CHARSET">
 <!-- option value="auto" ##THANKS_TMPL_CHARSET:auto##>自動認識</option -->
@@ -189,7 +199,7 @@ function to_confpanel () {
 <option value="euc" ##THANKS_TMPL_CHARSET:euc##>EUC</option>
 </select></td></tr>
 <tr><td class="bg_eef">付加URL<span class="fn">(THANKS_TMPL_BASE_URL)</span></td>
-<td><input name="THANKS_TMPL_BASE_URL" value="##THANKS_TMPL_BASE_URL##" size="50" />
+<td><input name="THANKS_TMPL_BASE_URL" value="##THANKS_TMPL_BASE_URL##" size="40" />
 </td></tr>
 </table>
 <div class="caption">
@@ -202,7 +212,7 @@ function to_confpanel () {
 <tr><td class="bg_eef">(7-a)連続送信防止機能<span class="fn">(DENY_DUPL_SEND)</span>
 </td>
 <td>
-<input type="radio" name="DENY_DUPL_SEND" value="1" ##DENY_DUPL_SEND:1## />[1]使用する ( 禁止期間<span class="fn">(DENY_DUPL_SEND_MIN)</span>→<input name="DENY_DUPL_SEND_MIN" value="##DENY_DUPL_SEND_MIN##" size="5" />分 )　　
+<input type="radio" name="DENY_DUPL_SEND" value="1" ##DENY_DUPL_SEND:1## />[1]使用する ( 禁止期間<span class="fn">(DENY_DUPL_SEND_MIN)</span>→<input name="DENY_DUPL_SEND_MIN" value="##DENY_DUPL_SEND_MIN##" size="3" />分 )　　
 <input type="radio" name="DENY_DUPL_SEND" value="0" ##DENY_DUPL_SEND:0## />[0]使用しない
 <div class="caption">
 ※通常は「使用する」にしておくことをおすすめします。<br />
@@ -214,7 +224,7 @@ function to_confpanel () {
 <td>
 <table class="tbl">
 <tr><td class="bg_eef">送信先<span class="fn">(SENDTO)</span>
-</td><td><textarea name="SENDTO" cols="60" rows="1" class="auto_height">##SENDTO##</textarea>
+</td><td><textarea name="SENDTO" size="60" rows="1" class="auto_height">##SENDTO##</textarea>
 <br />
 <input type="checkbox" name="DO_NOT_SEND" value="1" ##DO_NOT_SEND:1## />管理者へメールを送らない<span class="fn">(DO_NOT_SEND)</span>
 <div class="caption">
@@ -224,19 +234,25 @@ function to_confpanel () {
 </div>
 </td></tr>
 <tr><td class="bg_eef">同報送信先<span class="fn">(CC)</span>
-</td><td><textarea name="CC" cols="60" rows="1" class="auto_height">##CC##</textarea>
+</td><td><textarea name="CC" size="60" rows="1" class="auto_height">##CC##</textarea>
 <div class="caption">
 ※フォームメールの送り先(CC)となります。改行区切りで複数指定できます。
 </div>
 </td></tr>
+<tr><td class="bg_eef">隠し同報送信先<span class="fn">(BCC)</span>
+</td><td><textarea name="BCC" size="60" rows="1" class="auto_height">##BCC##</textarea>
+<div class="caption">
+※フォームメールの隠し送り先(BCC)となります。改行区切りで複数指定できます。
+</div>
+</td></tr>
 <tr><td class="bg_eef">送信元アドレス<span class="fn">(SENDFROM)</span></td>
-<td><input name="SENDFROM" value="##SENDFROM##" size="60" />
+<td><input name="SENDFROM" value="##SENDFROM##" size="40" />
 <div class="caption">
 ※フォームメールのFromヘッダとなります。ただし、フォーム中に name="EMAIL" の入力欄があって、その値がある場合は、EMAILの値が優先され Fromヘッダとなります。 
 </div>
 </td></tr>
 <tr><td class="bg_eef nowrap">エラー送信先<br /><span class="fn">(ENVELOPE_ADDR)</span>
-</td><td><input name="ENVELOPE_ADDR" value="##ENVELOPE_ADDR##" size="60" />
+</td><td><input name="ENVELOPE_ADDR" value="##ENVELOPE_ADDR##" size="40" />
 <br />
 <input type="checkbox" name="ENVELOPE_ADDR_LINK" value="1" ##ENVELOPE_ADDR_LINK:1## />送信元アドレスを自動的に指定する<span class="fn">(ENVELOPE_ADDR_LINK)</span>
 <div class="caption">
@@ -244,8 +260,21 @@ function to_confpanel () {
 ※「送信元アドレスを自動的に指定する」にチェックを入れると、フォーム中に name="EMAIL" の入力欄があって、その値がある場合は、EMAILの値が、ない場合は「送信元アドレス<span class="fn">(SENDFROM)</span>」の値が自動的に指定されます。
 </div>
 </td></tr>
+<tr><td class="bg_eef">文字コード<span class="fn">(CHARSET)</span></td>
+<td><select name="CHARSET">
+<option value="auto" ##CHARSET:auto##>自動認識</option -->
+<option value="us-ascii" ##CHARSET:us-ascii##>US-ASCII</option>
+<option value="iso-8859-1" ##CHARSET:iso-8859-1##>ISO-8859-1</option>
+<option value="jis" ##CHARSET:jis##>ISO-2022-JP</option>
+<option value="utf8" ##CHARSET:utf8##>UTF-8</option>
+<option value="sjis" ##CHARSET:sjis##>Shift_JIS</option>
+</select>
+<div class="caption">
+※「自動認識」の場合、US-ASCII→ISO-8859-1→UTF-8→ISO-2022-JPの順に、一番先にマッチする文字コードを選択します(Shift_JISは選択されません)。 
+</div>
+</td></tr>
 <tr><td class="bg_eef">件名<span class="fn">(SUBJECT)</span>
-</td><td><input name="SUBJECT" value="##SUBJECT##" size="60" />
+</td><td><input name="SUBJECT" value="##SUBJECT##" size="40" />
 <div class="caption">
 ※フォームメールのSubjectヘッダとなります。 <br />
 <a href="javascript:display_sw('subject')">件名内で指定できる差し込み用文字列の一覧</a>
@@ -267,7 +296,7 @@ function to_confpanel () {
 </div>
 </td></tr>
 <tr><td class="bg_eef">添付を許可するファイル拡張子<span class="fn">(ATTACH_EXT)</span>
-</td><td><input name="ATTACH_EXT" value="##ATTACH_EXT##" size="60" />
+</td><td><input name="ATTACH_EXT" value="##ATTACH_EXT##" size="40" />
 <div class="caption">
 ※許可する拡張子を、半角スペース区切りで複数指定できます。<br />
 ※拡張子は半角数小文字で指定してください。
@@ -345,7 +374,7 @@ function to_confpanel () {
 <input type="radio" name="MAIL_FORMAT_TYPE" value="0" ##MAIL_FORMAT_TYPE:0## />[0]以下に指定する
 <span class="fn">(FORMAT)</span><br />
 
-<textarea name="FORMAT" cols="66" rows="12">##FORMAT##</textarea><br />
+<textarea name="FORMAT" cols="40" rows="12">##FORMAT##</textarea><br />
 
 <a href="javascript:display_sw('mail_format_type_0')">フォーマット内で指定できる差し込み用文字列の一覧表示</a>
 
@@ -414,15 +443,21 @@ function to_confpanel () {
 </div>
 </td></tr>
 <tr><td class="bg_eef">同報送信先<span class="fn">(REPLY_CC)</span>
-</td><td><textarea name="REPLY_CC" cols="60" rows="1" class="auto_height">##REPLY_CC##</textarea>
+</td><td><textarea name="REPLY_CC" size="60" rows="1" class="auto_height">##REPLY_CC##</textarea>
 <div class="caption">
 ※自動返信メールの送り先(CC)となります。改行区切りで複数指定できます。
 </div>
 </td></tr>
+<tr><td class="bg_eef">隠し同報送信先<span class="fn">(REPLY_BCC)</span>
+</td><td><textarea name="REPLY_BCC" size="60" rows="1" class="auto_height">##REPLY_BCC##</textarea>
+<div class="caption">
+※自動返信メールの隠し送り先(BCC)となります。改行区切りで複数指定できます。
+</div>
+</td></tr>
 <tr><td class="bg_eef">送信元</td>
-<td>送信元アドレス<span class="fn">(REPLY_SENDFROM)</span><br /><input name="REPLY_SENDFROM" value="##REPLY_SENDFROM##" size="60" />
+<td>送信元アドレス<span class="fn">(REPLY_SENDFROM)</span><br /><input name="REPLY_SENDFROM" value="##REPLY_SENDFROM##" size="40" />
 <br />
-送信元名<span class="fn">(REPLY_SENDFROMNAME)</span><br /><input name="REPLY_SENDFROMNAME" value="##REPLY_SENDFROMNAME##" size="60" />
+送信元名<span class="fn">(REPLY_SENDFROMNAME)</span><br /><input name="REPLY_SENDFROMNAME" value="##REPLY_SENDFROMNAME##" size="40" />
 
 <div class="caption">
 ※自動返信メールのFromヘッダとなります。空欄にしておくと「(8)管理者に送られるフォーム内容メール」の「送信元(SENDFROM)」の値が使われます。<br />
@@ -430,14 +465,27 @@ function to_confpanel () {
 </div>
 </td></tr>
 <tr><td class="bg_eef nowrap">エラー送信先<br /><span class="fn">(REPLY_ENVELOPE_ADDR)</span>
-</td><td><input name="REPLY_ENVELOPE_ADDR" value="##REPLY_ENVELOPE_ADDR##" size="60" />
+</td><td><input name="REPLY_ENVELOPE_ADDR" value="##REPLY_ENVELOPE_ADDR##" size="40" />
 <div class="caption">
 ※自動返信メールがアドレス間違いなどで届かなかったときに、エラーメールの送り先となります。<br />
 ※空欄にしておくと、管理者に送られるメールのエラー送信先(ENVELOPE_ADDR)が使われます。
 </div>
 </td></tr>
+<tr><td class="bg_eef">文字コード<span class="fn">(REPLY_CHARSET)</span></td>
+<td><select name="REPLY_CHARSET">
+<option value="auto" ##REPLY_CHARSET:auto##>自動認識</option -->
+<option value="us-ascii" ##REPLY_CHARSET:us-ascii##>US-ASCII</option>
+<option value="iso-8859-1" ##REPLY_CHARSET:iso-8859-1##>ISO-8859-1</option>
+<option value="jis" ##REPLY_CHARSET:jis##>ISO-2022-JP</option>
+<option value="utf8" ##REPLY_CHARSET:utf8##>UTF-8</option>
+<option value="sjis" ##REPLY_CHARSET:sjis##>Shift_JIS</option>
+</select>
+<div class="caption">
+※「自動認識」の場合、US-ASCII→ISO-8859-1→UTF-8→ISO-2022-JPの順に、一番先にマッチする文字コードを選択します(Shift_JISは選択されません)。 
+</div>
+</td></tr>
 <tr><td class="bg_eef nowrap">件名<span class="fn">(REPLY_SUBJECT)</span>
-</td><td><input name="REPLY_SUBJECT" value="##REPLY_SUBJECT##" size="60" />
+</td><td><input name="REPLY_SUBJECT" value="##REPLY_SUBJECT##" size="40" />
 <div class="caption">
 ※自動返信メールのSubjectヘッダとなります。<br />
 <a href="javascript:display_sw('reply_subject')">件名内で指定できる差し込み用文字列の一覧表示</a>
@@ -525,7 +573,7 @@ function to_confpanel () {
 <span class="fn">(REPLY_FORMAT)</span>
 <br />
 
-<textarea name="REPLY_FORMAT" cols="66" rows="12">##REPLY_FORMAT##</textarea><br />
+<textarea name="REPLY_FORMAT" cols="40" rows="12">##REPLY_FORMAT##</textarea><br />
 
 <a href="javascript:display_sw('reply_mail_format_type_0')">フォーマット内で指定できる差し込み用文字列の一覧表示</a>
 
@@ -578,7 +626,7 @@ function to_confpanel () {
 <table class="tbl">
 
 <tr><td class="bg_eef">書き出すファイル名<span class="fn">(OUTPUT_FILENAME)</span>
-</td><td><input name="OUTPUT_FILENAME" value="##OUTPUT_FILENAME##" size="60" />
+</td><td><input name="OUTPUT_FILENAME" value="##OUTPUT_FILENAME##" size="40" />
 <div class="caption">
 ※<tt>./data/[CONFID]</tt>内にのみ書き出しできます。ファイル名のみを指定してください。パスは指定できません。<br />
 ※ファイル名にフォーム値を<tt>##フィールド名##</tt>の形で指定できます。半角英数および&quot;-&quot;、&quot;_&quot;、&quot;.&quot;以外の文字はURIエスケープされます。
@@ -594,7 +642,7 @@ function to_confpanel () {
 </td></tr>
 <tr><td class="bg_eef">同じフィールド内に複数の値が入る際のセパレータ<span class="fn">(FIELD_SEPARATOR)</span>
 </td><td>
-<input name="FIELD_SEPARATOR" value="##FIELD_SEPARATOR##" size="60" />
+<input name="FIELD_SEPARATOR" value="##FIELD_SEPARATOR##" size="40" />
 <div class="caption">
 ※何も指定しない(または空文字列の)場合は半角スペース1つとなります(前バージョンとの互換性のため)。<br />
 ※カンマ区切り形式での書き出しの場合も、カンマを指定できます。
