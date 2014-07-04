@@ -934,7 +934,7 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.7 beta140304},
+		version   => q{0.7 beta140704},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{http://www.psl.ne.jp/},
 		copyright => q{&copy;1997-2014},
@@ -978,6 +978,7 @@ sub temp_read {
 
 	my($page, $temp) = @_;
 	open(R, "<:utf8", "temp/$temp-$page")
+#	open(R, "<", "temp/$temp-$page")
 #     or error("temp/$temp-$pageを開けませんでした。: $!");
 	;
 	my %form;
@@ -1004,7 +1005,8 @@ sub temp_write {
 
 	($form{$temp}) = $form{$temp} =~ /^(\d+)$/;
 #    ($page) = $page =~ /^(\w+)$/;
-	open(W, ">:utf8",  "temp/$form{$temp}-$page")
+#	open(W, ">:utf8",  "temp/$form{$temp}-$page")
+	open(W, ">",  "temp/$form{$temp}-$page")
 	 or error(get_errmsg("320", $!));
 	foreach ($page eq "confform" ? ("label", get_conffields()) : keys %form) {
 		$form{$_} =~ s/\r?\n/\x0b/g;
