@@ -277,8 +277,8 @@ sub passwd_read {
 
 	open(my $fh, "<", "./data/passwd.cgi")
 	 or error(get_errmsg("630", $!));
-	my $passwd = <R>;
-	close(R);
+	my $passwd = <$fh>;
+	close($fh);
 	return $passwd;
 
 }
