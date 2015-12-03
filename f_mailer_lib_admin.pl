@@ -13,7 +13,7 @@
 #     http://www.psl.ne.jp/lab/copyright.html
 # ---------------------------------------------------------------
 use strict;
-use utf8;
+#use utf8;
 use vars qw(%CONF %FORM %alt $q);
 
 sub conf_to_temp {
@@ -58,7 +58,7 @@ sub gen_conffilename {
 
 sub get_conffields {
 
-	open(my $fh, "<:utf8", "./data/conffields.txt")
+	open(my $fh, "<", "./data/conffields.txt")
 	 or error(get_errmsg("600", $!));
 	chomp(my @fields = <$fh>);
 	close($fh);
@@ -76,7 +76,7 @@ sub get_langlist {
 	foreach (sort grep(/^errmsg_[a-z]{2}\.txt$/, readdir($dh))) {
 		(my $lang) = /^errmsg_([a-z]{2})\.txt$/;
 		next if $lang eq "ja";
-		open(my $fh, "<:utf8", "./data/$_") or error(get_errmsg("603", $_, $!));
+		open(my $fh, "<", "./data/$_") or error(get_errmsg("603", $_, $!));
 		chomp(my $lang_dsp = <$fh>);
 		push(@list, [$lang, $lang_dsp]);
 	}
@@ -114,7 +114,7 @@ sub mk_conffile {
 	($conf{conffile}) = $conf{conffile} =~ /^([\w\.]+)$/;
 
 	unless (-e "./data/confext/ext_$conf{conffile}") {
-		open(my $fh, ">:utf8", "./data/confext/ext_$conf{conffile}")
+		open(my $fh, ">", "./data/confext/ext_$conf{conffile}")
 		 or error(get_errmsg("610", $!));
 		print $fh <<STR;
 #
@@ -126,7 +126,7 @@ sub mk_conffile {
 # このファイルはプログラムによって自動生成されました。
 # 生成日時: $date
 
-use utf8;
+#use utf8;
 #package ext;
 
 sub ext_sub0 { }
@@ -162,7 +162,7 @@ STR
 		close($fh);
 	}
 
-	open(my $fh, ">:utf8", "data/conf/$conf{conffile}")
+	open(my $fh, ">", "data/conf/$conf{conffile}")
 	 or error(get_errmsg("611", $!));
 	print $fh <<STR;
 #
@@ -174,7 +174,7 @@ STR
 # このファイルはプログラムによって自動生成されました。
 # 生成日時: $date
 
-use utf8;
+#use utf8;
 package conf;
 
  sub conf {
@@ -234,7 +234,7 @@ sub mk_sysconffile {
 	my %conf = @_;
 
 	my $date = get_datetime(time);
-	open(my $fh, ">:utf8", "./f_mailer_sysconf.pl")
+	open(my $fh, ">", "./f_mailer_sysconf.pl")
 	 or error(get_errmsg("620", $!));
 	print $fh <<STR;
 #
@@ -246,7 +246,7 @@ sub mk_sysconffile {
 # このファイルはプログラムによって自動生成されました。
 # 生成日時: $date
 
-use utf8;
+#use utf8;
 package conf;
 
  sub sysconf {
@@ -275,7 +275,7 @@ sub passwd_compare {
 
 sub passwd_read {
 
-	open(my $fh, "<:utf8", "./data/passwd.cgi")
+	open(my $fh, "<", "./data/passwd.cgi")
 	 or error(get_errmsg("630", $!));
 	my $passwd = <R>;
 	close(R);
@@ -286,7 +286,7 @@ sub passwd_read {
 sub passwd_write {
 
 	my $passwd = shift || 12345;
-	open(my $fh, ">:utf8", "./data/passwd.cgi")
+	open(my $fh, ">", "./data/passwd.cgi")
 	 or error(get_errmsg("640", $!));
 	my $salt = join("", map { (0..9,"a".."z","A".."Z")[rand(62)] } (1..8));
 	print $fh crypt($passwd, index(crypt('a','$1$a$'),'$1$a$') == 0 ? "\$1\$$salt\$" : $salt);

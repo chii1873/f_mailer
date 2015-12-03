@@ -13,7 +13,7 @@
 #     http://www.psl.ne.jp/lab/copyright.html
 # ---------------------------------------------------------------
 use strict;
-use utf8;
+#use utf8;
 use vars qw(%CONF %FORM %alt $q);
 use HTML::SimpleParse;
 
@@ -23,8 +23,8 @@ sub get_output_form {
     {
         my %d_;
         while (my($k, $v) = each %d) {
-            $k = Unicode::Japanese->new($k, "utf8")->getu;
-            $v = Unicode::Japanese->new($v, "utf8")->getu;
+            $k = Unicode::Japanese->new($k, "utf8")->get;
+            $v = Unicode::Japanese->new($v, "utf8")->get;
             $d_{$k} = $v;
         }
         %d = %d_;
@@ -49,10 +49,10 @@ sub get_output_form {
             if ($c{tagname} eq "input") {
                 $h{type} = lc($h{type});
                 if ($h{type} eq "" or $h{type} eq "text" or $h{type} eq "password") {
-                    $h{value} = $d{$h{name}};
+                    $h{value} = h($d{$h{name}});
                 } elsif ($h{type} eq "checkbox" or $h{type} eq "radio") {
                     if (exists $d{"$h{name}\0$h{value}"}) {
-                        $h{checked} = q|checked="checked"|;
+                        $h{checked} = q|checked|;
                     } else {
                         delete $h{checked} if exists $h{checked};
                     }
@@ -61,7 +61,7 @@ sub get_output_form {
                      unless $h{src} =~ m#^(?:/|https*)#i;
                 } elsif ($h{type} eq "hidden") {
                     unless (exists $h{value} and $d{$h{name}} eq "") {
-                        $h{value} = $d{$h{name}};
+                        $h{value} = h($d{$h{name}});
                     }
                 }
                 $output .= get_output_form_remake_tag($c{tagname}, %h);
@@ -115,7 +115,7 @@ sub get_output_form {
             }
         } elsif ($c{type} eq "endtag") {
             if ($c{tagname} eq "/textarea") {
-                $output .= $d{$now_name};
+                $output .= h($d{$now_name});
                 $textarea_flag = 0;
             } elsif ($c{tagname} eq "/option" or $c{tagname} eq "/select") {
                 if ($option_stack) {
@@ -153,7 +153,7 @@ sub get_output_form_set_option_tag {
     my %d = %$d;
 
     if (exists $d{"$now_name\0$h{value}"}) {
-        $h{selected} = q|selected="selected"|;
+        $h{selected} = q|selected|;
     } else {
         delete $h{selected} if exists $h{selected};
     }

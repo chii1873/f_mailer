@@ -13,7 +13,6 @@
 #     http://www.psl.ne.jp/lab/copyright.html
 # ---------------------------------------------------------------
 use strict;
-use utf8;
 use vars qw(%CONF %FORM %alt $q $name_list_ref %ERRMSG $smtp);
 use POSIX qw(SEEK_SET);
 
@@ -58,11 +57,13 @@ sub data_convert {
 
 	my %form2;
 	while (my($key, $value) = each %form) {
-		$key = Unicode::Japanese->new($key, $code)->getu;
-		$value = Unicode::Japanese->new($value, $code)->getu;
+		$key = Unicode::Japanese->new($key, $code)->get if $code ne "utf8";
+		$value = Unicode::Japanese->new($value, $code)->get if $code ne "utf8";
 		$form2{$key} = $value;
 	}
-	for (@$name_list_ref) { $_ = Unicode::Japanese->new($_, $code)->getu }
+	if ($code ne "utf8") {
+		for (@$name_list_ref) { $_ = Unicode::Japanese->new($_, $code)->get }
+	}
 	%form2;
 
 }
@@ -78,7 +79,7 @@ sub decoding {
 			if (defined($form{$name})) {
 				$form{$name} = join('!!!', $form{$name}, $each);
 			} else {
-				$form{$name} = $each;
+				$form{$name} = $each . "";
 			}
 		}
 		push(@name_list, $name) unless $form_name_cnt{$name}++;
@@ -97,7 +98,7 @@ sub error_ {
 
 sub get_checklist {
 
-	open(my $fh, "<:utf8", "data/check.txt")
+	open(my $fh, "<", "data/check.txt")
 	 or error(get_errmsg("200", $!));
 	my @list;
 	while (<$fh>) {
@@ -113,7 +114,7 @@ sub get_checklist {
 sub get_conffile_by_id {
 
 	my $conf_id = shift;
-	open(my $fh, "<:utf8", "data/conflist.cgi")
+	open(my $fh, "<", "data/conflist.cgi")
 	 or error_(get_errmsg("210", $!));
 	while (<$fh>) {
 		my($id, $file, $label) = split(/\t/);
@@ -126,7 +127,7 @@ sub get_conffile_by_id {
 
 sub get_conflist {
 
-	open(my $fh, "<:utf8", "data/conflist.cgi")
+	open(my $fh, "<", "data/conflist.cgi")
 	 or error(get_errmsg("220", $!));
 	my $conflist;
 	my @list;
@@ -224,7 +225,7 @@ sub h {
 sub h2z {
 
 	 my($str) = @_;
-	 return Unicode::Japanese->new($str, "utf8")->h2zSym->h2zNum->h2zAlpha->getu;
+	 return Unicode::Japanese->new($str, "utf8")->h2zSym->h2zNum->h2zAlpha->get;
 
 }
 
@@ -232,7 +233,7 @@ sub h2z {
 sub h2z_kana {
 
 	my($str) = @_;
-	return Unicode::Japanese->new($str, "utf8")->h2zKana->getu;
+	return Unicode::Japanese->new($str, "utf8")->h2zKana->get;
 
 }
 
@@ -250,13 +251,12 @@ sub html_output_escape {
 
 sub imgsave {
 
-#    no strict 'subs';
 	umask 0;
 
-	my($param) = @_;
-	my $filename = $q->param($param);
+	my($temp, $param) = @_;
+	my $filename = $q->param($param) . "";
 	my $stream;
-	my $temp ||= time . $$;
+	my $param_enc = uri_escape($param);
 
 	if (ref $q->uploadInfo($q->param($param))) {
 		my $ctype = $q->uploadInfo($q->param($param))->{'Content-Type'};
@@ -274,21 +274,20 @@ sub imgsave {
 	}
 
 	if ($stream) {
-#        $filename = Unicode::Japanese->new($filename, "sjis")->euc;
 		my @path = split(/\\/, $filename);
 		$filename = $path[-1];
-#        $filename = Unicode::Japanese->new($filename, "euc")->sjis;
-		(my $filename_enc = $filename) =~ s/([^\da-zA-Z_.,-])/'%'.unpack('H2',$1)/eg;
+		my $filename_enc = uri_escape($filename);
 		(my $filename_enc_clean) = $filename_enc =~ /^([\da-zA-Z_.,%-]+)$/;
-		error("taint check error: $filename")
+		return "taint check error: $filename"
 		 unless $filename_enc_clean eq $filename_enc;
-		open(my $fh, ">:utf8 ./temp/$temp-$filename_enc_clean")
-		 or error(get_errmsg("240", $!));
+		my $filename_path_enc = "./temp/$temp-$param_enc-$filename_enc_clean";
+		open(my $fh, ">", $filename_path_enc)
+		 or return get_errmsg("240", $!, $filename_path_enc);
 		print $fh $stream;
 		close($fh);
-		($temp, $filename, length($stream));
+		return;
 	} else {
-		undef;
+		return get_errmsg("241");
 	}
 
 }
@@ -349,11 +348,11 @@ sub load_condcheck {
 	};
 	$condcheck{hira2kata} = sub {
 		my($f_name, $alt_name, $f_value) = @_;
-		return Unicode::Japanese->new($f_value, "utf8")->hira2kata->getu;
+		return Unicode::Japanese->new($f_value, "utf8")->hira2kata->get;
 	};
 	$condcheck{hira_only} = sub {
 		my($f_name, $alt_name, $f_value) = @_;
-		my $f_value_ = Unicode::Japanese->new($f_value, "utf8")->getu;
+		my $f_value_ = Unicode::Japanese->new($f_value, "utf8")->get;
 		my @errmsg;
 		unless ($f_value_ =~ /^[\p{InHiragana}\x{3000}\x{30fc}]*$/o) { # ひらがな、全角スペース(　)、長音記号(ー)
 			push(@errmsg, set_errmsg(key=>"hira_only", f_name=>($alt_name or $f_name)));
@@ -362,7 +361,7 @@ sub load_condcheck {
 	};
 	$condcheck{kata2hira} = sub {
 		my($f_name, $alt_name, $f_value) = @_;
-		return Unicode::Japanese->new($f_value, "utf8")->kata2hira->getu;
+		return Unicode::Japanese->new($f_value, "utf8")->kata2hira->get;
 	};
 	$condcheck{kata_only} = sub {
 		my($f_name, $alt_name, $f_value) = @_;
@@ -465,7 +464,7 @@ sub load_condcheck {
 		my($f_name, $alt_name, $f_value) = @_;
 		return z2h($f_value);
 	};
-	open(my $fh, "<:utf8", "data/check.txt")
+	open(my $fh, "<", "data/check.txt")
 	 or error("Failed to open check.txt: $!");
 	while (<$fh>) {
 		my($f) = split(/\t/, $_, 2);
@@ -480,7 +479,7 @@ sub load_errmsg {
 	my $lang = shift || "en";
 	my %errmsg;
 
-	open(my $fh, "<:utf8", "data/errmsg_$lang.txt")
+	open(my $fh, "<", "data/errmsg_$lang.txt")
 	 or error_("Can't load errmsg data: $!");
 	while (<$fh>) {
 		chomp;
@@ -519,7 +518,7 @@ sub mojichk {
 
 #die "@debug";
 	@error_char
-	 ? (get_errmsg("250", $fname, join(q|", "|, map { Unicode::Japanese->new($_, "utf8")->getu } @error_char)))
+	 ? (get_errmsg("250", $fname, join(q|", "|, map { Unicode::Japanese->new($_, "utf8")->get } @error_char)))
 	 : "";
 
 }
@@ -542,12 +541,12 @@ sub printhtml {
 	}
 	$charset ||= "auto";
 
-	open(my $fh, "<:utf8", "tmpl/_header.html");
+	open(my $fh, "<", "tmpl/_header.html");
 	my $header = join("", <$fh>);
 	$header =~ s/##STYLESHEET##/$CONF{STYLESHEET}/g;
 	map { $header =~ s/##$_##/$CONF{$_}/g } qw(TEXT BGCOLOR LINK VLINK ALINK BACKGROUND BORDER SYS_TEXT SYS_BGCOLOR SYS_LINK SYS_VLINK SYS_ALINK SYS_BACKGROUND SYS_BORDER);
 	close($fh);
-	open($fh, "<:utf8", "tmpl/_footer.html");
+	open($fh, "<", "tmpl/_footer.html");
 	my $footer = join("", <$fh>);
 	close($fh);
 	my($code, $htmlstr) = printhtml_getpage($charset, { filename=>$filename,
@@ -569,21 +568,22 @@ sub printhtml_getpage {
 	if ($opt{filename} =~ /^http/) {
 		eval "use LWP::Simple;";
 		error_(get_errmsg("260", $@)) if $@;
-		$htmlstr = get($opt{filename});
+		$opt{filename} =~ s/##([^#]+)##/uri_escape($FORM{$1})/eg;
+		$htmlstr = encode_utf8(get($opt{filename}));
 	} else {
-		open(my $fh, "<:utf8", $opt{filename}) or error_(get_errmsg("261", $@, $opt{filename}));
+		open(my $fh, "<", $opt{filename}) or error_(get_errmsg("261", $@, $opt{filename}));
 		$htmlstr = join("", <$fh>);
 		close($fh);
 	}
 	my $code;
 	if ($ENV{SCRIPT_FILENAME} =~ m#admin# or $opt{filename} =~ m#\./tmpl/default/#) {
 		$charset = "utf8";
-	} else {
+	} else{
 		my $code = $charset || Unicode::Japanese->new($htmlstr)->getcode() || "utf8";
 		$code = "utf8" if $code =~ /utf/;
 		$charset = $code if $charset eq "auto";
 	### 2013-10-30 常にコード変換する(utf-8→utf-8の文字化け回避)
-		$htmlstr = Unicode::Japanese->new($htmlstr, $charset)->getu if $charset ne "utf8";
+		$htmlstr = Unicode::Japanese->new($htmlstr, $charset)->get if $charset ne "utf8";
 	}
 	$htmlstr =~ s/<!-- header -->/$opt{header}/;
 	$htmlstr =~ s/<!-- footer -->/$opt{footer}/;
@@ -610,7 +610,8 @@ sub printhtml_output {
 	} elsif ($code eq "euc") {
 		print "euc-jp\n\n", Unicode::Japanese->new($htmlstr, "utf8")->euc;
 	} else {
-		print "utf-8\n\n", Unicode::Japanese->new($htmlstr, "utf8")->get;
+#		print "utf-8\n\n", Unicode::Japanese->new($htmlstr, "utf8")->get;
+		print "utf-8\n\n", $htmlstr;
 	}
 
 }
@@ -645,7 +646,7 @@ sub replace {
 
 sub reserved_words {
 
-	qw(CONF CONFID TEMP VALUES CREDIT SEND_FORCED GETCODE);
+	qw(CONF CONFID TEMP VALUES CREDIT SEND_FORCED GETCODE DUMMY);
 }
 
 sub reserved_words2 {
@@ -719,7 +720,8 @@ sub sendmail {
 	### sendmailモード
 	} else {
 
-		open(my $mail, "| $CONF{SENDMAIL} -t $opt{envelope}")
+#		open(my $mail, "| $CONF{SENDMAIL} -t $opt{envelope}")
+		open(my $mail, "| $CONF{SENDMAIL} -t")
 			 or error(get_errmsg("270", $!));
 		print $mail "Date: $date\n";
 		print $mail "To: $opt{mailto}\n";
@@ -744,11 +746,11 @@ sub serial_increment {
 	my $conf_id = shift;
 	($conf_id) = $conf_id =~ /^(\w+)$/;
 	unless (-e "./data/serial/$conf_id") {
-		open(my $fh, ">:utf8", "./data/serial/$conf_id")
+		open(my $fh, ">", "./data/serial/$conf_id")
 		 or error(get_errmsg("280", $!));
 		close($fh);
 	}
-	open(my $fh, "+<:utf8", "./data/serial/$conf_id")
+	open(my $fh, "+<", "./data/serial/$conf_id")
 	 or error(get_errmsg("281", $!));
 	flock($fh, LOCK_EX);
 	seek($fh, 0, 0);
@@ -937,22 +939,22 @@ sub setver {
 		version   => q{0.7 beta140704},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{http://www.psl.ne.jp/},
-		copyright => q{&copy;1997-2014},
-		copyright2 => q{(c)1997-2014},
+		copyright => q{&copy;1997-2015},
+		copyright2 => q{(c)1997-2015},
 	);
-	chomp($PROD{copyright_html_footer} = <<STR);
-<a href="$PROD{a_url}" target="_blank"><strong>$PROD{prod_name} v$PROD{version}</strong></a>
-STR
-	chomp($PROD{copyright_html_footer_admin} = <<STR);
-<strong>$PROD{prod_name} v$PROD{version}</strong>
-$PROD{copyright} <a href="$PROD{a_url}" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
-STR
+#	chomp($PROD{copyright_html_footer} = <<STR);
+#<a href="$PROD{a_url}" target="_blank"><strong>$PROD{prod_name} v$PROD{version}</strong></a>
+#STR
+#	chomp($PROD{copyright_html_footer_admin} = <<STR);
+#<strong>$PROD{prod_name} v$PROD{version}</strong>
+#$PROD{copyright} <a href="$PROD{a_url}" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
+#STR
 
-	chomp($PROD{copyright_mail_footer} = <<STR);
-----
-$PROD{"copyright2"} $PROD{"prod_name"} v$PROD{"version"}
-$PROD{"a_url"}
-STR
+#	chomp($PROD{copyright_mail_footer} = <<STR);
+#----
+#$PROD{"copyright2"} $PROD{"prod_name"} v$PROD{"version"}
+#$PROD{"a_url"}
+#STR
 ##############################################
 ###              ここまで                  ###
 ##############################################
@@ -977,12 +979,11 @@ sub temp_del {
 sub temp_read {
 
 	my($page, $temp) = @_;
-	open(R, "<:utf8", "temp/$temp-$page")
-#	open(R, "<", "temp/$temp-$page")
+	open(my $fh, "<", "temp/$temp-$page")
 #     or error("temp/$temp-$pageを開けませんでした。: $!");
 	;
 	my %form;
-	while (<R>) {
+	while (<$fh>) {
 		chomp;
 		my($k, $v) = split(/:/, $_, 2);
 		$v =~ s/\x0b/\n/g;
@@ -991,7 +992,7 @@ sub temp_read {
 			$form{"$k\0$v_"} = $v_;
 		}
 	}
-	close(R);
+	close($fh);
 
 	return %form;
 
@@ -1005,7 +1006,6 @@ sub temp_write {
 
 	($form{$temp}) = $form{$temp} =~ /^(\d+)$/;
 #    ($page) = $page =~ /^(\w+)$/;
-#	open(W, ">:utf8",  "temp/$form{$temp}-$page")
 	open(W, ">",  "temp/$form{$temp}-$page")
 	 or error(get_errmsg("320", $!));
 	foreach ($page eq "confform" ? ("label", get_conffields()) : keys %form) {
@@ -1015,6 +1015,14 @@ sub temp_write {
 	close(W);
 
 	return $form{$temp};
+
+}
+
+sub uri_escape {
+
+	my $str = shift;
+	$str =~ s/(\W)/'%' . unpack('H2', $1)/eg;
+	return $str;
 
 }
 
@@ -1030,7 +1038,7 @@ sub uuencode {
 sub z2h {
 
 	 my($str) = @_;
-	 return Unicode::Japanese->new($str, "utf8")->z2h->h2zKana->getu;
+	 return Unicode::Japanese->new($str, "utf8")->z2h->h2zKana->get;
 
 }
 

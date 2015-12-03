@@ -18,7 +18,7 @@
 use strict;
 use lib qw(./lib);
 use vars qw($q %FORM %CONF %alt $name_list_ref %ERRMSG);
-use utf8;
+#use utf8;
 use CGI;
 use Unicode::Japanese;
 #use Jcode;
@@ -267,7 +267,7 @@ sub confform_done {
 	unless ($conffile_exists) {
 		push(@newlist, { id=>$conf_id, file=>$conffile, label=>$conf{label}, lang=>$conf{LANG}, date=>get_datetime(time) });
 	}
-	open(W, ">:utf8", "data/conflist.cgi")
+	open(W, ">", "data/conflist.cgi")
 	 or error(get_errmsg("472", $!));
 	foreach my $ref(@newlist) {
 		print W join("\t", map { $ref->{$_} } qw(id file label lang date)), "\n";
@@ -450,13 +450,13 @@ sub confserial {
 	my $serial;
 	($FORM{conf_id}) = $FORM{conf_id} =~ /^(\w+)$/;
 	if (-e "./data/serial/$FORM{conf_id}") {
-		open(my $fh, "<:utf8", "./data/serial/$FORM{conf_id}")
+		open(my $fh, "<", "./data/serial/$FORM{conf_id}")
 		 or error(get_errmsg("450", $!));
 		flock($fh, LOCK_EX);
 		chomp($serial = <$fh>);
 		close($fh);
 	} else {
-		open(my $fh, ">:utf8", "./data/serial/$FORM{conf_id}")
+		open(my $fh, ">", "./data/serial/$FORM{conf_id}")
 		 or error(get_errmsg("451", $!));
 		close($fh);
 	}
@@ -489,7 +489,7 @@ sub confserial_update {
 
 	my $serial_input = shift;
 	($FORM{conf_id}) = $FORM{conf_id} =~ /^(\w+)$/;
-	open(my $fh, "+<:utf8", "./data/serial/$FORM{conf_id}")
+	open(my $fh, "+<", "./data/serial/$FORM{conf_id}")
 	 or error(get_errmsg("450", $!));
 	flock($fh, LOCK_EX);
 	seek($fh, 0, 0);
@@ -523,7 +523,7 @@ sub del {
 	($conffile) = $conffile =~ /^([\w\.\-\_]+)$/;
 
 	my @data;
-	open(my $fh, "<:utf8", "data/conflist.cgi")
+	open(my $fh, "<", "data/conflist.cgi")
 	 or error(get_errmsg("471", $!));
 	while (<$fh>) {
 		my($conf_id) = split(/\t/);
@@ -531,7 +531,7 @@ sub del {
 		push(@data, $_);
 	}
 
-	open($fh, ">:utf8", "data/conflist.cgi")
+	open($fh, ">", "data/conflist.cgi")
 	 or error(get_errmsg("472", $!));
 	print $fh @data;
 	close($fh);
@@ -615,7 +615,7 @@ sub form_check_confform {
 		} elsif (! -e $FORM{ERROR_TMPL}) {
 			push(@msg, get_errmsg("492"));
 		} else {
-			if (open(my $fh, "<:utf8", $FORM{ERROR_TMPL})) {
+			if (open(my $fh, "<", $FORM{ERROR_TMPL})) {
 				$error_html = join("", <$fh>);
 				close($fh);
 			} else {

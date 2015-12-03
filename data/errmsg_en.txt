@@ -8,6 +8,7 @@
 101	<v1> file Size is larger than <v2> kb.
 102	Total size of attached files is larger than <v1> kb.
 103	Could not open temp directory: <v1>
+104	Could not delete attached file: <v1>
 110	You can not send the same form countinuely. You need to close the browser and try again.
 115	Data could not be saved to <v1>: <v2>
 116	Data output file could not be opened: <v1>
@@ -18,7 +19,8 @@
 211	The data of ID=<v1> is not exited.
 220	data/conflist.cgi could not be opened: <v1>
 230	Please specify Cookie Name.
-240	./temp/<v2>-<v3>_enc_clean could not be loaded: <v1>
+240	<v2> could not be saved: <v1>
+241	The filesize of the upoaded file is 0.
 250	You can not use &quot;<v2>&quot; platform dependent characters in <v1> field.
 260	Unable to printhtml: use LWP::Simple: <v1>
 261	printhtml: <v2> could not be loaded: <v1>

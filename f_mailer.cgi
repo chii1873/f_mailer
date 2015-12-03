@@ -18,13 +18,15 @@
 use strict;
 use lib qw(./lib);
 use vars qw($q %FORM %CONF $name_list_ref %alt $conffile %ERRMSG);
-use utf8;
-#use Encode;
+#use utf8;
+use Encode;
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use Unicode::Japanese;
 use Fcntl ':flock';
 use String::Util qw(trim);
+use JSON;
+use URI::Escape;
 
 #BEGIN{ print "Content-type: text/html\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
 
@@ -33,6 +35,8 @@ use CGI::Carp qw(fatalsToBrowser);
 use Data::Dumper;
 sub d { die Dumper @_ }
 #error_(Dumper($CONF{COND}));
+use Carp 'verbose';
+$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 
 require "./f_mailer_lib.pl";
 require "./f_mailer_sysconf.pl";
@@ -85,46 +89,129 @@ if ($FORM{FORM}) {
 }
 $FORM{TEMP} = temp_write("formdata", %FORM)
  if !$FORM{TEMP} or !$FORM{SEND_FORCED};
+ajax_delete() if $FORM{"ajax_delete"};
+ajax_file_check() if $FORM{"ajax_file_check"};
+ajax_upload() if $FORM{"ajax_upload"};
 sendmail_do() if ($FORM{SEND_FORCED} or !$CONF{CONFIRM_FLAG} and !$FORM{CONFIRM_FORCED});
 checkvalues();
 checkuploads();
 confirm();
 
-sub checkuploads {
+sub ajax_delete {
 
-	my %fsize;
-	my $fsize;
 	my @msg;
+	my %exists = ajax_file_check("thru"=>1);
+	if ($exists{$FORM{"ajax_delete"}}) {
+		my $file = $exists{$FORM{"ajax_delete"}}{"filename"};
+		if (-e "temp/$file") {
+			unlink("temp/$file") or ajax_error(get_errmsg("100", $!));
+		}
+	}
+	ajax_done();
+
+}
+
+sub ajax_done {
+
+	my $alert = shift;
+	if ($alert ne "") {
+		$alert =~ s/"/&quot;/;
+		$alert = <<STR;
+	alert("$alert");
+STR
+	}
+	printhtml("./tmpl/upload_done.html",
+	 "alert"=>$alert,
+	);
+	exit;
+
+}
+
+sub ajax_error {
+
+	my $errmsg = shift;
+#d($errmsg);
+	ajax_done($errmsg);
+
+}
+
+sub ajax_file_check {
+
+	my %opt = @_;
+
+	my %ATTACH_FIELDNAME = map { $_ => { "name" => "", "size" => 0 } } @{$CONF{ATTACH_FIELDNAME}};
+	$FORM{"TEMP"} ||= time . $$;
+
+	my %exists;
+	opendir(my $dir, "./temp") or ajax_error(get_errmsg("103", $!));
+	my $size_total = 0;
+	for my $f(grep(/^$FORM{"TEMP"}-/, readdir($dir))) {
+		my($temp, $field_name, $file_name) = split(/-/, $f, 3);
+#		$field_name = uri_unescape($field_name);
+#		$file_name = uri_unescape($file_name);
+		next unless $ATTACH_FIELDNAME{$field_name};
+		my $file_size = (stat("temp/$f"))[7];
+		$size_total += $file_size;
+		$exists{$field_name} = {
+			"name" => Unicode::Japanese->new(uri_unescape($file_name), "utf8")->get,
+			"filename" => $f,
+			"size" => $file_size,
+		};
+	}
+	closedir($dir);
+
+	if ($opt{"thru"}) {
+		return %ATTACH_FIELDNAME, %exists, "__TOTAL__" => $size_total, "TEMP" => $FORM{"TEMP"};
+	} else {
+		print "Content-Type: application/json\n\n";
+		print encode_json({ %ATTACH_FIELDNAME, %exists, "__TOTAL__" => $size_total, "TEMP" => $FORM{"TEMP"} });
+		exit;
+	}
+
+}
+
+sub ajax_init {
+
+	ajax_done();
+
+}
+
+sub ajax_upload {
+
+	my $ext = (split(/\./, $FORM{$FORM{"ajax_upload"}}))[-1];
 	my %ext = map { $_ => 1 } @{$CONF{ATTACH_EXT}};
 
+	my $filename = (split(/[\\\/]/, $FORM{$FORM{"ajax_upload"}}))[-1];
+	if ($ext{$ext}) {
+		$FORM{"TEMP"} ||= time . $$;
+		my $errmsg = imgsave($FORM{"TEMP"}, $FORM{"ajax_upload"});
+		ajax_error($errmsg) if $errmsg;
+	} else {
+		ajax_error(get_errmsg("100", ($alt{$FORM{"ajax_upload"}} or $FORM{"ajax_upload"}), $filename));
+	}
+
+	ajax_done();
+
+}
+
+sub checkuploads {
+
+	my @errmsg;
+
+	my %exists = ajax_file_check("thru"=>1);
 	foreach my $fname(@{$CONF{ATTACH_FIELDNAME}}) {
-		next if $FORM{$fname} eq "";
-		my $ext = (split(/\./, $FORM{$fname}))[-1];
-		my $filename = (split(/[\\\/]/, $FORM{$fname}))[-1];
-#error($fname, $FORM{$fname}, $ext, $filename);
-		unless ($ext{$ext}) {
-			push(@msg, get_errmsg("100", ($alt{$fname} or $fname), $filename));
-			next;
+		if ($exists{$fname}) {
+			if ($CONF{"ATTACH_SIZE_MAX"} and $exists{$fname}{"file_size"} > $CONF{"ATTACH_SIZE_MAX"} * 1024) {
+				push(@errmsg, get_errmsg("101", $exists{$fname}{"name"}, $CONF{"ATTACH_SIZE_MAX"}));
+			}
+			$FORM{$fname} = $exists{$fname}{"name"};
 		}
-		(my $temp, $FORM{$fname},$fsize{$fname}) = imgsave($fname);
-		$FORM{TEMP} ||= $temp;
-		if ($CONF{ATTACH_SIZE_MAX} and $fsize{$fname} > $CONF{ATTACH_SIZE_MAX} * 1024) {
-			push(@msg, get_errmsg("101", $FORM{$fname}, $CONF{ATTACH_SIZE_MAX}));
-		}
-		$fsize += $fsize{$fname};
 	}
-	if ($CONF{ATTACH_TSIZE_MAX} and $fsize > $CONF{ATTACH_TSIZE_MAX} * 1024) {
-		push(@msg, get_errmsg("102", $CONF{ATTACH_TSIZE_MAX}));
+	if ($CONF{"ATTACH_TSIZE_MAX"} and $exists{"__TOTAL__"} > $CONF{"ATTACH_TSIZE_MAX"} * 1024) {
+		push(@errmsg, get_errmsg("102", $CONF{"ATTACH_TSIZE_MAX"}));
 	}
-	if (@msg) {
-		opendir(DIR, "./temp")
-		 or error( get_errmsg("103", $!));
-		foreach my $f(grep(/^$FORM{TEMP}-/, readdir(DIR))) {
-			($f) = $f =~ /^([\da-zA-Z_.,%-]+)$/;
-			unlink("./temp/$f");
-		}
-		error(@msg);
-	}
+
+	error(@errmsg) if @errmsg;
 
 }
 
@@ -145,6 +232,7 @@ sub checkvalues {
 	my %cond_hash = map { $_->[0]=>$_->[1] } @{$CONF{COND}};
 	foreach (@{$CONF{COND}}) {
 		my($f_name, $cond_hash) = @$_;
+		$FORM{$f_name} = $FORM{$f_name};
 
 		if ($CONF{field_group_rev}{$f_name}) {
 			my @group_errmsg;
@@ -323,7 +411,7 @@ sub output_form {
 	$htmlstr =~ s/##list##/get_formdatalist()/e;
 	$htmlstr = get_output_form($phase, $htmlstr, %d, TEMP=>$FORM{TEMP});
 	foreach my $key(keys %d) {
-		eval { $htmlstr =~ s/##\Q$key\E##/Unicode::Japanese->new(($phase eq "CONFIRM" or $phase eq "THANKS") ? replace($key,'html',\%d) : $d{$key}, "utf8")->getu/eg; };
+		eval { $htmlstr =~ s/##\Q$key\E##/Unicode::Japanese->new(($phase eq "CONFIRM" or $phase eq "THANKS") ? replace($key,'html',\%d) : $d{$key}, "utf8")->get/eg; };
 		error_("$key, $d{$key}, $@") if $@;
 	}
 	printhtml_output($code, $htmlstr);
@@ -343,6 +431,16 @@ sub sendmail_do {
 
 	%FORM = (%FORM, temp_read("formdata", $FORM{TEMP}));
 	$name_list_ref = [split(/,/, $FORM{FIELDLIST})];
+
+	### 添付ファイル名の読み込み
+	my %exists;# = ajax_file_check("thru" => 1);
+#	for my $fname(@{$CONF{ATTACH_FIELDNAME}}) {
+#		if ($exists{$fname}{"name"} ne "") {
+#			$FORM{$fname} = $exists{$fname}{"name"};
+#		} else {
+#			$FORM{$fname} = "";
+#		}
+#	}
 
 	### 拡張コードの実行
 	### エラーメッセージのリストを受け取ります。
@@ -462,7 +560,7 @@ sub sendmail_file_output {
 		mkdir("data/output/$FORM{CONFID}", 0777)
 		 or error(get_errmsg("116", $CONF{"OUTPUT_FILENAME"}, $!));
 	}
-	open(my $fh, ">>:utf8", qq|./data/output/$FORM{"CONFID"}/$CONF{"OUTPUT_FILENAME"}|)
+	open(my $fh, ">>", qq|./data/output/$FORM{"CONFID"}/$CONF{"OUTPUT_FILENAME"}|)
 	 or error(get_errmsg("115", $CONF{"OUTPUT_FILENAME"}, $!));
 	flock($fh, LOCK_EX);
 	seek($fh, 0, 2);
@@ -492,22 +590,18 @@ sub sendmail_get_attachdata {
 
 	my %attachdata;
 	my @del_list;
-	if (@{$CONF{ATTACH_FIELDNAME}}) {
-		opendir(DIR, "./temp")
-		 or error(get_errmsg("120", $!));
-		foreach my $f_(grep(/^$FORM{TEMP}-/, readdir(DIR))) {
-			next if $f_ eq "$FORM{TEMP}-formdata";
-			(my $file = $f_)
-			 =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C",hex($1))/eg;
-			$file =~ s/^$FORM{TEMP}-//;
-			open(R, "./temp/$f_")
+	my %exists = ajax_file_check("thru" => 1);
+
+	for my $fname(@{$CONF{ATTACH_FIELDNAME}}) {
+
+		if ($exists{$fname}{"name"} ne "") {
+			open(my $fh, "<", qq|./temp/$exists{$fname}{"filename"}|)
 			 or error(get_errmsg("121", $!));
-			$attachdata{$file} = join("", <R>);
-			close(R);
-			($f_) = $f_ =~ /^([\da-zA-Z_.,%-]+)$/;
-			push(@del_list, "./temp/$f_");
+			$attachdata{$exists{$fname}{"name"}} = join("", <$fh>);
+			close($fh);
+			(my $f) = $exists{$fname}{"filename"} =~ /^([\da-zA-Z_.,%-]+)$/;
+			push(@del_list, "./temp/$f");
 		}
-		close(DIR);
 	}
 
 	return \@del_list, %attachdata;
