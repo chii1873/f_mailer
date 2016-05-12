@@ -36,9 +36,6 @@ require './f_mailer_lib_admin.pl';
 require './f_mailer_sysconf.pl';
 %CONF = (setver(), conf::sysconf());
 %ERRMSG = load_errmsg($CONF{LANG_DEFAULT} || "ja");
-if ($CONF{SENDMAIL_FLAG}) {
-	require './f_mailer_lib_smtp.pl';
-}
 
 umask 0;
 $CONF{ERROR_TMPL} = "tmpl/error.html";
