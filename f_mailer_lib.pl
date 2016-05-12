@@ -936,11 +936,11 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.7 beta140704},
+		version   => q{0.7 beta160512},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{http://www.psl.ne.jp/},
-		copyright => q{&copy;1997-2015},
-		copyright2 => q{(c)1997-2015},
+		copyright => q{&copy;1997-2016},
+		copyright2 => q{(c)1997-2016},
 	);
 #	chomp($PROD{copyright_html_footer} = <<STR);
 #<a href="$PROD{a_url}" target="_blank"><strong>$PROD{prod_name} v$PROD{version}</strong></a>
