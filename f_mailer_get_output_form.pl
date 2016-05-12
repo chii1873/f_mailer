@@ -48,7 +48,7 @@ sub get_output_form {
             { my %h_; for (keys %h) { $h_{lc($_)} = $h{$_} }; %h = %h_ }
             if ($c{tagname} eq "input") {
                 $h{type} = lc($h{type});
-                if ($h{type} eq "" or $h{type} eq "text" or $h{type} eq "password") {
+                if ($h{type} eq "" or $h{type} eq "text" or $h{type} eq "password" or $h{type} eq "email" or $h{type} eq "tel") {
                     $h{value} = h($d{$h{name}});
                 } elsif ($h{type} eq "checkbox" or $h{type} eq "radio") {
                     if (exists $d{"$h{name}\0$h{value}"}) {
