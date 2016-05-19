@@ -502,7 +502,7 @@ _STR_REPLY_OFT_
 1
 _STR_FILE_OUTPUT_
     chomp($conf{OUTPUT_FILENAME} = <<'_STR_OUTPUT_FILENAME_');
-./data/output.txt
+output.txt
 _STR_OUTPUT_FILENAME_
     chomp($conf{OUTPUT_SEPARATOR} = <<'_STR_OUTPUT_SEPARATOR_');
 0
