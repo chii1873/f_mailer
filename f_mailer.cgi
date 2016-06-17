@@ -1,19 +1,16 @@
 #!/usr/bin/perl
-### for dedug
-#!/usr/bin/perl -Tw
 # ---------------------------------------------------------------
-#  - システム名    フォームデコード+メール送信 (FORM MAILER)
-#  - バージョン    0.63
-#  - 公開年月日    2013/05/01
+#  - システム名    FORM MAILER
+#  - バージョン    0.71
+#  - 公開年月日    2016/06/17
 #  - スクリプト名  f_mailer.cgi
-#  - 著作権表示    (c)1997-2013 Perl Script Laboratory
-#  - 連  絡  先    http://www.psl.ne.jp/bbpro/
-#                  https://awawa.jp/psl/lab/pslform.html
+#  - 著作権表示    (c)1997-2016 Perl Script Laboratory
+#  - 連  絡  先    http://psl.ne.jp/contact/index.html
 # ---------------------------------------------------------------
 # ご利用にあたっての注意
 #   ※このシステムはフリーウエアです。
 #   ※このシステムは、「利用規約」をお読みの上ご利用ください。
-#     http://www.psl.ne.jp/lab/copyright.html
+#     http://psl.ne.jp/info/copyright.html
 # ---------------------------------------------------------------
 use strict;
 use lib qw(./lib);
@@ -554,7 +551,7 @@ sub sendmail_file_output {
 
 	return unless @{$CONF{OUTPUT_FIELDS}};
 
-	my %dt = get_datetime_for_file_output;
+	my %dt = get_datetime_for_file_output();
 	$CONF{OUTPUT_FILENAME} =~ s/%([YMDHIS])/$dt{$1}/g;
 	$CONF{OUTPUT_FILENAME} =~ s/##([^#]+)##/$FORM{$1}/g;
 	$CONF{OUTPUT_FILENAME} =~ s#([^\da-zA-Z_.,-])#'%' . unpack('H2', $1)#eg;
