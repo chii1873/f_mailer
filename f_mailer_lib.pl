@@ -316,6 +316,24 @@ sub is_ascii {
 
 }
 
+sub is_valid_date {
+
+#日付が存在するかチェックする
+#引数： 年、月 (1-12)、日
+#戻り値：フラグ (1=OK、0=NG) 
+	use Time::Local;
+
+	my ($year, $month, $day) = @_;
+	$year and $month and $day
+	 and $year =~ /^\d+$/ and $month =~ /^\d+$/ and $day =~ /^\d+$/
+	or return 0;
+
+	my $epoch = eval { timelocal(0, 0, 0, $day, $month-1, $year) };
+
+	return (defined $epoch) ? 1 : 0;
+
+}
+
 sub is_email {
 
 	return $_[0] =~ /^[-_.!*a-zA-Z0-9\/&+%\#]+\@[-_.a-zA-Z0-9]+\.(?:[a-zA-Z]{2,4})$/ ? 1 : 0;
