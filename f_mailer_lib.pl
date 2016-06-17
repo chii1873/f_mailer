@@ -178,6 +178,24 @@ sub get_datetime_for_cookie {
 
 }
 
+sub get_datetime_for_file_output {
+
+	my $time = shift || time;
+
+	my($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime($time);
+	my %dt;
+	@dt{qw(Y M D H I S)} = (
+		$year+1900,
+		sprintf("%02d", ++$mon),
+		sprintf("%02d", $mday),
+		sprintf("%02d", $hour),
+		sprintf("%02d", $min),
+		sprintf("%02d", $sec),
+	);
+	return %dt;
+
+}
+
 sub get_datetime_for_mailheader {
 
 	my $time = shift || time;

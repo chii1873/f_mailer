@@ -629,7 +629,11 @@ function to_confpanel () {
 </td><td><input name="OUTPUT_FILENAME" value="##OUTPUT_FILENAME##" size="40" />
 <div class="caption">
 ※<tt>./data/[CONFID]</tt>内にのみ書き出しできます。ファイル名のみを指定してください。パスは指定できません。<br />
-※ファイル名にフォーム値を<tt>##フィールド名##</tt>の形で指定できます。半角英数および&quot;-&quot;、&quot;_&quot;、&quot;.&quot;以外の文字はURIエスケープされます。
+※書き出し時の日時を以下の通り指定できます。日別、月別などにファイルを分割したいときに便利です。<br />
+　<tt>%Y</tt>…西暦年(4ケタ)、<tt>%M</tt>…月(01～12)、<tt>%D</tt>…日(01～31)、<br />
+　<tt>%H</tt>…時(00～23)、<tt>%I</tt>…分(00～59)、<tt>%S</tt>…秒(00～59)<br />
+※ファイル名にフォーム値を<tt>##フィールド名##</tt>の形で指定できます。<br />
+※半角英数および&quot;-&quot;、&quot;_&quot;、&quot;.&quot;以外の文字はURIエスケープされます。
 </div>
 </td></tr>
 <tr><td class="bg_eef">書き出すファイルの形式<span class="fn">(OUTPUT_SEPARATOR)</span>

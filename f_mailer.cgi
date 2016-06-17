@@ -554,6 +554,8 @@ sub sendmail_file_output {
 
 	return unless @{$CONF{OUTPUT_FIELDS}};
 
+	my %dt = get_datetime_for_file_output;
+	$CONF{OUTPUT_FILENAME} =~ s/%([YMDHIS])/$dt{$1}/g;
 	$CONF{OUTPUT_FILENAME} =~ s/##([^#]+)##/$FORM{$1}/g;
 	$CONF{OUTPUT_FILENAME} =~ s#([^\da-zA-Z_.,-])#'%' . unpack('H2', $1)#eg;
 	unless (-d "data/output/$FORM{CONFID}") {
