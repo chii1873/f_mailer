@@ -971,7 +971,7 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.7 beta160512},
+		version   => q{0.71},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{http://www.psl.ne.jp/},
 		copyright => q{&copy;1997-2016},
