@@ -387,7 +387,7 @@ sub load_condcheck {
 	};
 	$condcheck{hira_only} = sub {
 		my($f_name, $alt_name, $f_value) = @_;
-		my $f_value_ = Unicode::Japanese->new($f_value, "utf8")->get;
+		my $f_value_ = Unicode::Japanese->new($f_value, "utf8")->getu;
 		my @errmsg;
 		unless ($f_value_ =~ /^[\p{InHiragana}\x{3000}\x{30fc}]*$/o) { # ひらがな、全角スペース(　)、長音記号(ー)
 			push(@errmsg, set_errmsg(key=>"hira_only", f_name=>($alt_name or $f_name)));
@@ -971,11 +971,11 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.71},
+		version   => q{0.71a},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{http://www.psl.ne.jp/},
-		copyright => q{&copy;1997-2016},
-		copyright2 => q{(c)1997-2016},
+		copyright => q{&copy;1997-2017},
+		copyright2 => q{(c)1997-2017},
 	);
 #	chomp($PROD{copyright_html_footer} = <<STR);
 #<a href="$PROD{a_url}" target="_blank"><strong>$PROD{prod_name} v$PROD{version}</strong></a>
