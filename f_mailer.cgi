@@ -37,6 +37,8 @@ $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 
 require "./f_mailer_lib.pl";
 require "./f_mailer_sysconf.pl";
+require "./f_mailer_condcheck.pl";
+
 $q = new CGI;
 $ENV{PATH} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
 %CONF = (setver(), conf::sysconf());
