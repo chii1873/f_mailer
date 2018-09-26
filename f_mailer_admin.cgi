@@ -209,6 +209,7 @@ sub confform {
 	 temp => $FORM{temp}, conf_id=>$FORM{conf_id},
 	 langlist => get_langlist_select($conf{LANG}),
 	 ("DO_NOT_SEND:1" => $conf{DO_NOT_SEND} ? q|checked="checked"| : ""),
+	 ("SENDFROM_EMAIL_FORCED:1" => $conf{SENDFROM_EMAIL_FORCED} ? q|checked="checked"| : ""),
 	 ("ENVELOPE_ADDR_LINK:1" => $conf{ENVELOPE_ADDR_LINK} ? q|checked="checked"| : ""),
 	 (map { "FORM_FLAG:".$_ => $conf{FORM_FLAG} == $_ ? q|checked="checked"| : "" } (0,1)),
 	 (map { "FORM_TMPL_CHARSET:".$_ => $conf{FORM_TMPL_CHARSET} eq $_ ? q|selected="selected"| : "" } qw(auto sjis euc utf8)),

@@ -246,9 +246,11 @@ function to_confpanel () {
 </div>
 </td></tr>
 <tr><td class="bg_eef">送信元アドレス<span class="fn">(SENDFROM)</span></td>
-<td><input name="SENDFROM" value="##SENDFROM##" size="40" />
+<td><input name="SENDFROM" value="##SENDFROM##" size="40" /><br />
+<label><input type="checkbox" name="SENDFROM_EMAIL_FORCED" value="1" ##SENDFROM_EMAIL_FORCED:1## />name=&quot;EMAIL&quot;の値を優先する<span class="fn">(SENDFROM_EMAIL_FORCED)</span></label>
 <div class="caption">
-※フォームメールのFromヘッダとなります。ただし、フォーム中に name="EMAIL" の入力欄があって、その値がある場合は、EMAILの値が優先され Fromヘッダとなります。 
+※フォームメールのFromヘッダとなります。<br />
+※今までは、フォーム中に name=&quot;EMAIL&quot; の入力欄があって、その値がある場合は、EMAILの値が優先されていましたが、v0.72より、SENDFROMの値を優先します。name=&quot;EMAIL&quot;の値を優先する場合はSENDFROM_EMAIL_FORCEDをチェックしてください。
 </div>
 </td></tr>
 <tr><td class="bg_eef nowrap">エラー送信先<br /><span class="fn">(ENVELOPE_ADDR)</span>
