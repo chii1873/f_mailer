@@ -43,6 +43,7 @@
 302	Please <v2> "<v1>".
 303	select
 304	input
+305	upload
 310	Temp Directory could not be opened:<v1>
 320	temp/<v2>-<v3> could not be loaded: <v1>
 400	Please enter the new password.
