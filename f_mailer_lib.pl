@@ -783,6 +783,7 @@ sub set_errmsg_init {
 	required => get_errmsg("302",  "##f_name##", "##str##"),
 	required_choose => get_errmsg("303"),
 	required_input  => get_errmsg("304"),
+	required_upload => get_errmsg("305"),
 	url      => get_errmsg("292",  "##f_name##"),
 	};
 
