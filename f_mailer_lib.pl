@@ -866,18 +866,18 @@ sub temp_read {
 sub temp_write {
 
 	my($page, %form) = @_;
-	my $temp = $ENV{SCRIPT_FILENAME} =~ /admin/ ? "temp" : "TEMP";
+	my $temp = $ENV{"SCRIPT_FILENAME"} =~ /admin/ ? "temp" : "TEMP";
 	$form{$temp} ||= time . $$;
 
 	($form{$temp}) = $form{$temp} =~ /^(\d+)$/;
 #    ($page) = $page =~ /^(\w+)$/;
-	open(W, ">",  "temp/$form{$temp}-$page")
+	open(my $fh, ">",  "temp/$form{$temp}-$page")
 	 or error(get_errmsg("320", $!));
 	foreach ($page eq "confform" ? ("label", get_conffields()) : keys %form) {
 		$form{$_} =~ s/\r?\n/\x0b/g;
-		print W "$_:$form{$_}\n";
+		print $fh "$_:$form{$_}\n";
 	}
-	close(W);
+	close($fh);
 
 	return $form{$temp};
 
