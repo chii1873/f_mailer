@@ -1,16 +1,16 @@
 #!/usr/bin/perl
 # ---------------------------------------------------------------
 #  - システム名    FORM MAILER
-#  - バージョン    0.71
-#  - 公開年月日    2016/06/17
+#  - バージョン    0.72
+#  - 公開年月日    2018/11/08
 #  - スクリプト名  f_mailer_admin.cgi
-#  - 著作権表示    (c)1997-2016 Perl Script Laboratory
-#  - 連  絡  先    http://psl.ne.jp/contact/index.html
+#  - 著作権表示    (c)1997-2018 Perl Script Laboratory
+#  - 連  絡  先    http://www.psl.ne.jp/contact/index.html
 # ---------------------------------------------------------------
 # ご利用にあたっての注意
 #   ※このシステムはフリーウエアです。
 #   ※このシステムは、「利用規約」をお読みの上ご利用ください。
-#     http://psl.ne.jp/info/copyright.html
+#     http://www.psl.ne.jp/info/copyright.html
 # ---------------------------------------------------------------
 use strict;
 use lib qw(./lib);
