@@ -82,19 +82,35 @@ $FORM{"NOW_DATE"}    = get_datetime(time);
 
 temp_del(2);  ### 2時間経過したtempファイルを削除
 
-if ($FORM{FORM}) {
-	%FORM = (%FORM, temp_read("formdata", $FORM{TEMP}));
+if ($FORM{"FORM"}) {
+	$FORM{"TEMP"} ||= time . $$;
+	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
 	form();
 }
-$FORM{TEMP} = temp_write("formdata", %FORM)
- if !$FORM{TEMP} or !$FORM{SEND_FORCED};
+#print __LINE__, $FORM{"ajax_file_check"}, "\n";
+#$FORM{"TEMP"} = temp_write("formdata", %FORM) if (!$FORM{"TEMP"} or !$FORM{"SEND_FORCED"});
+#%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"})) if !$FORM{"SEND_FORCED"};
+
+#print __LINE__, $FORM{"ajax_file_check"}, "\n";
+
+$name_list_ref = [split(/,/, $FORM{"FIELDLIST"})] if exists $FORM{"FIELDLIST"};
 ajax_delete() if $FORM{"ajax_delete"};
 ajax_file_check() if $FORM{"ajax_file_check"};
 ajax_upload() if $FORM{"ajax_upload"};
-sendmail_do() if ($FORM{SEND_FORCED} or !$CONF{CONFIRM_FLAG} and !$FORM{CONFIRM_FORCED});
-checkvalues();
-checkuploads();
-confirm();
+
+if (($FORM{"SEND_FORCED"} or !$CONF{"CONFIRM_FLAG"} and !$FORM{"CONFIRM_FORCED"})) {
+
+	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
+	checkvalues();
+	sendmail_do();
+
+} else {
+
+	$FORM{"TEMP"} = temp_write("formdata", %FORM);
+	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
+	checkvalues();
+	confirm();
+}
 
 sub ajax_delete {
 
