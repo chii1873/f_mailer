@@ -31,7 +31,7 @@ use URI::Escape;
 use CGI::Carp qw(fatalsToBrowser);
 use Data::Dumper;
 sub d { die Dumper @_ }
-#error_(Dumper($CONF{COND}));
+#error_(Dumper($CONF{"COND"}));
 use Carp 'verbose';
 $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 
@@ -40,7 +40,7 @@ require "./f_mailer_sysconf.pl";
 require "./f_mailer_condcheck.pl";
 
 $q = new CGI;
-$ENV{PATH} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
+$ENV{"PATH"} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
 %CONF = (setver(), conf::sysconf());
 set_errmsg_init();
 umask 0;
@@ -49,8 +49,8 @@ umask 0;
 error_(get_errmsg("000")) unless keys %FORM;
 
 ### 設定ファイルのロード
-if ($FORM{CONFID}) {
-	$conffile = get_conffile_by_id($FORM{CONFID});
+if ($FORM{"CONFID"}) {
+	$conffile = get_conffile_by_id($FORM{"CONFID"});
 	($conffile) = $conffile =~ /^(.*\.pl)$/;
 	eval { require "./data/conf/$conffile"; };
 	error_(get_errmsg("001", $@)) if $@;
@@ -138,7 +138,7 @@ sub ajax_file_check {
 
 	my %opt = @_;
 
-	my %ATTACH_FIELDNAME = map { $_ => { "name" => "", "size" => 0 } } @{$CONF{ATTACH_FIELDNAME}};
+	my %ATTACH_FIELDNAME = map { $_ => { "name" => "", "size" => 0 } } @{$CONF{"ATTACH_FIELDNAME"}};
 	$FORM{"TEMP"} ||= time . $$;
 
 	my %exists;
@@ -260,7 +260,7 @@ sub checkvalues {
 
 	### 拡張コードの実行
 	### エラーメッセージのリストを受け取ります。
-	if ($CONF{EXTFILE_EXIST}) {
+	if ($CONF{"EXTFILE_EXIST"}) {
 		my @xerrmsg = ext_sub();
 		if (ref($xerrmsg[0])) {
 			@xerrmsg = @{$xerrmsg[0]};
@@ -299,8 +299,8 @@ sub checkvalues {
 #use Data::Dumper;
 #die Dumper $name_list_ref;
 
-	$FORM{TEMP} = temp_write("formdata", %FORM, temp=>$FORM{TEMP},
-	 FIELDLIST=>join(",", @$name_list_ref),
+	$FORM{"TEMP"} = temp_write("formdata", %FORM, "temp"=>$FORM{"TEMP"},
+	 "FIELDLIST"=>join(",", @$name_list_ref),
 	);
 
 }
@@ -370,7 +370,7 @@ sub error {
 
 sub error_formcheck {
 
-	error(@_) unless $CONF{FORM_FLAG};
+	error(@_) unless $CONF{"FORM_FLAG"};
 
 	output_form("FORM", \@_);
 
@@ -393,14 +393,14 @@ sub output_form {
 	my($code, $htmlstr) = printhtml_getpage(
 	 ($CONF{"${phase}_TMPL_CHARSET"} || "auto"),
 	 {
-	   filename => $CONF{"${phase}_TMPL"},
-	   errmsg => ($errmsg_ref || []),
+	   "filename" => $CONF{"${phase}_TMPL"},
+	   "errmsg" => ($errmsg_ref || []),
 	 }
 	);
 
 	my %d;
 	if (ref $errmsg_ref) {
-		%d = temp_read("formdata", $FORM{TEMP});
+		%d = temp_read("formdata", $FORM{"TEMP"});
 		$htmlstr =~ s|<!--\s*errmsg\s*-->|mk_errmsg($errmsg_ref)|ie;
 		$htmlstr =~ s|##errmsg##|mk_errmsg($errmsg_ref)|ie;
 	} else {
@@ -408,7 +408,7 @@ sub output_form {
 	}
 #d(\%d);
 	$htmlstr =~ s/##list##/get_formdatalist()/e;
-	$htmlstr = get_output_form($phase, $htmlstr, %d, TEMP=>$FORM{TEMP});
+	$htmlstr = get_output_form($phase, $htmlstr, %d, "TEMP"=>$FORM{"TEMP"});
 	foreach my $key(keys %d) {
 		eval { $htmlstr =~ s/##\Q$key\E##/Unicode::Japanese->new(($phase eq "CONFIRM" or $phase eq "THANKS") ? replace($key,'html',\%d) : $d{$key}, "utf8")->get/eg; };
 		error_("$key, $d{$key}, $@") if $@;
@@ -422,18 +422,18 @@ sub sendmail_do {
 
 	my @errmsg;
 
-	if ($CONF{DENY_DUPL_SEND}) {
-		if (get_cookie($FORM{CONFID})) {
+	if ($CONF{"DENY_DUPL_SEND"}) {
+		if (get_cookie($FORM{"CONFID"})) {
 			error(get_errmsg("110"));
 		}
 	}
 
-	%FORM = (%FORM, temp_read("formdata", $FORM{TEMP}));
-	$name_list_ref = [split(/,/, $FORM{FIELDLIST})];
+	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
+	$name_list_ref = [split(/,/, $FORM{"FIELDLIST"})];
 
 	### 添付ファイル名の読み込み
 	my %exists;# = ajax_file_check("thru" => 1);
-#	for my $fname(@{$CONF{ATTACH_FIELDNAME}}) {
+#	for my $fname(@{$CONF{"ATTACH_FIELDNAME"}}) {
 #		if ($exists{$fname}{"name"} ne "") {
 #			$FORM{$fname} = $exists{$fname}{"name"};
 #		} else {
@@ -443,7 +443,7 @@ sub sendmail_do {
 
 	### 拡張コードの実行
 	### エラーメッセージのリストを受け取ります。
-	if ($CONF{EXTFILE_EXIST}) {
+	if ($CONF{"EXTFILE_EXIST"}) {
 		my @xerrmsg = ext_sub2();
 		if (ref($xerrmsg[0])) {
 			@xerrmsg = @{$xerrmsg[0]};
@@ -551,14 +551,14 @@ sub sendmail_do {
 
 sub sendmail_file_output {
 
-	return unless @{$CONF{OUTPUT_FIELDS}};
+	return unless @{$CONF{"OUTPUT_FIELDS"}};
 
 	my %dt = get_datetime_for_file_output();
-	$CONF{OUTPUT_FILENAME} =~ s/%([YMDHIS])/$dt{$1}/g;
-	$CONF{OUTPUT_FILENAME} =~ s/##([^#]+)##/$FORM{$1}/g;
-	$CONF{OUTPUT_FILENAME} =~ s#([^\da-zA-Z_.,-])#'%' . unpack('H2', $1)#eg;
-	unless (-d "data/output/$FORM{CONFID}") {
-		mkdir("data/output/$FORM{CONFID}", 0777)
+	$CONF{"OUTPUT_FILENAME"} =~ s/%([YMDHIS])/$dt{$1}/g;
+	$CONF{"OUTPUT_FILENAME"} =~ s/##([^#]+)##/$FORM{$1}/g;
+	$CONF{"OUTPUT_FILENAME"} =~ s#([^\da-zA-Z_.,-])#'%' . unpack('H2', $1)#eg;
+	unless (-d qq|data/output/$FORM{"CONFID"}|) {
+		mkdir(qq|data/output/$FORM{"CONFID"}|, 0777)
 		 or error(get_errmsg("116", $CONF{"OUTPUT_FILENAME"}, $!));
 	}
 	open(my $fh, ">>", qq|./data/output/$FORM{"CONFID"}/$CONF{"OUTPUT_FILENAME"}|)
@@ -567,22 +567,22 @@ sub sendmail_file_output {
 	seek($fh, 0, 2);
 
 	my %FORM2;
-	foreach my $field(@{$CONF{OUTPUT_FIELDS}}) {
+	foreach my $field(@{$CONF{"OUTPUT_FIELDS"}}) {
 		$FORM{$field} =~ s/\r\n/\n/g;
 		$FORM{$field} =~ s/\r/\n/g;
-		if ($CONF{OUTPUT_SEPARATOR}) {
+		if ($CONF{"OUTPUT_SEPARATOR"}) {
 			$FORM{$field} =~ s/"/""/g;
 			$FORM2{$field} = qq|"$FORM{$field}"|;
-			$FORM2{$field} =~ s/\n/$CONF{NEWLINE_REPLACE} eq '' ? "\n" : $CONF{NEWLINE_REPLACE}/eg;
+			$FORM2{$field} =~ s/\n/$CONF{"NEWLINE_REPLACE"} eq '' ? "\n" : $CONF{"NEWLINE_REPLACE"}/eg;
 		} else {
 			$FORM{$field} =~ s/\t+/ /g;
 			$FORM2{$field} = $FORM{$field};
-			$FORM2{$field} =~ s/\n/$CONF{NEWLINE_REPLACE}/g;
+			$FORM2{$field} =~ s/\n/$CONF{"NEWLINE_REPLACE"}/g;
 		}
-		$FORM2{$field} =~ s/\!\!\!/$CONF{FIELD_SEPARATOR} eq '' ? " " : $CONF{FIELD_SEPARATOR}/eg;
+		$FORM2{$field} =~ s/\!\!\!/$CONF{"FIELD_SEPARATOR"} eq '' ? " " : $CONF{"FIELD_SEPARATOR"}/eg;
 	}
-	print $fh join(($CONF{OUTPUT_SEPARATOR} ? "," : "\t"),
-	 @FORM2{@{$CONF{OUTPUT_FIELDS}}}),"\n";
+	print $fh join(($CONF{"OUTPUT_SEPARATOR"} ? "," : "\t"),
+	 @FORM2{@{$CONF{"OUTPUT_FIELDS"}}}),"\n";
 	close($fh);
 
 }
@@ -593,7 +593,7 @@ sub sendmail_get_attachdata {
 	my @del_list;
 	my %exists = ajax_file_check("thru" => 1);
 
-	for my $fname(@{$CONF{ATTACH_FIELDNAME}}) {
+	for my $fname(@{$CONF{"ATTACH_FIELDNAME"}}) {
 
 		if ($exists{$fname}{"name"} ne "") {
 			open(my $fh, "<", qq|./temp/$exists{$fname}{"filename"}|)
