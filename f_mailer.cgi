@@ -473,6 +473,9 @@ sub sendmail_do {
 	### シリアル番号の取得
 	$FORM{"SERIAL"} = serial_increment($FORM{"CONFID"});
 
+	### v0.72より、Fromヘッダアドレスの優先切替対応
+	my $sendfrom = $CONF{"SENDFROM_EMAIL_FORCED"} ? ($FORM{"EMAIL"} || $CONF{"SENDFROM"}) : $CONF{"SENDFROM"};
+
 	### フォーム内容メールの送信処理
 	unless ($CONF{"DO_NOT_SEND"}) {
 		my($del_list_ref, %attachdata) = sendmail_get_attachdata();
