@@ -152,10 +152,11 @@ sub ajax_file_check {
 		my $file_size = (stat("temp/$f"))[7];
 		$size_total += $file_size;
 		$exists{$field_name} = {
-			"name" => Unicode::Japanese->new(uri_unescape($file_name), "utf8")->get,
+			"name" => Unicode::Japanese->new(uri_unescape($file_name), "utf8")->getu,
 			"filename" => $f,
 			"size" => $file_size,
 		};
+		$FORM{$field_name} = $exists{$field_name}{"name"};
 	}
 	closedir($dir);
 
@@ -185,6 +186,24 @@ sub ajax_upload {
 		$FORM{"TEMP"} ||= time . $$;
 		my $errmsg = imgsave($FORM{"TEMP"}, $FORM{"ajax_upload"});
 		ajax_error($errmsg) if $errmsg;
+
+		### アップロードしたファイルの単体/合計サイズ超過チェック
+		my %exists = ajax_file_check("thru"=>1);
+		if ($exists{$FORM{"ajax_upload"}} and $CONF{"ATTACH_SIZE_MAX"} and $exists{$FORM{"ajax_upload"}}{"file_size"} > $CONF{"ATTACH_SIZE_MAX"} * 1024) {
+			my $file = $exists{$FORM{"ajax_upload"}}{"filename"};
+			if (-e "temp/$file") {
+				unlink("temp/$file") or ajax_error(get_errmsg("100", $!));
+			}
+			ajax_error(get_errmsg("101", $alt{$FORM{"ajax_upload"}}, $CONF{"ATTACH_SIZE_MAX"}));
+		}
+		if ($CONF{"ATTACH_TSIZE_MAX"} and $exists{"__TOTAL__"} > $CONF{"ATTACH_TSIZE_MAX"} * 1024) {
+			my $file = $exists{$FORM{"ajax_upload"}}{"filename"};
+			if (-e "temp/$file") {
+				unlink("temp/$file") or ajax_error(get_errmsg("100", $!));
+			}
+			ajax_error(get_errmsg("102", $CONF{"ATTACH_TSIZE_MAX"}));
+		}
+
 	} else {
 		ajax_error(get_errmsg("100", ($alt{$FORM{"ajax_upload"}} or $FORM{"ajax_upload"}), $filename));
 	}
@@ -193,33 +212,13 @@ sub ajax_upload {
 
 }
 
-sub checkuploads {
-
-	my @errmsg;
-
-	my %exists = ajax_file_check("thru"=>1);
-	foreach my $fname(@{$CONF{ATTACH_FIELDNAME}}) {
-		if ($exists{$fname}) {
-			if ($CONF{"ATTACH_SIZE_MAX"} and $exists{$fname}{"file_size"} > $CONF{"ATTACH_SIZE_MAX"} * 1024) {
-				push(@errmsg, get_errmsg("101", $exists{$fname}{"name"}, $CONF{"ATTACH_SIZE_MAX"}));
-			}
-			$FORM{$fname} = $exists{$fname}{"name"};
-		}
-	}
-	if ($CONF{"ATTACH_TSIZE_MAX"} and $exists{"__TOTAL__"} > $CONF{"ATTACH_TSIZE_MAX"} * 1024) {
-		push(@errmsg, get_errmsg("102", $CONF{"ATTACH_TSIZE_MAX"}));
-	}
-
-	error(@errmsg) if @errmsg;
-
-}
-
 sub checkvalues {
 
 	my @errmsg;
-	my %condcheck = load_condcheck();
-	my @checklist = map { $_->{name} } get_checklist();
+	my %condcheck = condcheck_init();
+	my @checklist = map { $_->{"name"} } get_checklist();
 	my %to_delete;
+	my %exists = ajax_file_check("thru"=>1);
 
 	### フィールドのグループ化
 	### 暫定的にこの位置に入れる
@@ -253,7 +252,7 @@ sub checkvalues {
 			push(@errmsg, @group_errmsg) if @group_errmsg;
 		} else {
 			my($errmsg_ref, $to_delete_ref)
-			 = checkvalues_condcheck(\%condcheck, $f_name, $cond_hash);
+			 = checkvalues_condcheck(\%condcheck, $f_name, $cond_hash, "exists"=>($exists{$f_name}{"name"} ? 1 : 0));
 			%to_delete = (%to_delete, %$to_delete_ref);
 			push(@errmsg, @$errmsg_ref) if @$errmsg_ref;
 		}
@@ -326,6 +325,7 @@ sub checkvalues_condcheck {
 		 ($key eq "compare" ? $FORM{"${f_name}2"} : $cond_hash->{$key}),
 		 $cond_hash->{"type"},
 		 $cond_hash->{"d_only"},
+		 $opt{"exists"}, ### 添付ファイルアップロード有無
 		);
 		if (@errmsg_) {
 			if ($opt{"group"} and $key !~ /^(?:min|max)$/) {
