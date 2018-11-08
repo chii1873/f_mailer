@@ -63,20 +63,20 @@ if ($FORM{"CONFID"}) {
 }
 
 ### 拡張ファイルのロード
-my %conflist = map { $_->{id} => $_->{file} } get_conflist();
-if (-e "./data/confext/ext_$conflist{$FORM{CONFID}}") {
-	$CONF{EXTFILE_EXIST} = 1;
-	eval qq|require "./data/confext/ext_$conflist{$FORM{CONFID}}";|;
-	error(get_errmsg("004", $@, $conflist{$FORM{CONFID}})) if $@;
+my %conflist = map { $_->{"id"} => $_->{"file"} } get_conflist();
+if (-e qq|./data/confext/ext_$conflist{$FORM{"CONFID"}}|) {
+	$CONF{"EXTFILE_EXIST"} = 1;
+	eval qq|require qq[./data/confext/ext_$conflist{$FORM{"CONFID"}}];|;
+	error(get_errmsg("004", $@, $conflist{$FORM{"CONFID"}})) if $@;
 }
 
 %CONF = (%CONF, conf::conf());
 set_errmsg_init(); ### フォームの使用言語確定後ロード
 %FORM = data_convert(%FORM);
-$FORM{REMOTE_HOST} = remote_host();
-$FORM{REMOTE_ADDR} = $ENV{REMOTE_ADDR};
-$FORM{USER_AGENT}  = $ENV{HTTP_USER_AGENT};
-$FORM{NOW_DATE}    = get_datetime(time);
+$FORM{"REMOTE_HOST"} = remote_host();
+$FORM{"REMOTE_ADDR"} = $ENV{"REMOTE_ADDR"};
+$FORM{"USER_AGENT"}  = $ENV{"HTTP_USER_AGENT"};
+$FORM{"NOW_DATE"}    = get_datetime(time);
 
 %alt = setalt();
 
@@ -177,8 +177,8 @@ sub ajax_init {
 
 sub ajax_upload {
 
-	my $ext = (split(/\./, $FORM{$FORM{"ajax_upload"}}))[-1];
-	my %ext = map { $_ => 1 } @{$CONF{ATTACH_EXT}};
+	my $ext = lc((split(/\./, $FORM{$FORM{"ajax_upload"}}))[-1]);
+	my %ext = map { lc($_) => 1 } @{$CONF{"ATTACH_EXT"}};
 
 	my $filename = (split(/[\\\/]/, $FORM{$FORM{"ajax_upload"}}))[-1];
 	if ($ext{$ext}) {
@@ -223,23 +223,23 @@ sub checkvalues {
 
 	### フィールドのグループ化
 	### 暫定的にこの位置に入れる
-	ext_sub0() if $CONF{EXTFILE_EXIST};
+	ext_sub0() if $CONF{"EXTFILE_EXIST"};
 #use Data::Dumper;
 #die Dumper \%condcheck;
 #die(@{$condcheck{__order}});
 	my %group_flag;
-	my %cond_hash = map { $_->[0]=>$_->[1] } @{$CONF{COND}};
-	foreach (@{$CONF{COND}}) {
+	my %cond_hash = map { $_->[0]=>$_->[1] } @{$CONF{"COND"}};
+	foreach (@{$CONF{"COND"}}) {
 		my($f_name, $cond_hash) = @$_;
 		$FORM{$f_name} = $FORM{$f_name};
 
-		if ($CONF{field_group_rev}{$f_name}) {
+		if ($CONF{"field_group_rev"}{$f_name}) {
 			my @group_errmsg;
 			my %errtype;
-			next if $group_flag{$CONF{field_group_rev}{$f_name}}++;
-			for my $group_field(@{$CONF{field_group}{$CONF{field_group_rev}{$f_name}}{list}}) {
+			next if $group_flag{$CONF{"field_group_rev"}{$f_name}}++;
+			for my $group_field(@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$f_name}}{"list"}}) {
 				my($errmsg_ref, $to_delete_ref, $errtype_ref)
-				 = checkvalues_condcheck(\%condcheck, $group_field, $cond_hash{$group_field}, group=>1);
+				 = checkvalues_condcheck(\%condcheck, $group_field, $cond_hash{$group_field}, "group"=>1);
 				%errtype = (%errtype, %$errtype_ref);
 				push(@group_errmsg, @$errmsg_ref) if @$errmsg_ref;
 			}
@@ -279,18 +279,18 @@ sub checkvalues {
 	foreach (keys %to_delete) { delete $FORM{"${_}2"} }
 	for (@$name_list_ref) {
 		next if /^(.*)2$/ and $to_delete{$1};
-		if ($CONF{field_group_rev}{$_}) {
-			next if $group_flag{$CONF{field_group_rev}{$_}}++;
-			push(@name_list_new, $CONF{field_group_rev}{$_});
+		if ($CONF{"field_group_rev"}{$_}) {
+			next if $group_flag{$CONF{"field_group_rev"}{$_}}++;
+			push(@name_list_new, $CONF{"field_group_rev"}{$_});
 			my $vchk = 0;
-			for (@{$CONF{field_group}{$CONF{field_group_rev}{$_}}{list}}) {
+			for (@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"list"}}) {
 				$vchk++ if $_ ne "";
 			}
-			$FORM{$CONF{field_group_rev}{$_}}
-			 = join($CONF{field_group}{$CONF{field_group_rev}{$_}}{constr},
-			  @FORM{@{$CONF{field_group}{$CONF{field_group_rev}{$_}}{list}}})
+			$FORM{$CONF{"field_group_rev"}{$_}}
+			 = join($CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"constr"},
+			  @FORM{@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"list"}}})
 			 if $vchk;
-			$alt{$CONF{field_group_rev}{$_}} = $CONF{field_group}{$CONF{field_group_rev}{$_}}{alt};
+			$alt{$CONF{"field_group_rev"}{$_}} = $CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"alt"};
 			next;
 		}
 		push(@name_list_new, $_);
@@ -323,46 +323,46 @@ sub checkvalues_condcheck {
 		 $alt{$f_name},
 		 $FORM{$f_name},
 		 ($key eq "compare" ? $FORM{"${f_name}2"} : $cond_hash->{$key}),
-		 $cond_hash->{type},
-		 $cond_hash->{d_only},
+		 $cond_hash->{"type"},
+		 $cond_hash->{"d_only"},
 		);
 		if (@errmsg_) {
-			if ($opt{group} and $key !~ /^(?:min|max)$/) {
+			if ($opt{"group"} and $key !~ /^(?:min|max)$/) {
 				$errtype{$key} = 1;
 			} else {
 				push(@errmsg, @errmsg_);
 			}
 		}
 	}
-	$to_delete{$f_name} = 1 if $opt{group};
+	$to_delete{$f_name} = 1 if $opt{"group"};
 	return \@errmsg, \%to_delete, \%errtype;
 
 }
 
 sub confirm {
 
-	output_form("CONFIRM") if $CONF{CONFIRM_FLAG} == 2;
+	output_form("CONFIRM") if $CONF{"CONFIRM_FLAG"} == 2;
 
-#die $FORM{addr};
-	printhtml("./tmpl/default/@{[ $CONF{LANG} or $CONF{LANG_DEFAULT} ]}/confirm.html",
+#die $FORM{"addr"};
+	printhtml(qq|./tmpl/default/@{[ $CONF{"LANG"} or $CONF{"LANG_DEFAULT"} ]}/confirm.html|,
 	 CHARSET=>"sjis",
-	 list => get_formdatalist(), CONFID=>$FORM{CONFID},
-	 TEMP=>$FORM{TEMP}, (map { $_ => $CONF{$_} } keys %CONF),
-	 map { $_ => replace($_, "html", \%FORM) } map { $_->[0] } @{$CONF{COND}});
+	 "list" => get_formdatalist(), "CONFID"=>$FORM{"CONFID"},
+	 "TEMP" => $FORM{"TEMP"}, (map { $_ => $CONF{$_} } keys %CONF),
+	 map { $_ => replace($_, "html", \%FORM) } map { $_->[0] } @{$CONF{"COND"}});
 	exit;
 
 }
 
 sub error {
 
-	output_form("ERROR", \@_) if $CONF{ERROR_FLAG};
+	output_form("ERROR", \@_) if $CONF{"ERROR_FLAG"};
 
 	my $errmsg = mk_errmsg(\@_);
 
-	printhtml("./tmpl/default/@{[ $CONF{LANG} or $CONF{LANG_DEFAULT} ]}/error.html",
-	 CHARSET=>"sjis",
+	printhtml(qq|./tmpl/default/@{[ $CONF{"LANG"} or $CONF{"LANG_DEFAULT"} ]}/error.html|,
+	 "CHARSET"=> "sjis",
 	 (map { $_ => $CONF{$_} } keys %CONF),
-	 errmsg => $errmsg,
+	 "errmsg" => $errmsg,
 	);
 	 exit;
 
@@ -454,96 +454,91 @@ sub sendmail_do {
 	error(@errmsg) if @errmsg;
 
 	### シリアル番号の取得
-	$FORM{SERIAL} = serial_increment($FORM{CONFID});
+	$FORM{"SERIAL"} = serial_increment($FORM{"CONFID"});
 
 	### フォーム内容メールの送信処理
-	unless ($CONF{DO_NOT_SEND}) {
+	unless ($CONF{"DO_NOT_SEND"}) {
 		my($del_list_ref, %attachdata) = sendmail_get_attachdata();
-		my $format = $CONF{MAIL_FORMAT_TYPE}
-		 ? set_default_mail_format(type=>$CONF{MAIL_FORMAT_TYPE})
-		 : $CONF{FORMAT};
+		my $format = $CONF{"MAIL_FORMAT_TYPE"} ? set_default_mail_format(type=>$CONF{"MAIL_FORMAT_TYPE"}) : $CONF{"FORMAT"};
 		$format =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
-		my $subject = $CONF{SUBJECT};
+		my $subject = $CONF{"SUBJECT"};
 		$subject =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
 		my %str = sendmail_mkstr(
-			subject => $subject,
-			fromname => $CONF{SENDFROMNAME},
-			mailstr => $format,
-			credit => $CONF{copyright_mail_footer},
-			charset=>$CONF{CHARSET},
-			attachdata => \%attachdata,
+			"subject"	=> $subject,
+			"fromname"	=> $CONF{"SENDFROMNAME"},
+			"mailstr"	=> $format,
+			"credit"	=> $CONF{"copyright_mail_footer"},
+			"charset"	=>$CONF{"CHARSET"},
+			"attachdata"	=> \%attachdata,
 		);
 		### 2007-10-7 エンベロープアドレス対応
-		my $envelope = $CONF{ENVELOPE_ADDR_LINK}
-		 ? ($FORM{EMAIL} || $CONF{SENDFROM}) : $CONF{ENVELOPE_ADDR};
-		foreach my $mailto(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/,$CONF{SENDTO})) {
+		my $envelope = $CONF{"ENVELOPE_ADDR_LINK"} ? $sendfrom : $CONF{"ENVELOPE_ADDR"};
+		foreach my $mailto(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/,$CONF{"SENDTO"})) {
 			sendmail(
-				charset  => $str{charset},
-				mailto   => $mailto,
-				cc       => $CONF{CC},
-		                bcc      => $CONF{BCC},
-				from     => ($FORM{EMAIL} || $CONF{SENDFROM}),
-				subject  => $str{subject},
-				mailstr  => $str{mailstr},
-				fromname => $str{fromname},
-				envelope => $envelope,
+				"charset"	=> $str{"charset"},
+				"mailto"	=> $mailto,
+				"cc"		=> $CONF{"CC"},
+		                "bcc"		=> $CONF{"BCC"},
+				"from"		=> $sendfrom,
+				"subject"	=> $str{"subject"},
+				"mailstr"	=> $str{"mailstr"},
+				"fromname"	=> $str{"fromname"},
+				"envelope"	=> $envelope,
 			);
 		}
 	}
 
 	### 自動返信メールの送信処理
-	if ($CONF{AUTO_REPLY}) {
-		my $format = $CONF{REPLY_MAIL_FORMAT_TYPE}
-		 ? set_default_mail_format(type=>$CONF{REPLY_MAIL_FORMAT_TYPE},reply=>1)
-		 : $CONF{REPLY_FORMAT};
+	if ($CONF{"AUTO_REPLY"}) {
+		my $format = $CONF{"REPLY_MAIL_FORMAT_TYPE"} ? set_default_mail_format("type"=>$CONF{"REPLY_MAIL_FORMAT_TYPE"}, "reply"=>1) : $CONF{"REPLY_FORMAT"};
 		$format =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
-		my $subject = $CONF{REPLY_SUBJECT};
+		my $subject = $CONF{"REPLY_SUBJECT"};
 		$subject =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
 		my %str = sendmail_mkstr(
-			subject => $subject,
-			fromname => $CONF{REPLY_SENDFROMNAME},
-			mailstr => $format,
-			credit => $CONF{copyright_mail_footer},
-			charset=>$CONF{REPLY_CHARSET},
-			attachdata => {},
+			"subject"	=> $subject,
+			"fromname"	=> $CONF{"REPLY_SENDFROMNAME"},
+			"mailstr"	=> $format,
+			"credit"	=> $CONF{"copyright_mail_footer"},
+			"charset"	=> $CONF{"REPLY_CHARSET"},
+			"attachdata"	=> {},
 		);
 		### フォーム内容メールの送信処理
-		foreach my $mailto(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/,$FORM{EMAIL})) {
+		foreach my $mailto(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/,$FORM{"EMAIL"})) {
 			sendmail(
-				charset  => $str{charset},
-				mailto   => $mailto,
-				cc       => $CONF{REPLY_CC},
-		                bcc      => $CONF{REPLY_BCC},
-				from     => $CONF{REPLY_SENDFROM},
-				subject  => $str{subject},
-				mailstr  => $str{mailstr},
-				fromname => $str{fromname},
-				envelope => $CONF{REPLY_ENVELOPE_ADDR},
+				"charset"	=> $str{"charset"},
+				"mailto"	=> $mailto,
+				"cc"		=> $CONF{"REPLY_CC"},
+		                "bcc"		=> $CONF{"REPLY_BCC"},
+				"from"		=> ($CONF{"REPLY_SENDFROM"} || $CONF{"SENDFROM"}),
+				"subject"	=> $str{"subject"},
+				"mailstr"	=> $str{"mailstr"},
+				"fromname"	=> $str{"fromname"},
+				"envelope"	=> $CONF{"REPLY_ENVELOPE_ADDR"},
 			);
 		}
 	}
 
 	### ファイル書き出し処理
-	sendmail_file_output() if $CONF{FILE_OUTPUT};
+	sendmail_file_output() if $CONF{"FILE_OUTPUT"};
 
-	set_cookie($FORM{CONFID}, $CONF{DENY_DUPL_SEND_MIN}, 1)
-	 if $CONF{DENY_DUPL_SEND};
+	set_cookie($FORM{"CONFID"}, $CONF{"DENY_DUPL_SEND_MIN"}, 1)
+	 if $CONF{"DENY_DUPL_SEND"};
 
-	if (!$CONF{THANKS_FLAG}) {
-		print "Location: $CONF{THANKS}\n\n";
+	if (!$CONF{"THANKS_FLAG"}) {
+		print qq|Location: $CONF{"THANKS"}\n\n|;
 	} else {
-		$CONF{SUBJECT} = html_output_escape($CONF{SUBJECT});
+		$CONF{"SUBJECT"} = html_output_escape($CONF{"SUBJECT"});
 
-		output_form("THANKS") if $CONF{THANKS_FLAG} == 2;
+		output_form("THANKS") if $CONF{"THANKS_FLAG"} == 2;
 
 		my $str;
-		printhtml("./tmpl/default/@{[ $CONF{LANG} or $CONF{LANG_DEFAULT} ]}/thanks.html",
-		 CHARSET=>($CONF{THANKS_TMPL_CHARSET} || "auto"),
+		printhtml(qq|./tmpl/default/@{[ $CONF{"LANG"} or $CONF{"LANG_DEFAULT"} ]}/thanks.html|,
+		 "CHARSET"=>($CONF{"THANKS_TMPL_CHARSET"} || "auto"),
 		 (map { $_ => $CONF{$_} } keys %CONF),
-		 list=>get_formdatalist(),
-		 map { $_ => replace($_,"html",\%FORM) } map { $_->[0] } @{$CONF{COND}});
+		 "list" => get_formdatalist(),
+		 map { $_ => replace($_,"html",\%FORM) } map { $_->[0] } @{$CONF{"COND"}});
 	}
 	exit;
 
@@ -640,82 +635,82 @@ sub sendmail_mkstr {
 	### -------------------------------------------
 
 	### 自動判定
-	if ($opt{charset} eq "" or $opt{charset} eq "auto") {
-		if ($opt{subject} =~ /^[\r\n\x20-\x7e]*$/ and $opt{str} =~ /^[\r\n\x20-\x7e]*$/ and $opt{credit} =~ /^[\r\n\x20-\x7e]*$/) {
-			$opt{charset} = $charset_conv{"us-ascii"};
-		} elsif ($opt{subject} =~ /^[\r\n\x20-\x7e\xa0-\xff]*$/ and $opt{str} =~ /^[\r\n\x20-\x7e\xa0-\xff]*$/ and $opt{credit} =~ /^[\x20-\x7e\xa0-\xff]*$/) {
-			$opt{charset} = $charset_conv{"iso-8859-1"};
-		} elsif (mojichk($opt{subject}) or mojichk($opt{mailstr}) or mojichk($opt{credit})) {
-			$opt{charset} = $charset_conv{"utf8"};
-			$opt{subject} = base64_subj($opt{charset}, $opt{subject});
-			$opt{fromname} = base64_subj($opt{charset}, $opt{fromname})
-			 if $opt{fromname} ne "";
+	if ($opt{"charset"} eq "" or $opt{"charset"} eq "auto") {
+		if ($opt{"subject"} =~ /^[\r\n\x20-\x7e]*$/ and $opt{"str"} =~ /^[\r\n\x20-\x7e]*$/ and $opt{"credit"} =~ /^[\r\n\x20-\x7e]*$/) {
+			$opt{"charset"} = $charset_conv{"us-ascii"};
+		} elsif ($opt{"subject"} =~ /^[\r\n\x20-\x7e\xa0-\xff]*$/ and $opt{"str"} =~ /^[\r\n\x20-\x7e\xa0-\xff]*$/ and $opt{"credit"} =~ /^[\x20-\x7e\xa0-\xff]*$/) {
+			$opt{"charset"} = $charset_conv{"iso-8859-1"};
+		} elsif (mojichk($opt{"subject"}) or mojichk($opt{"mailstr"}) or mojichk($opt{"credit"})) {
+			$opt{"charset"} = $charset_conv{"utf8"};
+			$opt{"subject"} = base64_subj($opt{"charset"}, $opt{"subject"});
+			$opt{"fromname"} = base64_subj($opt{"charset"}, $opt{"fromname"})
+			 if $opt{"fromname"} ne "";
 		} else {
-			$opt{charset} = $charset_conv{"jis"};
-			$opt{mailstr} = Unicode::Japanese->new($opt{mailstr}, "utf8")->jis;
-			$opt{credit} = Unicode::Japanese->new($opt{credit}, "utf8")->jis;
-			$opt{subject} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{subject}, "utf8")->jis);
-			$opt{fromname} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{fromname}, "utf8")->jis)
-			 if $opt{fromname} ne "";
+			$opt{"charset"} = $charset_conv{"jis"};
+			$opt{"mailstr"} = Unicode::Japanese->new($opt{"mailstr"}, "utf8")->jis;
+			$opt{"credit"} = Unicode::Japanese->new($opt{"credit"}, "utf8")->jis;
+			$opt{"subject"} = base64_subj($opt{"charset"}, Unicode::Japanese->new($opt{"subject"}, "utf8")->jis);
+			$opt{"fromname"} = base64_subj($opt{"charset"}, Unicode::Japanese->new($opt{"fromname"}, "utf8")->jis)
+			 if $opt{"fromname"} ne "";
 		}
 
 	### 文字コード固定
 	} else {
-		if ($opt{charset} eq "utf8") {
-			$opt{charset} = $charset_conv{"utf8"};
-			$opt{subject} = base64_subj($opt{charset}, $opt{subject});
-			$opt{fromname} = base64_subj($opt{charset}, $opt{fromname})
-			 if $opt{fromname} ne "";
-		} elsif ($opt{charset} eq "jis") {
-			$opt{charset} = $charset_conv{"jis"};
-			$opt{mailstr} = Unicode::Japanese->new($opt{mailstr}, "utf8")->jis;
-			$opt{credit} = Unicode::Japanese->new($opt{credit}, "utf8")->jis;
-			$opt{subject} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{subject}, "utf8")->jis);
-			$opt{fromname} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{fromname}, "utf8")->jis)
-			 if $opt{fromname} ne "";
-		} elsif ($opt{charset} eq "sjis") {
-			$opt{charset} = $charset_conv{"sjis"};
-			$opt{mailstr} = Unicode::Japanese->new($opt{mailstr}, "utf8")->sjis;
-			$opt{credit} = Unicode::Japanese->new($opt{credit}, "utf8")->sjis;
-			$opt{subject} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{subject}, "utf8")->sjis);
-			$opt{fromname} = base64_subj($opt{charset}, Unicode::Japanese->new($opt{fromname}, "utf8")->sjis)
-			 if $opt{fromname} ne "";
+		if ($opt{"charset"} eq "utf8") {
+			$opt{"charset"} = $charset_conv{"utf8"};
+			$opt{"subject"} = base64_subj($opt{"charset"}, $opt{"subject"});
+			$opt{"fromname"} = base64_subj($opt{"charset"}, $opt{"fromname"})
+			 if $opt{"fromname"} ne "";
+		} elsif ($opt{"charset"} eq "jis") {
+			$opt{"charset"} = $charset_conv{"jis"};
+			$opt{"mailstr"} = Unicode::Japanese->new($opt{"mailstr"}, "utf8")->jis;
+			$opt{"credit"} = Unicode::Japanese->new($opt{"credit"}, "utf8")->jis;
+			$opt{"subject"} = base64_subj($opt{"charset"}, Unicode::Japanese->new($opt{"subject"}, "utf8")->jis);
+			$opt{"fromname"} = base64_subj($opt{"charset"}, Unicode::Japanese->new($opt{"fromname"}, "utf8")->jis)
+			 if $opt{"fromname"} ne "";
+		} elsif ($opt{"charset"} eq "sjis") {
+			$opt{"charset"} = $charset_conv{"sjis"};
+			$opt{"mailstr"} = Unicode::Japanese->new($opt{"mailstr"}, "utf8")->sjis;
+			$opt{"credit"} = Unicode::Japanese->new($opt{"credit"}, "utf8")->sjis;
+			$opt{"subject"} = base64_subj($opt{"charset"}, Unicode::Japanese->new($opt{"subject"}, "utf8")->sjis);
+			$opt{"fromname"} = base64_subj($opt{"charset"}, Unicode::Japanese->new($opt{"fromname"}, "utf8")->sjis)
+			 if $opt{"fromname"} ne "";
 		} else {
-			$opt{charset} = $charset_conv{$opt{charset}};
+			$opt{"charset"} = $charset_conv{$opt{"charset"}};
 		}
 	}
 
-	if (keys %{$opt{attachdata}}) {
+	if (keys %{$opt{"attachdata"}}) {
 		$str .= <<STR;
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="$boundary"
 
 
 --$boundary
-Content-type: text/plain; charset=$opt{charset}
+Content-type: text/plain; charset=$opt{"charset"}
 
-$opt{mailstr}
-$opt{credit}
+$opt{"mailstr"}
+$opt{"credit"}
 STR
 	} else {
 		$str .= <<STR;
 MIME-Version: 1.0
 Content-Transfer-Encording: 7bit
-Content-type: text/plain; charset=$opt{charset}
+Content-type: text/plain; charset=$opt{"charset"}
 
-$opt{mailstr}
-$opt{credit}
+$opt{"mailstr"}
+$opt{"credit"}
 STR
 	}
 
-	foreach my $filename(keys %{$opt{attachdata}}) {
+	foreach my $filename(keys %{$opt{"attachdata"}}) {
 #        my $content_type = $filename =~ /\.html?$/ ? "text/html" : "application/octet-stream";
 		my $content_type = "application/octet-stream";
-		my $encoding_type = $opt{encoding} eq 'uuencode'
+		my $encoding_type = $opt{"encoding"} eq "uuencode"
 		 ? "X-uuencode" : "base64";
-		my $attachdata = $opt{encoding} eq 'uuencode'
-		 ? uuencode($opt{attachdata}->{$filename}, $filename)
-		 : base64($opt{attachdata}->{$filename});
+		my $attachdata = $opt{"encoding"} eq "uuencode"
+		 ? uuencode($opt{"attachdata"}->{$filename}, $filename)
+		 : base64($opt{"attachdata"}->{$filename});
 		$str .= <<STR;
 --$boundary
 Content-Type: $content_type; name="$filename"
@@ -727,7 +722,7 @@ $attachdata
 STR
 	}
 
-	$str .= "--$boundary--\n" if keys %{$opt{attachdata}};
+	$str .= "--$boundary--\n" if keys %{$opt{"attachdata"}};
 
 	return %opt, "mailstr" => $str;
 
