@@ -244,9 +244,10 @@ sub checkvalues {
 				push(@group_errmsg, @$errmsg_ref) if @$errmsg_ref;
 			}
 			for my $key(grep { $errtype{$_} } @checklist) {
-				push(@errmsg, set_errmsg(key=>$key,
-				 f_name=>$CONF{field_group}{$CONF{field_group_rev}{$f_name}}{alt},
-				 str=>$CONF{errmsg}{required_input},
+				push(@errmsg, set_errmsg(
+					"key"=>$key,
+					"f_name"=>$CONF{"field_group"}{$CONF{"field_group_rev"}{$f_name}}{"alt"},
+					"str"=>$CONF{"errmsg"}{"required_input"},
 				));
 			}
 			push(@errmsg, @group_errmsg) if @group_errmsg;
