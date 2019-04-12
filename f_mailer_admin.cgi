@@ -1,93 +1,92 @@
 #!/usr/bin/perl
-# ---------------------------------------------------------------
-#  - システム名    FORM MAILER
-#  - バージョン    0.72
-#  - 公開年月日    2018/11/08
-#  - スクリプト名  f_mailer_admin.cgi
-#  - 著作権表示    (c)1997-2018 Perl Script Laboratory
-#  - 連  絡  先    http://www.psl.ne.jp/contact/index.html
-# ---------------------------------------------------------------
-# ご利用にあたっての注意
-#   ※このシステムはフリーウエアです。
-#   ※このシステムは、「利用規約」をお読みの上ご利用ください。
-#     http://www.psl.ne.jp/info/copyright.html
-# ---------------------------------------------------------------
+#BEGIN{ print "Content-type: text/html\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
+
 use strict;
-use lib qw(./lib);
+use lib qw(./module ./lib);
 use vars qw($q %FORM %CONF %alt $name_list_ref %ERRMSG);
-#use utf8;
 use CGI;
 use Unicode::Japanese;
-#use Jcode;
-### for dedug
 use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session;
 use HTML::SimpleParse;
 use LWP::Simple;
 use Data::Dumper;
 use JSON;
-sub d { die Dumper($_[0]) }
 use Fcntl ':flock';
-$ENV{PATH} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
-require './f_mailer_lib.pl';
-require './f_mailer_lib_admin.pl';
-require './f_mailer_sysconf.pl';
+use Digest::MD5 qw(md5_hex);
+sub d { die Dumper($_[0]) }
+$ENV{"PATH"} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
+require "f_mailer_lib.pl";
+require "f_mailer_lib_admin.pl";
+require "f_mailer_sysconf.pl";
 %CONF = (setver(), conf::sysconf());
-%ERRMSG = load_errmsg($CONF{LANG_DEFAULT} || "ja");
+$CONF{"CGISESSID"} = get_cookie("CGISESSID");
+$CONF{"session"} = new CGI::Session("driver:File", $CONF{"CGISESSID"}, { "Directory" => "./temp" });
+$CONF{"__token"} = get_sid();
+%ERRMSG = load_errmsg($CONF{"LANG_DEFAULT"} || "ja");
 
 umask 0;
-$CONF{ERROR_TMPL} = "tmpl/error.html";
+$CONF{"ERROR_TMPL"} = "tmpl/error.html";
 
 $q = new CGI;
 ($name_list_ref, %FORM) = decoding($q);
+if ($ENV{"REQUEST_METHOD"} eq "POST") {
+	if (! exists $FORM{"__token"}) {
+		error(get_errmsg("090"));
+	}
+	if ($FORM{"__token"} ne $CONF{"session"}->param("__token")) {
+		error(get_errmsg("091"));
+	}
+}
+$CONF{"session"}->param("__token", $CONF{"__token"});
+$FORM{"__token"} = $CONF{"__token"};
+set_cookie("CGISESSID", "", $CONF{"session"}->id());
 
-login() if $FORM{login};
-login_form() unless get_cookie("FORM_MAILER_ADMIN");
-logout() if $FORM{logout};
-chpasswd() if $FORM{chpasswd};
-chpasswd_done() if $FORM{chpasswd_done};
-confform() if $FORM{confform};
-confform_done() if $FORM{confform_done};
-confform_select() if $FORM{confform_select};
-confpanel() if $FORM{confpanel};
-confpanel_import() if $FORM{confpanel_import};
-confpanel_import_done() if $FORM{confpanel_import_done};
-confserial() if $FORM{confserial};
-confserial_done() if $FORM{confserial_done};
-del() if $FORM{del};
-sysconfform() if $FORM{sysconfform};
-sysconfform_done() if $FORM{sysconfform_done};
-menu();
+login() if $FORM{"login"};
+p("002") if $FORM{"p"} eq "002";
+$CONF{"session"}->param("login_id") or p("001");
 
-#for my $p(qw()) {
-#	if ($FORM{p} == $p) {
-#		eval "p${p}();";
-#		if ($@) {
-#			error();
-#		}
-#	}
-#}
-#p100();
+p($FORM{"p"} || "012");
 
+sub login {
 
-sub chpasswd {
+#die __LINE__;
+	my @errmsg;
+	if ($FORM{"login_id"} eq "") {
+		push(@errmsg, get_errmsg("549"));
+	}
+	if ($FORM{"passwd"} eq "") {
+		push(@errmsg, get_errmsg("550"));
+	}
+#error(@errmsg);
+	p("001", @errmsg) if @errmsg;
+#error(__LINE__);
+#error(passwd_read($FORM{"login_id"}));
+	passwd_write() unless -e "data/passwd.cgi";
+	my $password_encrypted = passwd_read($FORM{"login_id"});
+	p("001", get_errmsg("551"))
+	 if ($password_encrypted eq "" or passwd_compare($FORM{"passwd"}, $password_encrypted) == 0);
 
-	printhtml("tmpl/admin_chpasswd.html");
+	$CONF{"session"}->param("login_id", $FORM{"login_id"});
+	set_cookie("FORM_MAILER_ADMIN_CACHE", 30 * 86400,
+	 ($FORM{"do_cache"} ? join("!!!", $FORM{"login_id"}, $FORM{"passwd"}) : ""));
+	print "Location: f_mailer_admin.cgi\n\n";
 	exit;
 
 }
 
-sub chpasswd_done {
+sub p {
 
-	$FORM{passwd} or error(get_errmsg("400"));
-	if ($FORM{passwd} ne $FORM{passwd2}) {
-		error(get_errmsg("401"));
+	my $p = shift;
+	my @errmsg = @_;
+
+	if (-e "lib/p/p$p.pl") {
+		require "lib/p/p$p.pl";
+		eval "p$p(\"$p\", \@errmsg);";
+		if ($@) {
+			error("p$p: $@");
+		}
 	}
-
-	passwd_write($FORM{passwd});
-
-	set_cookie("FORM_MAILER_ADMIN_CACHE", 30, $FORM{passwd})
-	if get_cookie("FORM_MAILER_ADMIN_CACHE");
-	printhtml("tmpl/admin_chpasswd_done.html");
 	exit;
 
 }
@@ -780,155 +779,3 @@ sub form_check_confpanel {
 
 }
 
-sub form_check_sysconfform {
-
-	my @msg;
-	if ($FORM{SENDMAIL_FLAG} eq "") {
-		push(@msg, get_errmsg("530"));
-	} elsif ($FORM{SENDMAIL_FLAG} == 0) {
-		if ($FORM{SENDMAIL} eq "") {
-			push(@msg, get_errmsg("531"));
-		} elsif (! -e $FORM{SENDMAIL}) {
-			push(@msg, get_errmsg("532"));
-		}
-	} elsif ($FORM{SENDMAIL_FLAG} == 1) {
-		eval "use Net::SMTP;";
-		push(@msg, get_errmsg("533", $@)) if $@;
-		if ($FORM{SMTP_HOST} eq "") {
-			push(@msg, get_errmsg("534"));
-		} else {
-			(my $smtp_host) = $FORM{SMTP_HOST} =~ /^([\w\.\-\_]*)$/;
-			if ($smtp_host) {
-				eval "use Net::SMTP;";
-				my $smtp = Net::SMTP->new($smtp_host)
-				 or push(@msg, get_errmsg("535", $FORM{SMTP_HOST}));
-				### 2007-7-19 SMTP_AUTH対応
-				if ($FORM{USE_SMTP_AUTH}) {
-					eval qq{use MIME::Base64};
-					push(@msg, get_errmsg("558")) if $@;
-					eval qq{use Authen::SASL};
-					push(@msg, get_errmsg("536")) if $@;
-					if ($FORM{SMTP_AUTH_ID} eq "" or $FORM{SMTP_AUTH_PASSWD} eq "") {
-						push(@msg, get_errmsg("537"));
-					} else {
-						$smtp->auth($FORM{SMTP_AUTH_ID}, $FORM{SMTP_AUTH_PASSWD})
-						 or push(@msg, get_errmsg("538", $!));
-					}
-				}
-			} else {
-				push(@msg, get_errmsg("539", $FORM{SMTP_HOST}));
-			}
-		}
-	}
-#    $FORM{SYS_TEXT} || push(@msg, "管理画面の文字色を指定してください。");
-#    $FORM{SYS_BGCOLOR} || push(@msg, "管理画面の背景色を指定してください。");
-#    $FORM{SYS_LINK} || push(@msg, "管理画面のリンク文字色を指定してください。");
-#    $FORM{SYS_VLINK} ||= $FORM{LINK};
-#    $FORM{SYS_ALINK} ||= $FORM{LINK};
-#    $FORM{SYS_BORDER} ||= $FORM{SYS_TEXT};
-
-	my $remote_host = remote_host();
-	my $ok;
-	foreach my $host(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $FORM{ALLOW_FROM})) {
-		next if $host eq "";
-		$ok = 1 if $remote_host =~ /$host$/i or $ENV{REMOTE_ADDR} =~ /^$host/;
-	}
-	if ($FORM{ALLOW_FROM} and !$ok) {
-		push(@msg, get_errmsg("543"));
-	}
-
-	@msg;
-
-}
-
-sub login {
-
-	$FORM{passwd} or error(get_errmsg("550"));
-	passwd_write() unless -e "data/passwd.cgi";
-	passwd_compare($FORM{passwd}) or error(get_errmsg("551"));
-
-	set_cookie("FORM_MAILER_ADMIN", "", "login");
-	set_cookie("FORM_MAILER_ADMIN_CACHE", 30 * 86400,
-	 ($FORM{do_cache} ? $FORM{passwd} : ""));
-	print "Location: f_mailer_admin.cgi\n\n";
-	exit;
-
-}
-
-sub login_form {
-
-	my $passwd = get_cookie("FORM_MAILER_ADMIN_CACHE");
-	printhtml("tmpl/admin_login_form.html", passwd=>$passwd,
-	 do_cache=>$passwd ? q|checked="checked"| : "");
-	exit;
-
-}
-
-sub logout {
-
-	set_cookie("FORM_MAILER_ADMIN");
-	printhtml("tmpl/admin_logout.html");
-	exit;
-
-}
-
-sub menu {
-
-	temp_del(2);  ### 2時間経過したtempファイルを削除
-
-	my $list;
-	my %lang = map { $_->[0] => $_->[1] } get_langlist();
-	my %errmsg = map { $_ => get_errmsg($_) } (570..574);
-	foreach my $conf(get_conflist()) {
-		my($conf_id, $filename, $label, $lang, $date) = map { $conf->{$_} } qw(id file label lang date);
-		$lang ||= "ja";
-		my $last_update = $date || get_datetime((stat("data/conf/$filename"))[9]);
-		$list .= <<STR;
-<tr>
-<td>$label</td>
-<td>$conf_id</td>
-<td>$filename</td>
-<td>ext_$filename</td>
-<td class="nowrap">($lang)$lang{$lang}</td>
-<td class="nowrap">$last_update</td>
-<td class="nowrap">
-<button onclick="location.href='f_mailer_admin.cgi?confform=1;conf_id=$conf_id'">$errmsg{570}</button>
-<button onclick="location.href='f_mailer_admin.cgi?confserial=1;conf_id=$conf_id'">$errmsg{571}</button>
-<button onclick="if(confirm('$errmsg{572}')){location.href='f_mailer_admin.cgi?del=1;conf_id=$conf_id'}">$errmsg{573}</button>
-</td>
-</tr>
-STR
-	}
-	$list ||= qq|<tr><td colspan="7" class="c">$errmsg{574}</td></tr>|;
-
-	printhtml("tmpl/admin_menu.html", list=>$list);
-	exit;
-
-}
-
-sub sysconfform {
-
-	my $errmsg_ref = shift || [];
-	my %conf = @$errmsg_ref ? %FORM : %CONF;
-
-	printhtml("tmpl/admin_sysconfform.html", errmsg => $errmsg_ref,
-	 langlist => get_langlist_select($conf{LANG_DEFAULT}),
-	 rh => remote_host(), ip => $ENV{"REMOTE_ADDR"},
-	 "USE_SMTP_AUTH:1" => ($conf{USE_SMTP_AUTH} ? q|checked="checked"| : ""),
-	 (map { "SENDMAIL_FLAG:".$_ => $conf{SENDMAIL_FLAG} eq $_ ? q|checked="checked"| : "" } (0,1)),
-	 (map { $_=>h($conf{$_}) } qw(SENDMAIL SMTP_HOST USE_SMTP_AUTH SMTP_AUTH_ID SMTP_AUTH_PASSWD ALLOW_FROM)),
-	);
-	exit;
-}
-
-sub sysconfform_done {
-
-	my @error = form_check_sysconfform();
-	sysconfform(\@error) if @error;
-
-	mk_sysconffile(%FORM);
-
-	printhtml("tmpl/admin_sysconfform_done.html");
-	exit;
-
-}

@@ -1,19 +1,8 @@
-# ---------------------------------------------------------------
-#  - システム名    FORM MAILER
-#  - バージョン    0.72
-#  - 公開年月日    2018/11/08
-#  - スクリプト名  f_mailer_lib.pl
-#  - 著作権表示    (c)1997-2018 Perl Script Laboratory
-#  - 連  絡  先    http://psl.ne.jp/contact/index.html
-# ---------------------------------------------------------------
-# ご利用にあたっての注意
-#   ※このシステムはフリーウエアです。
-#   ※このシステムは、「利用規約」をお読みの上ご利用ください。
-#     http://psl.ne.jp/info/copyright.html
-# ---------------------------------------------------------------
+
 use strict;
 use vars qw(%CONF %FORM %alt $q $name_list_ref %ERRMSG $smtp);
 use POSIX qw(SEEK_SET);
+require "f_mailer_get_output_form.pl";
 
 sub base64 {
 
@@ -232,6 +221,10 @@ STR
 
 }
 
+sub get_sid {
+	## Digest::MD5必要
+	return md5_hex(time . $$);
+}
 sub h {
 
 	return html_output_escape($_[0]);
@@ -802,25 +795,25 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.72},
+		version   => q{0.75pre190412},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{https://www.psl.ne.jp/},
-		copyright => q{&copy;1997-2018},
-		copyright2 => q{(c)1997-2018},
+		copyright => q{&copy;1997-2019},
+		copyright2 => q{(c)1997-2019},
 	);
-#	chomp($PROD{copyright_html_footer} = <<STR);
-#<a href="$PROD{a_url}" target="_blank"><strong>$PROD{prod_name} v$PROD{version}</strong></a>
-#STR
-#	chomp($PROD{copyright_html_footer_admin} = <<STR);
-#<strong>$PROD{prod_name} v$PROD{version}</strong>
-#$PROD{copyright} <a href="$PROD{a_url}" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
-#STR
+	chomp($PROD{copyright_html_footer} = <<STR);
+<a href="$PROD{a_url}" target="_blank"><strong>$PROD{prod_name} v$PROD{version}</strong></a>
+STR
+	chomp($PROD{copyright_html_footer_admin} = <<STR);
+<strong>$PROD{prod_name} v$PROD{version}</strong>
+$PROD{copyright} <a href="$PROD{a_url}" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
+STR
 
-#	chomp($PROD{copyright_mail_footer} = <<STR);
-#----
-#$PROD{"copyright2"} $PROD{"prod_name"} v$PROD{"version"}
-#$PROD{"a_url"}
-#STR
+	chomp($PROD{copyright_mail_footer} = <<STR);
+----
+$PROD{"copyright2"} $PROD{"prod_name"} v$PROD{"version"}
+$PROD{"a_url"}
+STR
 ##############################################
 ###              ここまで                  ###
 ##############################################

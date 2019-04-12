@@ -4,6 +4,8 @@
 002	This type of file could not be loaded: <v1>
 003	CONFID is not specified.
 004	<v2> file could not be loaded: <v1>
+090	Invalid access(no token).
+091	Invalid access(invalid token).
 100	Unable to send <v1>, Because Attached (<v2>) file extention is out of support.
 101	<v1> file Size is larger than <v2> kb.
 102	Total size of attached files is larger than <v1> kb.
@@ -67,6 +69,8 @@
 471	data/conflist.cgi could not be opened.
 472	data/conflist.cgi could not be written.
 473	./data/conf/<v1> could not be deleted. Please remove it manually.
+474	./data/confext/ext_<v1> could not be deleted. Please remove it manually.
+475	./data/serial/<v1> could not be deleted. Please remove it manually.
 480	Please set the text color code.
 481	Please set the background color.
 482	Please set the link color.
@@ -124,9 +128,25 @@
 541	Please specify the background color in admin page.
 542	Please specify the link color in admin page.
 543	Please specigy the IP address that allowd to access to admin page.
-550	Please enter the passsword.
-551	Password is incorrect.
+549	Please enter login ID.
+550	Please enter passsword.
+551	Login ID and password you entered is not registered in this system.
+552	The email address for administrator(<v1>) is invalid.
+553	The CC mail address(<v1>) is invalid.
+554	The BCC mail address(<v1>) is invalid.
+555	The CC address of the automatic reply mail(<v1>) is invalid.
+556	The BCC address of the automatic reply mail(<v1>) is invalid.
+557	You cannot specify a path for the filename to export.
+558	MIME::Base64 is not installed.
+570	Change
+571	Serial No
+572	Are you sure to delete this setting?
+573	Delete
+574	(No entry)
 600	./data/conffields.txt could not be opened: <v1>
+601	Error message file(English) is not found.
+602	Could not open ./data directory: <v1>
+603	Could not open error message file(<v1>): <v2>
 610	./data/confext/ext_<v2> could not be loaded: <v1>
 611	data/conf/<v2> could not be loaded.
 620	./f_mailer_sysconf.pl could not be loaded: <v1>

@@ -1,19 +1,7 @@
 #!/usr/bin/perl
-# ---------------------------------------------------------------
-#  - システム名    FORM MAILER
-#  - バージョン    0.72
-#  - 公開年月日    2018/11/08
-#  - スクリプト名  f_mailer.cgi
-#  - 著作権表示    (c)1997-2018 Perl Script Laboratory
-#  - 連  絡  先    http://www.psl.ne.jp/contact/index.html
-# ---------------------------------------------------------------
-# ご利用にあたっての注意
-#   ※このシステムはフリーウエアです。
-#   ※このシステムは、「利用規約」をお読みの上ご利用ください。
-#     http://www.psl.ne.jp/info/copyright.html
-# ---------------------------------------------------------------
+
 use strict;
-use lib qw(./lib);
+use lib qw(./module ./lib);
 use vars qw($q %FORM %CONF $name_list_ref %alt $conffile %ERRMSG);
 #use utf8;
 use Encode;
@@ -24,6 +12,7 @@ use Fcntl ':flock';
 use String::Util qw(trim);
 use JSON;
 use URI::Escape;
+use Digest::MD5  qw(md5_hex);
 
 #BEGIN{ print "Content-type: text/html\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
 
@@ -35,9 +24,9 @@ sub d { die Dumper @_ }
 use Carp 'verbose';
 $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 
-require "./f_mailer_lib.pl";
-require "./f_mailer_sysconf.pl";
-require "./f_mailer_condcheck.pl";
+require "f_mailer_lib.pl";
+require "f_mailer_sysconf.pl";
+require "f_mailer_condcheck.pl";
 
 $q = new CGI;
 $ENV{"PATH"} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
@@ -401,7 +390,7 @@ sub form {
 
 sub output_form {
 
-	require "./f_mailer_get_output_form.pl";
+	require "f_mailer_get_output_form.pl";
 
 	my($phase, $errmsg_ref) = @_;
 #die "$phase,$errmsg," , caller();

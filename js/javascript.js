@@ -1,34 +1,3 @@
-function order(f) {
-	if (document.getElementById("form0").elements["order_"+f].value != "") {
-		if (eval(document.getElementById("form0").elements["order_"+f].value)
-		 == eval(document.getElementById("form0").tmp.value)) {
-			document.getElementById("form0").elements["order_"+f].value = "";
-			document.getElementById("form0").tmp.value = eval(document.getElementById("form0").tmp.value)-1;
-		} else {
-			alert(f + " の欄にはすでに数字が入っています。");
-		}
-	} else {
-		document.getElementById("form0").elements["order_"+f].value
-		 = eval(document.getElementById("form0").tmp.value)+1;
-		document.getElementById("form0").tmp.value = eval(document.getElementById("form0").tmp.value)+1;
-	}
-}
-function order_clear() {
-	for (i=0; i<document.getElementById("form0").elements.length; i++) {
-		if (document.getElementById("form0").elements[i].name.match(/^order_/)) {
-			document.getElementById("form0").elements[i].value = "";
-		}
-	}
-	document.getElementById("form0").tmp.value = 0;
-}
-function display_sw(name) {
-	if (document.getElementById(name).style.display == 'none') {
-		document.getElementById(name).style.display = 'block';
-	} else {
-		document.getElementById(name).style.display = 'none';
-	}
-}
-
 $(function () {
 
 	$(".auto_height").each(function() {
@@ -49,6 +18,18 @@ $(function () {
 		allowed: 1000,
 		warning: 20,
 		counterText: "残り文字数：",
+	});
+
+	if ($("#to_page_title").get(0) && $("#to_page_title").text() != "") {
+		$("#page_title").text($("#to_page_title").text());
+	} else {
+		$("#page_title").hide();
+	}
+
+	$("#admin_menu div").on("click", function () {
+		var id = $(this).attr("id").match(/-(\d+)$/)[1];
+		$("#p").val(id);
+		$("#f0").submit();
 	});
 
 });

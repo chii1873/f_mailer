@@ -1,0 +1,977 @@
+<!-- header -->
+
+<div id="to_page_title">フォーム設定登録フォーム</div>
+<script type="text/javascript">
+$(function() {
+	$("#tabs").tabs();
+//	$("#bottonset_auto_reply").controlgroup();
+	$(".btn_mail_format_type_1").on("click", function () {
+		$("#mail_format_type_1").dialog({ title: "タイプ1", width: 500 });
+	});
+	$(".btn_mail_format_type_2").on("click", function () {
+		$("#mail_format_type_2").dialog({ title: "タイプ2", width: 500 });
+	});
+	$(".btn_mail_format_type_3").on("click", function () {
+		$("#mail_format_type_3").dialog({ title: "タイプ3", width: 500 });
+	});
+	$(".btn_mail_format_type_0").on("click", function () {
+		$("#mail_format_type_0").dialog({ title: "フォーマット内で指定できる差し込み用文字列", width: 800 });
+	});
+	$(".btn_subject").on("click", function () {
+		$("#mail_format_type_0").dialog({ title: "件名内で指定できる差し込み用文字列", width: 800 });
+	});
+	$(".btn_output_filename").on("click", function () {
+		$("#output_filename").dialog({ title: "書き出すファイル名で指定できる差し込み用文字列", width: 400 });
+	});
+
+	$("[name=FILE_OUTPUT],[name=DO_NOT_SEND],[name=AUTO_REPLY],[name=show_caption]").on("click", function () {
+		display_sw_p111();
+	});
+	display_sw_p111();
+	$("#buttonset_show_caption").controlgroup();
+	$("#tbl-tab3 tbody").sortable();
+	$(".output_fields_pool").sortable({
+		connectWith: ".output_fields_pool"
+	});
+});
+function display_sw_p111 () {
+	$(".caption").toggle($("#show_caption_1").prop("checked"));
+	$("#tbl-tab4").toggle($("#DO_NOT_SEND_0").prop("checked"));
+	$("#tbl-tab5").toggle($("#AUTO_REPLY_1").prop("checked"));
+	$("#tbl-tab6").toggle($("#FILE_OUTPUT_1").prop("checked"));
+}
+function tab_select (offset) {
+}
+</script>
+
+
+<!-- errmsg -->
+
+<div class="cf">
+<table style="float:right">
+<tr>
+	<td style="padding-right:4px">説明テキスト</td>
+	<td id="buttonset_show_caption">
+		<label><input type="radio" name="show_caption" value="1" id="show_caption_1">表示する</label>
+		<label><input type="radio" name="show_caption" value="0" id="show_caption_0">表示しない</label>
+	</td>
+</tr>
+</table>
+<table class="tbl" style="float:left">
+<tr>
+	<th class="bg_eef">フォームID</th>
+	<td style="padding:8px">##conf_id_dsp##</td>
+</tr>
+</table>
+</div>
+<br>
+
+<div id="tabs">
+<ul>
+	<li><a href="#tabs-1">基本設定</a></li>
+	<li><a href="#tabs-2">画面設定</a></li>
+	<li><a href="#tabs-3">入力条件設定</a></li>
+	<li><a href="#tabs-4">管理者宛メール</a></li>
+	<li><a href="#tabs-5">自動返信メール</a></li>
+	<li><a href="#tabs-6">送信データ</a></li>
+</ul>
+
+<div id="tabs-1">
+
+<table class="tbl">
+<tr>
+	<th>言語モード<span class="fn">(LANG)</span></th>
+	<td>
+		<select name="LANG" id="LANG">
+##langlist##
+		</select>
+		<ul class="caption">
+			<li>エラーメッセージの言語を選択します。</li>
+			<li>エラーメッセージデータは./data/lang/に設置してあるものの中から選択できます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>この設定ファイルの設定名<span class="fn">(label)</span></th>
+	<td>
+		<input type="text" name="label" value="" id="label">
+		<ul class="caption">
+			<li>管理メニューで設定ファイルを区別するためにつけておく名前です。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>このシステムのタイトル<span class="fn">(TITLE)</span></td>
+	<td>
+		<input type="text" name="TITLE" value="" id="TITLE">
+		<ul class="caption">
+			<li>システムが表示する確認画面、エラー画面、送信完了画面のタイトルに使用されます。</li>
+			<li>なにも指定しないと、管理者宛メールの「件名」がセットされます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>空欄のフィールドと置き換える文字列<span class="fn">(BLANK_STR)</span></th>
+	<td>
+		<input type="text" name="BLANK_STR" value="" id="BLANK_STR">
+		<ul class="caption">
+			<li>空欄のフィールドを空欄のままとしたい場合は、何も指定しないでください。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>連続送信防止機能<span class="fn">(DENY_DUPL_SEND)</span></th>
+	<td>
+		<label><input type="radio" name="DENY_DUPL_SEND" value="1" id="DENY_DUPL_SEND_1">使用する</label> ( 禁止期間<span class="fn">(DENY_DUPL_SEND_MIN)</span>→<input type="tel" name="DENY_DUPL_SEND_MIN" id="DENY_DUPL_SEND_MIN" class="num" style="width:3em">分 )<br>
+		<label><input type="radio" name="DENY_DUPL_SEND" value="0" id="DENY_DUPL_SEND_0">使用しない</label>
+
+		<ul class="caption">
+			<li>通常は「使用する」にしておくことをおすすめします。</li>
+			<li>連続送信禁止期間を「0」にすると、cookieの有効期限を設定しません(ブラウザ終了時まで有効)。</li>
+			<li>「連続送信防止機能」は、cookie を使うため、送信者のブラウザの cookie 機能が無効になっている場合は機能しません。</li>
+		</ul>
+	</td>
+</tr>
+</table>
+
+</div><!-- /tabs-1 -->
+
+<div id="tabs-2">
+
+<table class="tbl">
+<tr>
+	<th>入力フォーム<span class="fn">(FORM_FLAG)</span></th>
+	<td>
+		<table class="tbl">
+		<tr>
+			<th>テンプレート<span class="fn">(FORM_TMPL)</span></th>
+			<td><input type="text" name="FORM_TMPL" value="" id="FORM_TMPL"></td>
+		</tr>
+		<tr>
+			<th>文字コード<span class="fn">(FORM_TMPL_CHARSET)</span></th>
+			<td>
+				<select name="FORM_TMPL_CHARSET" id="ERROR_TMPL_CHARSET">
+				<option value="utf8">UTF-8</option>
+				<option value="sjis">SJIS</option>
+				<option value="euc">EUC</option>
+				</select>
+			</td>
+		</select></td>
+		</tr>
+		<tr>
+			<th>付加URL<span class="fn">(FORM_TMPL_BASE_URL)</span></th>
+			<td><input type="text" name="FORM_TMPL_BASE_URL" value="" id="FORM_TMPL_BASE_URL"></td>
+		</tr>
+		<tr>
+			<th>入力エラー<br>表示<span class="fn">(FORM_FLAG)</span></th>
+			<td>
+				<label><input type="radio" name="FORM_FLAG" value="0" id="FORM_FLAG_0">システムエラー画面を表示する</label><br>
+				<label><input type="radio" name="FORM_FLAG" value="1" id="FORM_FLAG_1">フォームを再表示する</label><br>
+			</td>
+		</tr>
+		</table>
+
+		<ul class="caption">
+			<li>テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。置き場所は<span class="tt">./tmpl/custom/</span>を推奨します。</li>
+			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
+			<li>付加URLとは、f_mailer.cgi経由でページを表示した際、相対パスで指定されているstyle/script/img/inputタグのsrc属性、aタグのhref属性が相対パスであった際に冒頭に付加するURLです。リンクや外部ファイルの参照ができなくなるのを防ぎます。なお、cssファイル内で呼び出しているimg()プロパティのパスは書き換わりませんのでご注意ください。</li>
+			<li>「フォームを再表示する」を選択すると、フォーム入力後に送信ボタンを押したとき、入力フォームそのものを再表示し、入力内容をそのまま維持して、エラーメッセージを表示します。これにより、戻るボタンで戻ったときに入力内容が消えてしまう問題が回避できます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>入力確認画面<span class="fn">(CONFIRM_FLAG)</span></th>
+	<td>
+		<label><input type="radio" name="CONFIRM_FLAG" value="0" id="CONFIRM_FLAG_0">省略する ( 直接送信 )</label><br>
+		<label><input type="radio" name="CONFIRM_FLAG" value="1" id="CONFIRM_FLAG_1">確認する ( システム内蔵ページ使用 )</label><br>
+		<label><input type="radio" name="CONFIRM_FLAG" value="2" id="CONFIRM_FLAG_2">確認する ( ↓以下に指定 )</label><br>
+
+		<table class="tbl">
+		<tr>
+			<th>テンプレート<span class="fn">(CONFIRM_TMPL)</span></th>
+			<td><input type="text" name="CONFIRM_TMPL" value="" id="CONFIRM_TMPL"></td>
+		</tr>
+		<tr>
+			<th>文字コード<span class="fn">(CONFIRM_TMPL_CHARSET)</span></th>
+			<td>
+				<select name="CONFIRM_TMPL_CHARSET" id="CONFIRM_TMPL_CHARSET">
+				<option value="utf8">UTF-8</option>
+				<option value="sjis">SJIS</option>
+				<option value="euc">EUC</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th>付加URL<span class="fn">(CONFIRM_TMPL_BASE_URL)</span></th>
+			<td><input type="text" name="CONFIRM_TMPL_BASE_URL" value="" id="CONFIRM_TMPL_BASE_URL"></td>
+		</tr>
+		</table>
+
+		<ul class="caption">
+			<li>確認画面を出すかどうかを指定してください。</li>
+			<li>システム内蔵ページとは、<span class="tt">./tmpl/default/confirm.html</span>のことです。</li>
+			<li>テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。置き場所は<span class="tt">./tmpl/custom/</span>を推奨します。</li>
+			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
+			<li>付加URLとは、f_mailer.cgi経由でページを表示した際、相対パスで指定されているstyle/script/img/inputタグのsrc属性、aタグのhref属性が相対パスであった際に冒頭に付加するURLです。リンクや外部ファイルの参照ができなくなるのを防ぎます。なお、cssファイル内で呼び出しているimg()プロパティのパスは書き換わりませんのでご注意ください。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>完了画面<span class="fn">(THANKS_FLAG)</span></th>
+	<td>
+		<label><input type="radio" name="THANKS_FLAG" value="0" id="THANKS_FLAG_0">指定したURLへジャンプ</label><br>
+		　　→<input type="text" name="THANKS" value="" id="THANKS"><br>
+		<label><input type="radio" name="THANKS_FLAG" value="1" id="THANKS_FLAG_1">システム内蔵ページ使用</label><br>
+		<label><input type="radio" name="THANKS_FLAG" value="2" id="THANKS_FLAG_2">↓以下に指定</label>
+
+		<table class="tbl">
+		<tr>
+			<th>テンプレート<span class="fn">(THANKS_TMPL)</span></th>
+			<td><input type="text" name="THANKS_TMPL" value="" id="THANKS_TMPL"></td>
+		</tr>
+		<tr>
+			<th>文字コード<span class="fn">(THANKS_TMPL_CHARSET)</span></th>
+			<td>
+				<select name="THANKS_TMPL_CHARSET" id="THANKS_TMPL_CHARSET">
+				<option value="utf8">UTF-8</option>
+				<option value="sjis">SJIS</option>
+				<option value="euc">EUC</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th>付加URL<span class="fn">(THANKS_TMPL_BASE_URL)</span></th>
+			<td><input type="text" name="THANKS_TMPL_BASE_URL" value="" id="THANKS_TMPL_BASE_URL"></td>
+		</tr>
+		</table>
+
+		<ul class="caption">
+			<li>システム内蔵ページとは、<span class="tt">./tmpl/default/thanks.html</span>のことです。</li>
+			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>システムエラー画面<span class="fn">(ERROR_FLAG)</span></th>
+	<td>
+		<label><input type="radio" name="ERROR_FLAG" value="0" id="ERROR_FLAG_0">システム内蔵ページ使用</label><br>
+		<label><input type="radio" name="ERROR_FLAG" value="1" id="ERROR_FLAG_1">↓以下に指定</label><br>
+
+		<table class="tbl">
+		<tr>
+			<th>テンプレート<span class="fn">(ERROR_TMPL)</span></th>
+			<td><input type="text" name="ERROR_TMPL" value="" id="ERROR_TMPL"></td>
+		</tr>
+		<tr>
+			<th>文字コード<span class="fn">(ERROR_TMPL_CHARSET)</span></td>
+			<td>
+				<select name="ERROR_TMPL_CHARSET" id="ERROR_TMPL_CHARSET">
+				<option value="utf8">UTF-8</option>
+				<option value="sjis">SJIS</option>
+				<option value="euc">EUC</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th>付加URL<span class="fn">(ERROR_TMPL_BASE_URL)</span></th>
+			<td><input type="text" name="ERROR_TMPL_BASE_URL" value="" id="ERROR_TMPL_BASE_URL"></td>
+		</tr>
+		</table>
+
+		<ul class="caption">
+			<li>システム内蔵ページとは、<span class="tt">./tmpl/default/error.html</span>のことです。</li>
+			<li>テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。</li>
+			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>エラーメッセージのスタイル設定</th>
+	<td>
+		<table class="tbl">
+		<tr>
+			<th>&lt;ul&gt;タグに設定するスタイル<br><span class="fn">(ERRMSG_STYLE_UL)</span></th>
+			<td><input type="text" name="ERRMSG_STYLE_UL" value="" id="ERRMSG_STYLE_UL"></td>
+		</tr>
+		<tr>
+			<th>&lt;li&gt;タグに設定するスタイル<br><span class="fn">(ERRMSG_STYLE_LI)</span></th>
+			<td><input type="text" name="ERRMSG_STYLE_LI" value="" id="ERRMSG_STYLE_LI"></td>
+		</tr>
+		</table>
+
+		<ul class="caption">
+			<li>エラーメッセージを表示するul-liタグのスタイルを設定します。</li>
+		</ul>
+	</td>
+</tr>
+</table>
+
+</div><!-- /tabs-2 -->
+
+<div id="tabs-3">
+
+<table class="tbl" id="tbl-tab3">
+<thead>
+<tr>
+	<th rowspan="2">　</th>
+	<th rowspan="2" class="c">フィールド名</th>
+	<th rowspan="2" class="c double_r">型</th>
+	<th colspan="11" class="c double_r">条件設定</th>
+	<th rowspan="2" class="c">操作</th>
+</tr>
+<tr>
+	<th class="c">別名</th>
+	<th>必須</th>
+	<th>添付</th>
+	<th>数値</th>
+	<th>かな</th>
+	<th>カナ</th>
+	<th>依存</th>
+	<th>URL</th>
+	<th>ﾒｰﾙ</th>
+	<th>照合</th>
+	<th class="c">他</th>
+</tr>
+</thead>
+<tbody>
+<tr id="tbl-tab3-row1">
+	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
+	<td><input type="text" name="cond_name_row1" value="name" class="cond_name" id="cond_name_row1"></td>
+	<td>
+		<select name="cond_type_row1" id="cond_type_row1" class="cond_type">
+		<option value="text">text</option>
+		<option value="radio">radio</option>
+		<option value="checkbox">checkbox</option>
+		<option value="email">email</option>
+		<option value="tel">tel</option>
+		<option value="textarea">textarea</option>
+		<option value="file">file</option>
+		</select>
+	</td>
+	<td><input type="text" name="cond_alt_row1" value="お名前" class="cond_alt" id="cond_alt_row1"></td>
+	<td><label><input type="checkbox" name="cond_required_row1" value="1" id="cond_required_row1" class="cond_required"></label></td>
+	<td><label><input type="checkbox" name="cond_att_row1" value="1" id="cond_att_row1" class="cond_att"></label></td>
+	<td><label><input type="checkbox" name="cond_d_only_row1" value="1" id="cond_d_only_row1" class="cond_d_only"></label></td>
+	<td><label><input type="checkbox" name="cond_hira_row1" value="1" id="cond_hira_row1" class="cond_hira"></label></td>
+	<td><label><input type="checkbox" name="cond_kata_row1" value="1" id="cond_kata_row1" class="cond_kata"></label></td>
+	<td><label><input type="checkbox" name="cond_rel_row1" value="1" id="cond_rel_row1" class="cond_rel"></label></td>
+	<td><label><input type="checkbox" name="cond_url_row1" value="1" id="cond_url_row1" class="cond_url"></label></td>
+	<td><label><input type="checkbox" name="cond_email_row1" value="1" id="cond_email_row1" class="cond_email"></label></td>
+	<td><label><input type="checkbox" name="cond_compare_row1" value="1" id="cond_compare_row1" class="cond_compare"></label></td>
+	<td>
+		<span class="cond_o_status" id="cond_o_status_row1">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
+		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row1">
+	</td>
+	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row1"></td>
+</tr>
+<tr id="tbl-tab3-row2">
+	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
+	<td><input type="text" name="cond_name_row2" value="kana" class="cond_name" id="cond_name_row2"></td>
+	<td>
+		<select name="cond_type_row2" id="cond_type_row2" class="cond_type">
+		<option value="text">text</option>
+		<option value="radio">radio</option>
+		<option value="checkbox">checkbox</option>
+		<option value="email">email</option>
+		<option value="tel">tel</option>
+		<option value="textarea">textarea</option>
+		<option value="file">file</option>
+		</select>
+	</td>
+	<td><input type="text" name="cond_alt_row2" value="フリガナ" class="cond_alt" id="cond_alt_row2"></td>
+	<td><label><input type="checkbox" name="cond_required_row2" value="1" id="cond_required_row2" class="cond_required"></label></td>
+	<td><label><input type="checkbox" name="cond_att_row2" value="1" id="cond_att_row2" class="cond_att"></label></td>
+	<td><label><input type="checkbox" name="cond_d_only_row2" value="1" id="cond_d_only_row2" class="cond_d_only"></label></td>
+	<td><label><input type="checkbox" name="cond_hira_row2" value="1" id="cond_hira_row2" class="cond_hira"></label></td>
+	<td><label><input type="checkbox" name="cond_kata_row2" value="1" id="cond_kata_row2" class="cond_kata"></label></td>
+	<td><label><input type="checkbox" name="cond_rel_row2" value="1" id="cond_rel_row2" class="cond_rel"></label></td>
+	<td><label><input type="checkbox" name="cond_url_row2" value="1" id="cond_url_row2" class="cond_url"></label></td>
+	<td><label><input type="checkbox" name="cond_email_row2" value="1" id="cond_email_row2" class="cond_email"></label></td>
+	<td><label><input type="checkbox" name="cond_compare_row2" value="1" id="cond_compare_row2" class="cond_compare"></label></td>
+	<td>
+		<span class="cond_o_status" id="cond_o_status_row2">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
+		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row2">
+	</td>
+	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row2"></td>
+</tr>
+<tr id="tbl-tab3-row3">
+	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
+	<td><input type="text" name="cond_name_row3" value="sex" class="cond_name" id="cond_name_row3"></td>
+	<td>
+		<select name="cond_type_row3" id="cond_type_row3" class="cond_type">
+		<option value="text">text</option>
+		<option value="radio">radio</option>
+		<option value="checkbox">checkbox</option>
+		<option value="email">email</option>
+		<option value="tel">tel</option>
+		<option value="textarea">textarea</option>
+		<option value="file">file</option>
+		</select>
+	</td>
+	<td><input type="text" name="cond_alt_row3" value="性別" class="cond_alt" id="cond_alt_row3"></td>
+	<td><label><input type="checkbox" name="cond_required_row3" value="1" id="cond_required_row3" class="cond_required"></label></td>
+	<td><label><input type="checkbox" name="cond_att_row3" value="1" id="cond_att_row3" class="cond_att"></label></td>
+	<td><label><input type="checkbox" name="cond_d_only_row3" value="1" id="cond_d_only_row3" class="cond_d_only"></label></td>
+	<td><label><input type="checkbox" name="cond_hira_row3" value="1" id="cond_hira_row3" class="cond_hira"></label></td>
+	<td><label><input type="checkbox" name="cond_kata_row3" value="1" id="cond_kata_row3" class="cond_kata"></label></td>
+	<td><label><input type="checkbox" name="cond_rel_row3" value="1" id="cond_rel_row3" class="cond_rel"></label></td>
+	<td><label><input type="checkbox" name="cond_url_row3" value="1" id="cond_url_row3" class="cond_url"></label></td>
+	<td><label><input type="checkbox" name="cond_email_row3" value="1" id="cond_email_row3" class="cond_email"></label></td>
+	<td><label><input type="checkbox" name="cond_compare_row3" value="1" id="cond_compare_row3" class="cond_compare"></label></td>
+	<td>
+		<span class="cond_o_status" id="cond_o_status_row3">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
+		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row3">
+	</td>
+	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row3"></td>
+</tr>
+<tr id="tbl-tab3-row4">
+	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
+	<td><input type="text" name="cond_name_row4" value="EMAIL" class="cond_name" id="cond_name_row4"></td>
+	<td>
+		<select name="cond_type_row4" id="cond_type_row4" class="cond_type">
+		<option value="text">text</option>
+		<option value="radio">radio</option>
+		<option value="checkbox">checkbox</option>
+		<option value="email">email</option>
+		<option value="tel">tel</option>
+		<option value="textarea">textarea</option>
+		<option value="file">file</option>
+		</select>
+	</td>
+	<td><input type="text" name="cond_alt_row4" value="メールアドレス" class="cond_alt" id="cond_alt_row4"></td>
+	<td><label><input type="checkbox" name="cond_required_row4" value="1" id="cond_required_row4" class="cond_required"></label></td>
+	<td><label><input type="checkbox" name="cond_att_row4" value="1" id="cond_att_row4" class="cond_att"></label></td>
+	<td><label><input type="checkbox" name="cond_d_only_row4" value="1" id="cond_d_only_row4" class="cond_d_only"></label></td>
+	<td><label><input type="checkbox" name="cond_hira_row4" value="1" id="cond_hira_row4" class="cond_hira"></label></td>
+	<td><label><input type="checkbox" name="cond_kata_row4" value="1" id="cond_kata_row4" class="cond_kata"></label></td>
+	<td><label><input type="checkbox" name="cond_rel_row4" value="1" id="cond_rel_row4" class="cond_rel"></label></td>
+	<td><label><input type="checkbox" name="cond_url_row4" value="1" id="cond_url_row4" class="cond_url"></label></td>
+	<td><label><input type="checkbox" name="cond_email_row4" value="1" id="cond_email_row4" class="cond_email"></label></td>
+	<td><label><input type="checkbox" name="cond_compare_row4" value="1" id="cond_compare_row4" class="cond_compare"></label></td>
+	<td>
+		<span class="cond_o_status" id="cond_o_status_row4">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
+		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row4">
+	</td>
+	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row4"></td>
+</tr>
+<tr id="tbl-tab3-row5">
+	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
+	<td><input type="text" name="cond_name_row5" value="EMAIL2" class="cond_name" id="cond_name_row5"></td>
+	<td>
+		<select name="cond_type_row5" id="cond_type_row5" class="cond_type">
+		<option value="text">text</option>
+		<option value="radio">radio</option>
+		<option value="checkbox">checkbox</option>
+		<option value="email">email</option>
+		<option value="tel">tel</option>
+		<option value="textarea">textarea</option>
+		<option value="file">file</option>
+		</select>
+	</td>
+	<td><input type="text" name="cond_alt_row5" value="メールアドレス確認用" class="cond_alt" id="cond_alt_row5"></td>
+	<td><label><input type="checkbox" name="cond_required_row5" value="1" id="cond_required_row5" class="cond_required"></label></td>
+	<td><label><input type="checkbox" name="cond_att_row5" value="1" id="cond_att_row5" class="cond_att"></label></td>
+	<td><label><input type="checkbox" name="cond_d_only_row5" value="1" id="cond_d_only_row5" class="cond_d_only"></label></td>
+	<td><label><input type="checkbox" name="cond_hira_row5" value="1" id="cond_hira_row5" class="cond_hira"></label></td>
+	<td><label><input type="checkbox" name="cond_kata_row5" value="1" id="cond_kata_row5" class="cond_kata"></label></td>
+	<td><label><input type="checkbox" name="cond_rel_row5" value="1" id="cond_rel_row5" class="cond_rel"></label></td>
+	<td><label><input type="checkbox" name="cond_url_row5" value="1" id="cond_url_row5" class="cond_url"></label></td>
+	<td><label><input type="checkbox" name="cond_email_row5" value="1" id="cond_email_row5" class="cond_email"></label></td>
+	<td><label><input type="checkbox" name="cond_compare_row5" value="1" id="cond_compare_row5" class="cond_compare"></label></td>
+	<td>
+		<span class="cond_o_status" id="cond_o_status_row5">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
+		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row5">
+	</td>
+	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row5"></td>
+</tr>
+<tr id="tbl-tab3-row6">
+	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
+	<td><input type="text" name="cond_name_row6" value="message" class="cond_name" id="cond_name_row6"></td>
+	<td>
+		<select name="cond_type_row6" id="cond_type_row6" class="cond_type">
+		<option value="text">text</option>
+		<option value="radio">radio</option>
+		<option value="checkbox">checkbox</option>
+		<option value="email">email</option>
+		<option value="tel">tel</option>
+		<option value="textarea">textarea</option>
+		<option value="file">file</option>
+		</select>
+	</td>
+	<td><input type="text" name="cond_alt_row6" value="メッセージ" class="cond_alt" id="cond_alt_row6"></td>
+	<td><label><input type="checkbox" name="cond_required_row6" value="1" id="cond_required_row6" class="cond_required"></label></td>
+	<td><label><input type="checkbox" name="cond_att_row6" value="1" id="cond_att_row6" class="cond_att"></label></td>
+	<td><label><input type="checkbox" name="cond_d_only_row6" value="1" id="cond_d_only_row6" class="cond_d_only"></label></td>
+	<td><label><input type="checkbox" name="cond_hira_row6" value="1" id="cond_hira_row6" class="cond_hira"></label></td>
+	<td><label><input type="checkbox" name="cond_kata_row6" value="1" id="cond_kata_row6" class="cond_kata"></label></td>
+	<td><label><input type="checkbox" name="cond_rel_row6" value="1" id="cond_rel_row6" class="cond_rel"></label></td>
+	<td><label><input type="checkbox" name="cond_url_row6" value="1" id="cond_url_row6" class="cond_url"></label></td>
+	<td><label><input type="checkbox" name="cond_email_row6" value="1" id="cond_email_row6" class="cond_email"></label></td>
+	<td><label><input type="checkbox" name="cond_compare_row6" value="1" id="cond_compare_row6" class="cond_compare"></label></td>
+	<td>
+		<span class="cond_o_status" id="cond_o_status_row6">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
+		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row6">
+	</td>
+	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row6"></td>
+</tr>
+</tbody>
+</table>
+<button class="btn_s btn_field_add"><img src="img/add.png" alt="追加">フィールド追加</button>
+<button class="btn_s btn_field_import"><img src="img/add.png" alt="追加">入力フォームからフィールド一括追加</button>
+
+<ul class="caption">
+	<li>v0.8から、入力フィールドの条件を手動で登録変更できるようになりました。</li>
+	<li>入力必須、入力文字種の制限などができます。</li>
+</ul>
+
+</div><!-- /tabs-3 -->
+
+<div id="tabs-4">
+
+<table class="tbl">
+<tr>
+	<th>管理者宛メール</th>
+	<td style="padding:8px">
+		<input type="radio" name="DO_NOT_SEND" value="0" id="DO_NOT_SEND_0"><label for="DO_NOT_SEND_0">送る</label>
+		<input type="radio" name="DO_NOT_SEND" value="1" id="DO_NOT_SEND_1"><label for="DO_NOT_SEND_1">送らない</label>
+	</td>
+</tr>
+</table><br>
+
+<table class="tbl" id="tbl-tab4">
+<tr>
+	<th>送信先<span class="fn">(SENDTO)</span></th>
+	<td>
+		<textarea name="SENDTO" size="60" rows="1" class="auto_height" id ="SENDTO"></textarea>
+		<ul class="caption">
+			<li>フォームメールの送り先となります。改行区切りで複数指定すると、すべてのアドレスに送ります。</li>
+			<li>同報送信先を指定する場合は、通常1つの送信先を指定してください。</li>
+			<li>「管理者へメールを送らない」にチェックした場合は、自動返信メール<span class="fn">(AUTO_REPLY)</span>を「送る」に設定していなければなりません。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>同報送信先<span class="fn">(CC)</span></th>
+	<td>
+		<textarea name="CC" size="60" rows="1" class="auto_height" id ="CC"></textarea>
+		<ul class="caption">
+			<li>フォームメールの送り先(CC)となります。1行に1つずつ複数指定できます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>隠し同報送信先<span class="fn">(BCC)</span></th>
+	<td>
+		<textarea name="BCC" size="60" rows="1" class="auto_height" id ="BCC">##BCC##</textarea>
+		<ul class="caption">
+			<li>フォームメールの隠し送り先(BCC)となります。1行に1つずつ複数指定できます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>送信元アドレス<span class="fn">(SENDFROM)</span></th>
+	<td>
+		<input type="text" name="SENDFROM" value="##SENDFROM##" id ="SENDFROM"><br>
+		<label ><input type="checkbox" name="SENDFROM_EMAIL_FORCED" value="1" id="SENDFROM_EMAIL_FORCED_1">name=&quot;EMAIL&quot;の値を優先する<span class="fn">(SENDFROM_EMAIL_FORCED)</span></label>
+		<ul class="caption">
+			<li>フォームメールのFromヘッダとなります。</li>
+			<li>今までは、フォーム中に name=&quot;EMAIL&quot; の入力欄があって、その値がある場合は、EMAILの値が優先されていましたが、v0.72より、SENDFROMの値を優先します。name=&quot;EMAIL&quot;の値を優先する場合はSENDFROM_EMAIL_FORCEDをチェックしてください。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th class="bg_eef nowrap">エラー送信先<br><span class="fn">(ENVELOPE_ADDR)</span></th>
+	<td>
+		<input type="text" name="ENVELOPE_ADDR" value="" id="ENVELOPE_ADDR"><br>
+		<label><input type="checkbox" name="ENVELOPE_ADDR_LINK" value="1" id="ENVELOPE_ADDR_LINK_1">送信元アドレスを自動的に指定する</label><span class="fn">(ENVELOPE_ADDR_LINK)</span>
+		<ul class="caption">
+			<li>メールが何らかの原因で届けられなかった場合に、エラーメールを届けるメールアドレスを指定します。管理者のメールアドレスを指定してください。<br>
+			<li>「送信元アドレスを自動的に指定する」にチェックを入れると、フォーム中に name="EMAIL" の入力欄があって、その値がある場合は、EMAILの値が、ない場合は「送信元アドレス<span class="fn">(SENDFROM)</span>」の値が自動的に指定されます。
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>文字コード<span class="fn">(CHARSET)</span></th>
+	<td>
+		<select name="CHARSET" id="CHARSET">
+		<option value="auto">自動認識</option>
+		<option value="us-ascii">US-ASCII</option>
+		<option value="iso-8859-1">ISO-8859-1</option>
+		<option value="jis">ISO-2022-JP</option>
+		<option value="utf8">UTF-8</option>
+		<option value="sjis">Shift_JIS</option>
+		</select>
+		<ul class="caption">
+			<li>「自動認識」の場合、US-ASCII→ISO-8859-1→UTF-8→ISO-2022-JPの順に、一番先にマッチする文字コードを選択します(Shift_JISは選択されません)。 </li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>件名<span class="fn">(SUBJECT)</span></th>
+	<td>
+		<input type="text" name="SUBJECT" value="" size="40" id="SUBJECT">
+		<ul class="caption">
+			<li>フォームメールのSubjectヘッダとなります。 <br>
+			<input type="button" value="件名内で指定できる差し込み用文字列の一覧" class="btn_s btn_subject"></li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>添付を許可するファイル拡張子<span class="fn">(ATTACH_EXT)</span></th>
+	<td>
+		<input type="text" name="ATTACH_EXT" value="" size="40" id="ATTACH_EXT">
+		<ul class="caption">
+			<li>許可する拡張子を、半角スペース区切りで複数指定できます。</li>
+			<li>拡張子は半角数小文字で指定してください。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>添付ファイルサイズ上限<span class="fn">(ATTACH_SIZE_MAX)</span></th>
+	<td>
+		<input type="text" name="ATTACH_SIZE_MAX" value="" id="ATTACH_SIZE_MAX" class="num" style="width:4em">キロバイトまで
+		<ul class="caption">
+			<li>添付ファイル1つあたりのサイズ上限を指定します。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>添付ファイルサイズ合計上限<span class="fn">(ATTACH_TSIZE_MAX)</span></th>
+	<td>
+		<input type="text" name="ATTACH_TSIZE_MAX" value="" id="" class="num" style="width:4em">キロバイトまで
+		<ul class="caption">
+			<li>添付ファイル合計サイズ上限を指定します。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>レイアウト<span class="fn">(MAIL_FORMAT_TYPE)</span></th>
+	<td>
+		<label><input type="radio" name="MAIL_FORMAT_TYPE" value="1" id="MAIL_FORMAT_TYPE_1">タイプ1</label>&nbsp;<input type="button" value="見本の表示" class="btn_s btn_mail_format_type_1"><br>
+		<label><input type="radio" name="MAIL_FORMAT_TYPE" value="2" id="MAIL_FORMAT_TYPE_2">タイプ2</label>&nbsp;<input type="button" value="見本の表示" class="btn_s btn_mail_format_type_2"><br>
+		<label><input type="radio" name="MAIL_FORMAT_TYPE" value="3" id="MAIL_FORMAT_TYPE_3">タイプ3</label>&nbsp;<input type="button" value="見本の表示" class="btn_s btn_mail_format_type_3"><br>
+		<label><input type="radio" name="MAIL_FORMAT_TYPE" value="0" id="MAIL_FORMAT_TYPE_0">以下に指定する</label><span class="fn">(FORMAT)</span><br>
+		<textarea name="FORMAT" cols="40" rows="12" id="FORMAT"></textarea><br>
+		<input type="button" value="フォーマット内で指定できる差し込み用文字列の一覧表示" class="btn_s btn_mail_format_type_0">
+	</td>
+</tr>
+<tr>
+	<th>項目の前に付加する文字列<span class="fn">(MARK)</span></th>
+	<td>
+		<input type="text" name="MARK" value="" id="MARK">
+		<ul class="caption">
+			<li>タイプ1～3の場合に反映されます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>項目と値の間のセパレータ<span class="fn">(SEPR)</span></th>
+	<td>
+		<input type="text" name="SEPR" value="" id ="SEPR">
+		<ul class="caption">
+			<li>タイプ1～3の場合に反映されます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>行頭からセパレータまでの文字数<span class="fn">(OFT)</span></th>
+	<td>
+		<input type="text" name="OFT" value="" id="OFT" class="num">
+		<ul class="caption">
+			<li>タイプ3の場合に反映されます。</li>
+		</ul>
+	</td>
+</tr>
+
+</table>
+
+</div><!-- /tabs-4 -->
+
+<div id="tabs-5">
+
+<table class="tbl">
+<tr>
+	<th>自動返信メール</th>
+	<td style="padding:8px">
+		<input type="radio" name="AUTO_REPLY" value="1" id="AUTO_REPLY_1"><label for="AUTO_REPLY_1">送る</label>
+		<input type="radio" name="AUTO_REPLY" value="0" id="AUTO_REPLY_0"><label for="AUTO_REPLY_0">送らない</label>
+	</td>
+</tr>
+</table><br>
+
+<table class="tbl" id="tbl-tab5">
+<tr>
+	<th>送信先</th>
+	<td>
+		フォーム中のname="EMAIL"の欄に入力されたアドレス
+		<ul class="caption">
+			<li>フォーム中のname="EMAIL"の欄がない場合、あっても入力がない場合は、「自動返信メール」を「送る」の設定にしておいても自動返信メールは送られません。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>同報送信先<span class="fn">(REPLY_CC)</span></th>
+	<td>
+		<textarea name="REPLY_CC" size="60" rows="1" class="auto_height" id="REPLY_CC"></textarea>
+		<ul class="caption">
+			<li>自動返信メールの送り先<span class="fn">(CC)</span>となります。1行に1つずつ複数指定できます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>隠し同報送信先<span class="fn">(REPLY_BCC)</span></th>
+	<td>
+		<textarea name="REPLY_BCC" size="60" rows="1" class="auto_height" id="REPLY_BCC"></textarea>
+		<ul class="caption">
+			<li>自動返信メールの隠し送り先<span class="fn">(BCC)</span>となります。1行に1つずつ複数指定できます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>送信元</th>
+	<td>
+		<table class="tbl">
+		<tr>
+			<th>送信元アドレス<span class="fn">(REPLY_SENDFROM)</span></th>
+			<td><input type="text" name="REPLY_SENDFROM" value="" id="REPLY_SENDFROM"></td>
+		</tr>
+		<tr>
+			<th>送信元名<span class="fn">(REPLY_SENDFROMNAME)</span></th>
+			<td><input type="text" name="REPLY_SENDFROMNAME" value="" id="REPLY_SENDFROMNAME"></td>
+		</tr>
+		</table>
+		<ul class="caption">
+			<li>自動返信メールのFromヘッダとなります。空欄にしておくと管理者宛メールの「送信元<span class="fn">(SENDFROM)</span>」の値が使われます。</li>
+			<li>送信元名を指定すると、<span class="tt">&quot;送信元名&quot; &lt;送信元アドレス&gt;</span> というFromヘッダとなります。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>エラー送信先<br><span class="fn">(REPLY_ENVELOPE_ADDR)</span></th>
+	<td>
+		<input type="text" name="REPLY_ENVELOPE_ADDR" value="" id="REPLY_ENVELOPE_ADDR">
+		<ul class="caption">
+			<li>自動返信メールがアドレス間違いなどで届かなかったときに、エラーメールの送り先となります。</li>
+			<li>空欄にしておくと、管理者に送られるメールのエラー送信先<span class="fn">(ENVELOPE_ADDR)</span>が使われます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>文字コード<span class="fn">(REPLY_CHARSET)</span></th>
+	<td>
+		<select name="REPLY_CHARSET" id="REPLY_CHARSET">
+		<option value="auto">自動認識</option>
+		<option value="us-ascii">US-ASCII</option>
+		<option value="iso-8859-1">ISO-8859-1</option>
+		<option value="jis">ISO-2022-JP</option>
+		<option value="utf8">UTF-8</option>
+		<option value="sjis">Shift_JIS</option>
+		</select>
+		<ul class="caption">
+			<li>「自動認識」の場合、US-ASCII→ISO-8859-1→UTF-8→ISO-2022-JPの順に、一番先にマッチする文字コードを選択します(Shift_JISは選択されません)。 </li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>件名<span class="fn">(REPLY_SUBJECT)</span></th>
+	<td>
+		<input type="text" name="REPLY_SUBJECT" id="REPLY_SUBJECT">
+		<ul class="caption">
+			<li>自動返信メールのSubjectヘッダとなります。<br>
+			<input type="button" value="件名内で指定できる差し込み用文字列の一覧" class="btn_s btn_subject"></li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>レイアウト<span class="fn">(REPLY_MAIL_FORMAT_TYPE)</span></th>
+	<td>
+		<label><input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="1" id="REPLY_MAIL_FORMAT_TYPE_1">タイプ1</label>&nbsp;<input type="button" value="見本の表示" class="btn_s btn_mail_format_type_1"><br>
+		<label><input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="2" id="REPLY_MAIL_FORMAT_TYPE_2">タイプ2</label>&nbsp;<input type="button" value="見本の表示" class="btn_s btn_mail_format_type_2"><br>
+		<label><input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="3" id="REPLY_MAIL_FORMAT_TYPE_3">タイプ3</label>&nbsp;<input type="button" value="見本の表示" class="btn_s btn_mail_format_type_3"><br>
+		<label><input type="radio" name="REPLY_MAIL_FORMAT_TYPE" value="0" id="REPLY_MAIL_FORMAT_TYPE_0">以下に指定する</label><span class="fn">(FORMAT)</span><br>
+		<textarea name="REPLY_FORMAT" cols="40" rows="12" id="REPLY_FORMAT"></textarea><br>
+		<input type="button" value="フォーマット内で指定できる差し込み用文字列の一覧表示" class="btn_s btn_mail_format_type_0">
+	</td>
+</tr>
+<tr>
+	<th>項目の前に付加する文字列<span class="fn">(REPLY_MARK)</span></th>
+	<td>
+		<input type="text" name="REPLY_MARK" value="" id="REPLY_MARK">
+		<ul class="caption">
+			<li>タイプ1～3の場合に反映されます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>項目と値の間のセパレータ<span class="fn">(REPLY_SEPR)</span></th>
+	<td>
+		<input type="text" name="REPLY_SEPR" value="" id="REPLY_SEPR">
+		<ul class="caption">
+			<li>タイプ1～3の場合に反映されます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>行頭からセパレータまでの文字数<span class="fn">(REPLY_OFT)</span></th>
+	<td>
+		<input type="text" name="REPLY_OFT" value="" id="REPLY_OFT" class="num">
+		<ul class="caption">
+			<li>タイプ3の場合に反映されます。</li>
+		</ul>
+	</td>
+</tr>
+</table>
+
+</div><!-- /tabs-5 -->
+
+<div id="tabs-6">
+
+<table class="tbl">
+<tr>
+	<th>送信データ</th>
+	<td style="padding:8px">
+		<input type="radio" name="FILE_OUTPUT" value="1" id="FILE_OUTPUT_1"><label for="FILE_OUTPUT_1">書き出す</label>
+		<input type="radio" name="FILE_OUTPUT" value="0" id="FILE_OUTPUT_0"><label for="FILE_OUTPUT_0">書き出さない</label>
+	</td>
+</tr>
+</table><br>
+
+<table class="tbl" id="tbl-tab6">
+<tr>
+	<th>書き出すファイル名<span class="fn">(OUTPUT_FILENAME)</span></th>
+	<td>
+		<input type="text" name="OUTPUT_FILENAME" value="" id="OUTPUT_FILENAME">
+		<ul class="caption">
+			<li><span class="tt">./data/[CONFID]</span>内にのみ書き出しできます。ファイル名のみを指定してください。パスは指定できません。</li>
+			<li>ファイル名に書き出し時の日時やフィールド値を指定することで、日別、月別などにファイルを分割して書き出すことができます。<br>
+			<input type="button" value="書き出すファイル名で指定できる差し込み用文字列の一覧" class="btn_s btn_output_filename"></li>
+			<li>半角英数および&quot;-&quot;、&quot;_&quot;、&quot;.&quot;以外の文字はURIエスケープされます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>書き出すフィールド<span class="fn">(OUTPUT_FIELDS)</span></th>
+	<td>
+		<input type="hidden" name="OUTPUT_FIELDS" id="OUTPUT_FIELDS">
+		<div class="cf">
+			<ul id="output_fields_pool1" class="output_fields_pool">
+			</ul>
+			<ul id="output_fields_pool0" class="output_fields_pool">
+				<li data-fieldname="name">お名前(name)</li>
+				<li data-fieldname="kana">フリガナ(kana)</li>
+				<li data-fieldname="sex">性別(sex)</li>
+				<li data-fieldname="EMAIL">メールアドレス(EMAIL)</li>
+				<li data-fieldname="EMAIL2">メールアドレス(確認用)(EMAIL2)</li>
+				<li data-fieldname="message">メッセージ(message)</li>
+				<li data-fieldname="SERIAL">受付番号(SERIAL)</li>
+				<li data-fieldname="REMOTE_HOST">受付番号(REMOTE_HOST)</li>
+				<li data-fieldname="REMOTE_ADDR">接続元ホスト(REMOTE_ADDR)</li>
+				<li data-fieldname="USER_AGENT">ブラウザ名(USER_AGENT)</li>
+				<li data-fieldname="NOW_DATE">送信日時(NOW_DATE)</li>
+			</ul>
+		</div>
+		<ul class="caption">
+			<li>ファイルに書き出すときのフィールド並び順を指定します。</li>
+			<li>書き出すフィールドを左側の枠線の中に並べてください。書き出さないフィールドは右側の点線の枠内に戻してください。</li>
+			<li>フィールドリストは、入力条件設定のリストと連動しています。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>書き出すファイルの形式<span class="fn">(OUTPUT_SEPARATOR)</span></th>
+	<td>
+		<label><input type="radio" name="OUTPUT_SEPARATOR" value="1" id="OUTPUT_SEPARATOR_1">カンマ区切り形式(CSV)</label><br>
+		<label><input type="radio" name="OUTPUT_SEPARATOR" value="0" id="OUTPUT_SEPARATOR_0">タブ区切り形式(TSV)<br>
+		<label><input type="radio" name="OUTPUT_SEPARATOR" value="2" id="OUTPUT_SEPARATOR_2">JSON形式</label>
+	</td>
+</tr>
+<tr>
+	<th>同じフィールド内に複数の値が入る際のセパレータ<span class="fn">(FIELD_SEPARATOR)</span></th>
+	<td>
+		<input type="text" name="FIELD_SEPARATOR" value="" id="FIELD_SEPARATOR">
+		<ul class="caption">
+			<li>何も指定しない(または空文字列の)場合は半角スペース1つとなります(前バージョンとの互換性のため)。</li>
+			<li>カンマ区切り形式での書き出しの場合も、カンマを指定できます。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>フィールド内の改行コードを置き換える文字列<span class="fn">(NEWLINE_REPLACE)</span></th>
+	<td>
+		<input type="text" name="NEWLINE_REPLACE" value="" id="NEWLINE_REPLACE">
+		<ul class="caption">
+			<li>何も指定しない(または空文字列の)場合は、カンマ区切りファイル書き出しの場合はなにもせず(改行のまま)、タブ区切りファイル書き出しの場合は改行を取り除きます。</li>
+		</ul>
+	</td>
+</tr>
+</table>
+
+</td></tr>
+</table>
+
+</div><!-- /tab-6 -->
+</div><!-- /tabs -->
+
+<p>
+	<input type="button" value="フォーム設定一覧へ" class="btn btn_confform_cancel">
+	<input type="button" value="設定確認画面へ" class="btn btn_confform_confirm">
+</p>
+
+</fieldset>
+</form>
+
+<div id="subject" style="display:none">
+<table class="tbl">
+<tr><td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td><td>フィールド値</td></tr>
+<tr><td><span class="tt">&#35;&#35;フィールド名:n&#35;&#35;</span></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
+<tr><td class="nowrap"><span class="tt">&#35;&#35;フィールド名::h&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
+<tr><td><span class="tt">&#35;&#35;フィールド名:n:v&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
+<tr><td><span class="tt">&#35;&#35;SERIAL&#35;&#35;</span></td><td>シリアル番号</td></tr>
+<tr><td><span class="tt">&#35;&#35;NOW_DATE&#35;&#35;</span></td><td>送信日時</td></tr>
+<tr><td><span class="tt">&#35;&#35;REMOTE_HOST&#35;&#35;</span></td><td>接続元ホスト名</td></tr>
+<tr><td><span class="tt">&#35;&#35;REMOTE_ADDR&#35;&#35;</span></td><td>接続元IPアドレス</td></tr>
+<tr><td><span class="tt">&#35;&#35;USER_AGENT&#35;&#35;</span></td><td>使用ブラウザ名</td></tr>
+</table>
+</div>
+
+<div id="mail_format_type_1" style="display:none">
+<img src="img/type1.png" alt="タイプ1">
+</div>
+
+<div id="mail_format_type_2" style="display:none">
+<img src="img/type2.png" alt="タイプ2">
+</div>
+<div id="mail_format_type_3" style="display:none">
+<img src="img/type3.png" alt="タイプ3">
+</div>
+<div id="mail_format_type_0" style="display:none">
+<table class="tbl">
+<tr><td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td><td>フィールド値</td></tr>
+<tr><td><span class="tt">&#35;&#35;フィールド名:n&#35;&#35;</span></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
+<tr><td class="nowrap"><span class="tt">&#35;&#35;フィールド名::h&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
+<tr><td><span class="tt">&#35;&#35;フィールド名:n:v&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
+<tr><td><span class="tt">&#35;&#35;SERIAL&#35;&#35;</span></td><td>シリアル番号</td></tr>
+<tr><td><span class="tt">&#35;&#35;NOW_DATE&#35;&#35;</span></td><td>送信日時</td></tr>
+<tr><td><span class="tt">&#35;&#35;REMOTE_HOST&#35;&#35;</span></td><td>接続元ホスト名</td></tr>
+<tr><td><span class="tt">&#35;&#35;REMOTE_ADDR&#35;&#35;</span></td><td>接続元IPアドレス</td></tr>
+<tr><td><span class="tt">&#35;&#35;USER_AGENT&#35;&#35;</span></td><td>使用ブラウザ名</td></tr>
+</table>
+</div>
+<div id="output_filename" style="display:none">
+<table class="tbl">
+<tr><td><span class="tt">%Y</span></td><td>西暦年(4ケタ)</td></tr>
+<tr><td><span class="tt">%M</span></td><td>月(01～12)</td></tr>
+<tr><td><span class="tt">%D</span></td><td>日(01～31)</td></tr>
+<tr><td><span class="tt">%H</span></td><td>時(00～23)</td></tr>
+<tr><td><span class="tt">%I</span></td><td>分(00～59)</td></tr>
+<tr><td><span class="tt">%S</span></td><td>秒(00～59)</td></tr>
+<tr><td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td><td>フィールド値</td></tr>
+</table>
+</div>
+
+
+<!-- footer -->

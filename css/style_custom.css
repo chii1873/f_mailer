@@ -1,0 +1,88 @@
+#tbl-tab1 tr th:first-child,
+#tbl-tab2 tr th:first-child,
+#tbl-tab4 tr th:first-child,
+#tbl-tab5 tr th:first-child,
+#tbl-tab6 tr th:first-child {
+	width: 200px;
+}
+#label                     { width: 500px; }
+#TITLE                     { width: 500px; }
+#BLANK_STR                 { width: 10em; }
+#DENY_DUPL_SEND_MIN        { width: 3em; }
+#FORM_TMPL                 { width: 500px; }
+#FORM_TMPL_BASE_URL        { width: 500px; }
+#CONFIRM_TMPL              { width: 500px; }
+#CONFIRM_TMPL_BASE_URL     { width: 500px; }
+#THANKS                    { width: 500px; }
+#THANKS_TMPL               { width: 500px; }
+#THANKS_TMPL_BASE_URL      { width: 500px; }
+#ERROR_TMPL                { width: 500px; }
+#ERROR_TMPL_BASE_URL       { width: 500px; }
+#ERRMSG_STYLE_UL           { width: 500px; }
+#ERRMSG_STYLE_LI           { width: 500px; }
+#tabs-3 .cond_name         { width: 140px; }
+#tabs-3 .cond_alt          { width: 200px; }
+#tabs-3 .btn_sort,
+#tabs-3 .btn_cond_del      { margin-top: 3px; width: 21px; }
+#tabs-3 .btn_sort          { cursor: n-resize; }
+#tabs-3 .btn_cond_del      { cursor: pointer; }
+#tabs-3 .btn_field_add img,
+#tabs-3 .btn_field_import img { vertical-align: top; margin-top: 2px; width: 16px; }
+#SENDTO                    { width: 400px; }
+#CC                        { width: 400px; }
+#BCC                       { width: 400px; }
+#SENDFROM                  { width: 400px; }
+#ENVELOPE_ADDR             { width: 400px; }
+#SUBJECT                   { width: 500px; }
+#ATTACH_EXT                { width: 6em; }
+#ATTACH_SIZE_MAX           { width: 6em; }
+#FORMAT                    { width: 500px; }
+#MARK                      { width: 3em; }
+#SEPR                      { width: 3em; }
+#OFT                       { width: 3em; }
+#REPLY_CC                  { width: 400px; }
+#REPLY_BCC                 { width: 400px; }
+#REPLY_SENDFROM            { width: 400px; }
+#REPLY_SENDFROMNAME        { width: 400px; }
+#REPLY_ENVELOPE_ADDR       { width: 400px; }
+#REPLY_SUBJECT             { width: 500px; }
+#REPLY_FORMAT              { width: 500px; }
+#REPLY_MARK                { width: 3em; }
+#REPLY_SEPR                { width: 3em; }
+#REPLY_OFT                 { width: 3em; }
+#OUTPUT_FILENAME           { width: 500px; }
+#FIELD_SEPARATOR           { width: 3em; }
+#NEWLINE_REPLACE           { width: 3em; }
+#tbl-tab6 .output_fields_pool {
+	float: left;
+	width: 350px;
+	min-height: 200px;
+	list-style-type: none;
+	margin: 0 2px;
+	padding: 2px;
+	border-radius: 8px;
+}
+#tbl-tab6 #output_fields_pool0 {
+	border: dashed 1px #999;
+}
+#tbl-tab6 #output_fields_pool1 {
+	border: solid 1px #999;
+}
+#tbl-tab6 .output_fields_pool li {
+	margin: 3px;
+	padding: 2px;
+	padding-left: 1em;
+	font-size: 14px;
+	cursor: move;
+	border-radius: 8px;
+}
+#tbl-tab6 #output_fields_pool0 li {
+	background: #f6f6f6;
+	color: #aaa;
+	border: 1px #aaa solid;
+}
+#tbl-tab6 #output_fields_pool1 li {
+	background: #eeeeff;
+	color: #669;
+	border: 1px #669 solid;
+}

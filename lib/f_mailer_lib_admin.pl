@@ -1,16 +1,4 @@
-# ---------------------------------------------------------------
-#  - システム名    フォームデコード+メール送信 (FORM MAILER)
-#  - バージョン    0.72
-#  - 公開年月日    2018/11/08
-#  - スクリプト名  f_mailer_lib_admin.pl
-#  - 著作権表示    (c)1997-2018 Perl Script Laboratory
-#  - 連  絡  先    http://www.psl.ne.jp/contact/index.html
-# ---------------------------------------------------------------
-# ご利用にあたっての注意
-#   ※このシステムはフリーウエアです。
-#   ※このシステムは、「利用規約」をお読みの上ご利用ください。
-#     http://www.psl.ne.jp/info/copyright.html
-# ---------------------------------------------------------------
+
 use strict;
 #use utf8;
 use vars qw(%CONF %FORM %alt $q);
@@ -228,6 +216,140 @@ STR
 
 }
 
+sub mk_errmsg_admin {
+
+	my @errmsg = @_;
+
+	my $errmsg = join("\n", map { qq|<li>$_</li>| } map { h($_) } @errmsg);
+	if ($errmsg ne "") {
+		return qq|<ul id="errmsg">\n$errmsg\n</ul>|;
+	}
+	return;
+
+}
+
+sub get_output_form_admin {
+
+	use HTML::SimpleParse;
+
+	my($content, %d) = @_;   ### 差し込みデータ
+
+	for my $k(keys %d) {
+		next if $d{$k} =~ /^<option /i;
+		for my $v_(split(/\!\!\!|\|\|\|/, $d{$k})) {
+			$d{ join("\0", $k, $v_) } = $v_;
+		}
+	}
+	my $p = new HTML::SimpleParse($content);
+	my %is_formtag = map { $_ => 1 } qw(input select textarea);
+	my $output;   ### 出力用htmlデータ
+	my $select_flag = 0; # select/textareaの閉じ対応チェック用
+	my $textarea_flag = 0;
+	my $now_name; # optionタグのname保持用
+	my $option_stack; # optionタグのvalue用コンテナ
+
+	for ($p->tree) {
+		my %c = %$_;
+		@c{qw(tagname content_)} = split(/\s+/, $c{"content"}, 2);
+		$c{"tagname"} = lc($c{"tagname"});
+		if ($c{"type"} eq "starttag") {
+			my %h = $p->parse_args( $c{"content_"} );
+			{ my %h_; for (keys %h) { $h_{lc($_)} = $h{$_} }; %h = %h_ }
+			if ($c{"tagname"} eq "input") {
+				$h{"type"} = lc($h{"type"});
+				if ($h{"type"} eq "" or $h{"type"} eq "text" or $h{"type"} eq "hidden" or $h{"type"} eq "password" or $h{"type"} eq "tel" or $h{"type"} eq "email") {
+					$h{"value"} = $d{$h{"name"}};
+				} elsif ($h{"type"} eq "checkbox" or $h{"type"} eq "radio") {
+					if (exists $d{ join("\0", $h{"name"}, $h{"value"}) }) {
+						$h{"checked"} = "checked";
+					} else {
+						delete $h{"checked"} if exists $h{"checked"};
+					}
+				}
+				$output .= get_output_form_admin_remake_tag($c{"tagname"}, %h);
+			} elsif ($c{"tagname"} eq "select") {
+				$select_flag = 1;
+				$now_name = $h{"name"};
+				$output .= "<$c{content}>";
+			} elsif ($c{"tagname"} eq "textarea") {
+				$textarea_flag = 1;
+				$now_name = $h{"name"};
+				$output .= qq|<$c{"content"}>|;
+			} elsif ($c{"tagname"} eq "option") {
+				if (exists $h{"value"}) {
+					$output .= get_output_form_admin_set_option_tag($now_name, \%h, \%d);
+				} else {
+					$option_stack = {%h};
+				}
+			} else {
+				$output .= qq|<$c{"content"}>|; # returns as-is
+			}
+
+		} elsif ($c{"type"} eq "text") {
+			if ($select_flag) {
+				if ($option_stack) {
+					my ($content, $space) = $c{"content"} =~ /^(.*)(\s*)$/;
+					$option_stack->{"value"} = $content;
+					$output .= get_output_form_admin_set_option_tag($now_name, $option_stack, \%d);
+					$output .= $space;
+				} else {
+					$output .= $c{"content"};
+				}
+			} elsif ($textarea_flag) {
+				1;  # skip -- endtagで処理
+			} else {
+				$output .= $c{"content"};
+			}
+		} elsif ($c{"type"} eq "endtag") {
+			if ($c{tagname} eq "/textarea") {
+			    $output .= $d{$now_name};
+			    $textarea_flag = 0;
+			} elsif ($c{tagname} eq "/option" or $c{"tagname"} eq "/select") {
+				if ($option_stack) {
+					my ($content, $space) = $c{"content"} =~ /^(.*)(\s*)$/;
+					$option_stack->{"value"} = $content;
+					$output .= get_output_form_admin_set_option_tag($now_name, $option_stack, \%d);
+					$output .= $space;
+				}
+				$option_stack = 0;
+				$select_flag = 0;
+			}
+			$output .= qq|<$c{tagname}>|;
+		} else {
+			$output .= "<$c{content}>";
+		}
+	}
+
+    return $output;
+
+}
+
+sub get_output_form_admin_remake_tag {
+
+	my($tagname, %h) = @_;
+
+	return "<$tagname "
+	 . join(" ", (map { qq|$_="|.scalar($h{$_}=~s/"/&quot;/g,$h{$_}).qq|"| }
+	  sort grep { $_ ne "/" } keys %h), $tagname =~ /(?:input|img|link)$/ ? "/" : ())
+	 . ">";
+
+}
+
+sub get_output_form_admin_set_option_tag {
+
+	my($now_name, $h, $d) = @_;
+	my %h = %$h;
+	my %d = %$d;
+
+	if (exists $d{qq|$now_name\0$h{"value"}|}) {
+		$h{"selected"} = "selected";
+	} else {
+		delete $h{"selected"} if exists $h{"selected"};
+	}
+	return get_output_form_remake_tag("option", %h);
+
+}
+
 sub mk_sysconffile {
 
 	my %conf = @_;
@@ -267,19 +389,26 @@ STR
 sub passwd_compare {
 
 	my $plain_passwd = shift;
-	my $crypt_passwd = passwd_read();
+	my $crypt_passwd = shift;
 	return crypt($plain_passwd, $crypt_passwd) eq $crypt_passwd ? 1 : 0;
 
 }
 
 sub passwd_read {
 
+	my ($login_id) = shift;
+
 	open(my $fh, "<", "./data/passwd.cgi")
 	 or error(get_errmsg("630", $!));
-	my $passwd = <$fh>;
-	close($fh);
-	return $passwd;
-
+	while (<$fh>) {
+		chomp;
+		my ($id, $passwd_encrypted) = split(/:/, $_, 2);
+		if ($id eq $login_id) {
+			close($fh);
+			return $passwd_encrypted;
+		}
+	}
+	return;
 }
 
 sub passwd_write {
@@ -288,8 +417,59 @@ sub passwd_write {
 	open(my $fh, ">", "./data/passwd.cgi")
 	 or error(get_errmsg("640", $!));
 	my $salt = join("", map { (0..9,"a".."z","A".."Z")[rand(62)] } (1..8));
-	print $fh crypt($passwd, index(crypt('a','$1$a$'),'$1$a$') == 0 ? "\$1\$$salt\$" : $salt);
+	print $fh "admin:", crypt($passwd, index(crypt('a','$1$a$'),'$1$a$') == 0 ? "\$1\$$salt\$" : $salt);
 	close($fh);
+
+}
+
+sub printhtml_admin {
+
+	my($files, %tr) = @_;
+	my $htmlstr;
+	my $submit_type;
+	my %data;
+	my $fh;
+#d($tr{"errmsg"});
+	if (-e "tmpl/_header.html") {
+		open($fh, "<", "tmpl/_header.html") or die $!;
+		$htmlstr = join("", <$fh>);
+		close($fh);
+	}
+	for my $file(split(/\s+/, $files)) {
+		open($fh, "tmpl/$file")
+		 or die("printhtml_admin: $fileが開けませんでした。: $!");
+		$htmlstr .= join("", <$fh>);
+		close($fh);
+	}
+	if (-e "tmpl/_footer.html") {
+		open($fh, "<", "tmpl/_footer.html") or die $!;
+		$htmlstr .= join("", <$fh>);
+		close($fh);
+	}
+
+	if (exists $tr{"errmsg"} and ref $tr{"errmsg"} eq "ARRAY") {
+		$htmlstr =~ s/<!-- *(?:##)?errmsg(?:##)? *-->/mk_errmsg_admin(@{$tr{"errmsg"}})/e;
+		delete $tr{"errmsg"};
+	} else {
+		$htmlstr =~ s/<!-- *(?:##)?errmsg(?:##)? *-->//;
+	}
+
+	for (keys %tr) {
+		next if ref $tr{$_};
+		$htmlstr =~ s/##$_##/$tr{$_}/g;
+	}
+
+	for (keys %CONF) {
+		next if ref $CONF{$_};
+		$htmlstr =~ s/##$_##/$CONF{$_}/g;
+	}
+
+	$htmlstr =~ s/##COPYRIGHT##/$ENV{"SCRIPT_FILENAME"} =~ m#admin# ? $CONF{"copyright_html_footer_admin"} : $CONF{"copyright_html_footer"}/eg;
+#	$htmlstr =~ s/##prod_name##/$CONF{"prod_name"}/g;
+#	$htmlstr =~ s/##version##/$CONF{"version"}/g;
+
+	$htmlstr = get_output_form_admin($htmlstr, %FORM, %tr);
+	print "Content-type: text/html; charset=utf-8\n\n$htmlstr";
 
 }
 
