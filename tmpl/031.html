@@ -1,47 +1,74 @@
 <!-- header -->
 
-<h2>システム設定</h2>
-
-<p><a href="#" onclick="if(confirm('設定内容を更新せずに管理メニューに戻ります。よろしいですか?')){location.href='f_mailer_admin.cgi'}">管理メニューへ</a></p>
+<div id="to_page_title">システムパラメータ設定</div>
 
 <!-- errmsg -->
 
-<form action="f_mailer_admin.cgi" method="post" id="form0">
-<fieldset>
-
-<p class="r"><input type="submit" name="sysconfform_done" value="下記の内容で更新" /></p>
+<div class="cf">
+<table style="float:right" class="message_sw">
+<tr>
+	<td style="padding-right:4px">説明テキスト</td>
+	<td id="buttonset_show_caption">
+		<label><input type="radio" name="show_caption" value="1" id="show_caption_1">表示する</label>
+		<label><input type="radio" name="show_caption" value="0" id="show_caption_0">表示しない</label>
+	</td>
+</tr>
+</table>
+</div>
+<br>
 
 <table class="tbl">
-<tr><td class="bg_eef">(1)デフォルト言語モード<span class="fn">(LANG_DEFAULT)</span></td>
-<td>
-<select name="LANG_DEFAULT">
+<tr>
+	<th>デフォルト言語モード<span class="fn">(LANG_DEFAULT)</span></th>
+	<td>
+		<select name="LANG_DEFAULT">
 ##langlist##
-</select>
-<div class="caption">
-※デフォルトのエラーメッセージ言語モードを指定します。
-</div>
-</td></tr>
-<tr><td class="bg_eef">(2)メール送信モード<span class="fn">(SENDMAIL_FLAG)</span></td>
-<td>
-<input type="radio" name="SENDMAIL_FLAG" value="0" ##SENDMAIL_FLAG:0## />[0]sendmail使用 ( sendmailのパス指定<span class="fn">(SENDMAIL)</span>→<input name="SENDMAIL" value="##SENDMAIL##" size="30" /> )<br />
-<input type="radio" name="SENDMAIL_FLAG" value="1" ##SENDMAIL_FLAG:1## />[1]NET::SMTP使用 ( SMTPホスト名/IPアドレス<span class="fn">(SMTP_HOST)</span>→<input name="SMTP_HOST" value="##SMTP_HOST##" size="30" /> )<br />
-　　<input type="checkbox" name="USE_SMTP_AUTH" value="1" ##USE_SMTP_AUTH:1## />SMTP-AUTHを使用する<span class="fn">(USE_SMTP_AUTH)</span><br />　　　→ ID：<input name="SMTP_AUTH_ID" value="##SMTP_AUTH_ID##" size="20" />/パスワード：<input name="SMTP_AUTH_PASSWD" value="##SMTP_AUTH_PASSWD##" size="16" />
-</td></tr>
-<tr><td class="bg_eef">(3)管理ページの接続元制限<span class="fn">(ALLOW_FROM)</span></td>
-<td>
-<textarea name="ALLOW_FROM" cols="40" rows="1" class="auto_height">##ALLOW_FROM##</textarea>
-<div>
-現在の接続元：<tt>##rh## ( ##ip## )</tt>
-</div>
-<div class="caption">
-※許可したい接続元IPアドレスあるいはホスト(ドメイン)名を1行に1つずつ複数設定できます。IPアドレスは前方一致、ホスト名は後方一致です。何も指定しないと、制限しません。<br />
-※指定する場合は現在の接続元を含めてください。
-</div>
-</td></tr>
+		</select>
+		<ul class="caption">
+			<li>デフォルトのエラーメッセージ言語モードを指定します。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>メール送信モード<span class="fn">(SENDMAIL_FLAG)</span></th>
+	<td>
+		<label><input type="radio" name="SENDMAIL_FLAG" id="SENDMAIL_FLAG_0" value="0">sendmail使用</label><br>
+		　　( sendmailのパス指定<span class="fn">(SENDMAIL)</span>→<input type="text" name="SENDMAIL" value="" id="SENDMAIL"> )<br>
+		<label><input type="radio" name="SENDMAIL_FLAG" id="SENDMAIL_FLAG_1" value="1">NET::SMTP使用</label><br>
+		　　( SMTPホスト名/IPアドレス<span class="fn">(SMTP_HOST)</span>→<input type="text" name="SMTP_HOST" value="" id="SMTP_HOST"> )<br>
+		　　　　<label><input type="checkbox" name="USE_SMTP_AUTH" id="USE_SMTP_AUTH_1" value="1">SMTP-AUTHを使用する</label><span class="fn">(USE_SMTP_AUTH)</span><br>
+		　　　　　　→ ID：<input type="text" name="SMTP_AUTH_ID" value="" id="SMTP_AUTH_ID" class="login"> / パスワード：<input type="text" name="SMTP_AUTH_PASSWD" value="" id="SMTP_AUTH_PASSWD" class="login">
+	</td>
+</tr>
+<tr>
+	<th class="nowrap">管理ページの接続元制限<span class="fn">(ALLOW_FROM)</span></th>
+	<td>
+		<textarea name="ALLOW_FROM" id="ALLOW_FROM" cols="40" rows="1" class="auto_height"></textarea>
+		<div>
+			現在の接続元：<tt>##rh## ( ##ip## )</tt>
+		</div>
+		<ul class="caption">
+			<li>許可したい接続元IPアドレスあるいはホスト(ドメイン)名を1行に1つずつ複数設定できます。IPアドレスは前方一致、ホスト名は後方一致です。何も指定しないと、制限しません。</li>
+			<li>指定する場合は現在の接続元を含めてください。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th class="nowrap">無視する送信元アドレス<span class="fn">(SENDFROM_SKIP)</span></th>
+	<td>
+		<textarea name="SENDFROM_SKIP" id="SENDFROM_SKIP" cols="40" rows="1" class="auto_height"></textarea>
+		<ul class="caption">
+			<li>差出人(name=&quot;EMAIL&quot;)に指定されたアドレスが、上記に登録したアドレスの一部を含んでいるとき、管理人及び本人宛にメールを送らず完了画面を出します。送信した本人にはわかりません。</li>
+			<li>これはspamやbotからのフォーム送信を防ぐための機能です。100％無視してよいものだけを登録してください。</li>
+			<li>ドメイン名だけを登録すると、例えば、「sample.com」とだけ登録した場合、「sample.com@sample.jp」のようなアドレスもマッチします。ドメイン名またはホスト名を指定する場合、「@sample.com」のように、冒頭に「@」を付けてください。</li>
+		</ul>
+	</td>
+</tr>
 </table>
 
-<p class="r"><input type="submit" name="sysconfform_done" value="上記の内容で更新" /></p>
+<div class="navi">
+	<input type="button" class="btn btn_to_menu" value="管理メニューへ戻る" data-confirm="1">
+	<input type="button" value="上記の内容で更新" class="btn btn_submit" id="btn_submit_to_032">
+</div>
 
-</fieldset>
-</form>
 <!-- footer -->

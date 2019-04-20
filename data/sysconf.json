@@ -1,0 +1,1 @@
+{"SENDMAIL":"/usr/sbin/sendmail","__date":"2019-04-14 16:04:49","SENDMAIL_FLAG":"0","SENDFROM_SKIP":["@qqq.com","@qq.com","@yahoo.com.cn","@641001111.com","@189.cn","@sinla.com","@163.com","@mail.com","@68abc.com","@qq126.com","@qq.coma","@126.com","@139.com","@chacuo.net"],"ALLOW_FROM":[],"SMTP_HOST":"localhost","LANG_DEFAULT":"ja"}

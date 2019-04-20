@@ -33,13 +33,44 @@ sub conf_to_temp {
 
 }
 
-sub gen_conffilename {
+sub conflist_read {
+
+	open(my $fh, "<", "data/conflist.json") or error(get_errmsg("471"));
+	my $json = json_decode(<$fh>);
+	close($fh);
+	return $json;
+
+}
+
+sub conflist_write {
+
+	my $json = shift;
+	open(my $fh, ">", "data/conflist.json") or error(get_errmsg("472"));
+	print $fh json_encode($json);
+	close($fh);
+}
+
+sub gen_confid {
 
 	my $digit = shift || 6;
-	while (1) {
-		my $sid = join("", map { (0..9)[rand(10)] } (1..$digit));
-		return $sid unless -e "data/conf/$sid.pl";
+
+	my $conflist = conflist_read();
+	my %confid_exists;
+	for my $d(@$conflist) {
+		$confid_exists{$d->{"id"}} = 1;
 	}
+	my $sid;
+	while (1) {
+		$sid = join("", map { (0..9)[rand(10)] } (1..$digit));
+		last unless (-e "data/conf/$sid.json" or $confid_exists{$sid});
+	}
+	$confid_exists{$sid} = 1;
+	my $sid2;
+	while (1) {
+		$sid2 = join("", map { (0..9)[rand(10)] } (1..$digit));
+		last unless (-e "data/conf/$sid2.json" or $confid_exists{$sid2});
+	}
+	return ($sid, $sid2);
 
 }
 
@@ -50,6 +81,29 @@ sub get_conffields {
 	chomp(my @fields = <$fh>);
 	close($fh);
 	@fields;
+
+}
+
+sub get_file_stream {
+
+	my($q, $param) = @_;
+	my $stream;
+
+	if (ref $q->uploadInfo($q->param($param))) {
+		my $ctype = $q->uploadInfo($q->param($param))->{'Content-Type'};
+		if ($ctype =~ /macbinary/) {
+			my $len;
+			seek($q->param($param), 83, SEEK_SET);
+			read($q->param($param), $len, 4);
+			$len = unpack "%N", $len;
+			seek($q->param($param), 128, SEEK_SET);
+			read($q->param($param), $stream, $len);
+		} else {
+			my $buf;
+			$stream .= $buf while read($q->param($param),$buf,1024);
+		}
+	}
+	$stream;
 
 }
 
@@ -257,9 +311,9 @@ sub get_output_form_admin {
 			{ my %h_; for (keys %h) { $h_{lc($_)} = $h{$_} }; %h = %h_ }
 			if ($c{"tagname"} eq "input") {
 				$h{"type"} = lc($h{"type"});
-				if ($h{"type"} eq "" or $h{"type"} eq "text" or $h{"type"} eq "hidden" or $h{"type"} eq "password" or $h{"type"} eq "tel" or $h{"type"} eq "email") {
+				if ($h{"type"} =~ /^(?:|text|hidden|password|tel|email)$/) {
 					$h{"value"} = $d{$h{"name"}};
-				} elsif ($h{"type"} eq "checkbox" or $h{"type"} eq "radio") {
+				} elsif ($h{"type"} =~ /^(?:checkbox|radio)$/) {
 					if (exists $d{ join("\0", $h{"name"}, $h{"value"}) }) {
 						$h{"checked"} = "checked";
 					} else {
@@ -350,42 +404,6 @@ sub get_output_form_admin_set_option_tag {
 
 }
 
-sub mk_sysconffile {
-
-	my %conf = @_;
-
-	my $date = get_datetime(time);
-	open(my $fh, ">", "./f_mailer_sysconf.pl")
-	 or error(get_errmsg("620", $!));
-	print $fh <<STR;
-#
-# $CONF{prod_name} v$CONF{version} 設定ファイル
-# $CONF{copyright2} Perl Script Laboratory All rights reserved.
-#
-# f_mailer_sysconf.pl
-#
-# このファイルはプログラムによって自動生成されました。
-# 生成日時: $date
-
-#use utf8;
-package conf;
-
- sub sysconf {
-
-	my %conf;
-
-STR
-
-	my $condstr;
-
-	foreach (qw(LANG_DEFAULT SENDMAIL_FLAG SENDMAIL SMTP_HOST ALLOW_FROM)) {
-		print $fh qq{    chomp(\$conf{$_} = <<_STR_${_}_);\n$conf{$_}\n_STR_${_}_\n};
-	}
-	print $fh qq{\n    \%conf;\n\n\}\n\n1;\n};
-	close($fh);
-
-}
-
 sub passwd_compare {
 
 	my $plain_passwd = shift;
@@ -396,7 +414,7 @@ sub passwd_compare {
 
 sub passwd_read {
 
-	my ($login_id) = shift;
+	my $login_id = shift;
 
 	open(my $fh, "<", "./data/passwd.cgi")
 	 or error(get_errmsg("630", $!));
@@ -413,11 +431,12 @@ sub passwd_read {
 
 sub passwd_write {
 
-	my $passwd = shift || 12345;
+	my $login_id = shift || "admin";
+	my $passwd = shift || "12345";
 	open(my $fh, ">", "./data/passwd.cgi")
 	 or error(get_errmsg("640", $!));
 	my $salt = join("", map { (0..9,"a".."z","A".."Z")[rand(62)] } (1..8));
-	print $fh "admin:", crypt($passwd, index(crypt('a','$1$a$'),'$1$a$') == 0 ? "\$1\$$salt\$" : $salt);
+	print $fh "$login_id:", crypt($passwd, index(crypt('a','$1$a$'),'$1$a$') == 0 ? "\$1\$$salt\$" : $salt);
 	close($fh);
 
 }

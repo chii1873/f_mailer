@@ -2,16 +2,34 @@
 
 <div id="to_page_title">パスワードの変更</div>
 
-<p><span class="link link-to_012">メニューへ</span></p>
+<!-- errmsg -->
 
-<p>新しいパスワードを入力してください。</p>
+<p>
+	現在ログインしているアカウントのパスワードを変更します。
+</p>
 
-<p><input type="password" name="passwd" value="" id="passwd"></p>
+<table class="tbl">
+<tr>
+	<th>現在のパスワードを入力してください。</th>
+	<td><input type="password" name="passwd" value="" id="passwd" class="login"></td>
+</tr>
+</table>
+<br>
 
-<p>確認のため、もう一度入力してください。</p>
+<table class="tbl">
+<tr>
+	<th>新しいパスワードを入力してください。</th>
+	<td><input type="password" name="passwd_new" value="" id="passwd_new" class="login"></td>
+</tr>
+<tr>
+	<th>確認のため、もう一度入力してください。</th>
+	<td><input type="password" name="passwd_new2" value="" id="passwd_new2" class="login"></td>
+</tr>
+</table>
 
-<p><input type="password" name="passwd2" value="" id="passwd2"></p>
-
-<input type="button" value="変更" class="btn btn-to_022">
+<div class="navi">
+	<input type="button" class="btn btn_to_menu" value="管理メニューへ戻る" data-confirm="1">
+	<input type="button" value="変更" class="btn btn_submit" id="btn_submit_to_022">
+</div>
 
 <!-- footer -->

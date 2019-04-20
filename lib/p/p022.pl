@@ -5,16 +5,36 @@ use vars qw($q %FORM %CONF %alt $name_list_ref %ERRMSG);
 sub p022 {
 
 	my $p = shift;
+	my @errmsg;
 
-	$FORM{"passwd"} or error(get_errmsg("400"));
-	if ($FORM{"passwd"} ne $FORM{"passwd2"}) {
-		p("021", get_errmsg("401"));
+	if ($FORM{"passwd"} eq "") {
+		push(@errmsg, get_errmsg("402"));
+	} else {
+		my $password_encrypted = passwd_read($CONF{"session"}->param("login_id"));
+		if (! passwd_compare($FORM{"passwd"}, $password_encrypted)) {
+			push(@errmsg, get_errmsg("403"));
+		}
 	}
 
-	passwd_write($FORM{"passwd"});
-	set_cookie("FORM_MAILER_ADMIN_CACHE", 30, $FORM{"passwd"}) if get_cookie("FORM_MAILER_ADMIN_CACHE");
+	if ($FORM{"passwd_new"} eq "") {
+		push(@errmsg, get_errmsg("400"));
+	} elsif ($CONF{"session"}->param("login_id") eq "admin" and $FORM{"passwd_new"} eq "12345") {
+		push(@errmsg, get_errmsg("701"));
+	} elsif ($FORM{"passwd_new"} ne $FORM{"passwd_new2"}) {
+		push(@errmsg, get_errmsg("401"));
+	}
 
-	printhtml("tmpl/admin/$p.html");
+	p("021", @errmsg) if @errmsg;
+
+	passwd_write($CONF{"session"}->param("login_id"), $FORM{"passwd_new"});
+	my ($cookie_id) = get_cookie("FORM_MAILER_ADMIN_CACHE");
+	set_cookie("FORM_MAILER_ADMIN_CACHE", 30 * 86400, join("!!!", $CONF{"session"}->param("login_id"), $FORM{"passwd_new"})) if $cookie_id ne "";
+
+	printhtml_admin("$p.html",
+		"errmsg" => \@errmsg,
+	);
 	exit;
 
 }
+
+1;

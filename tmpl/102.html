@@ -1,0 +1,72 @@
+<!-- header -->
+
+<div id="to_page_title">フォーム設定の新規追加</div>
+<script type="text/javascript">
+$(function() {
+	$("#tabs").tabs();
+});
+</script>
+
+<!-- errmsg -->
+
+<input type="hidden" name="mode" id="mode" value="">
+
+<div class="cf">
+<table style="float:right" class="message_sw">
+<tr>
+	<td style="padding-right:4px">説明テキスト</td>
+	<td id="buttonset_show_caption">
+		<label><input type="radio" name="show_caption" value="1" id="show_caption_1">表示する</label>
+		<label><input type="radio" name="show_caption" value="0" id="show_caption_0">表示しない</label>
+	</td>
+</tr>
+</table>
+</div>
+
+<p>
+	以下のいずれかの方法を選択してください。
+</p>
+
+<div id="tabs">
+<ul>
+	<li><a href="#tabs-1"><span>新規に作成する</span></a></li>
+	<li><a href="#tabs-2"><span>既存の設定データをコピーする</span></a></li>
+	<li><a href="#tabs-3"><span>設定データ(jsonファイル)をインポートする</span></a></li>
+</ul>
+
+<div id="tabs-1">
+
+<input type="button" value="新規作成" class="btn btn_submit" id="btn_submit_to_103" data-mode="blank">
+
+</div>
+
+<div id="tabs-2">
+
+<select name="confid0">
+<option value="">&nbsp;</option>
+##conflist##
+</select> の設定を
+<input type="button" value="コピーする" class="btn btn_submit" id="btn_submit_to_103" data-mode="copy">
+<div class="caption">
+	※読み込んだ設定ファイルの値が初期値としてあらかじめ入力されます。
+</div>
+
+</div>
+
+<div id="tabs-3">
+
+<input type="file" name="import_file" value="" id="import_file"><br>
+<input type="button" value="インポートする" class="btn btn_submit upload" id="btn_submit_to_103" data-mode="import">
+<div class="caption">
+	※設定データ(jsonファイル)をインポートします。
+</div>
+
+</div>
+</div>
+
+<div class="navi">
+	<input type="button" class="btn btn_submit" value="フォーム設定一覧へ戻る" id="btn_submit_to_100" data-confirm="1" data-confirm_message="処理を中止してフォーム設定一覧に戻ります。よろしいですか？">
+	<input type="button" class="btn btn_to_menu" value="管理メニューへ" data-confirm="1">
+</div>
+
+<!-- footer -->

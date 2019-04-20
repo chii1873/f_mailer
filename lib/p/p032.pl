@@ -55,11 +55,25 @@ sub p032 {
 	if ($FORM{"ALLOW_FROM"} and !$ok) {
 		push(@errmsg, get_errmsg("543"));
 	}
-	p("031", \@errmsg) if @errmsg;
+	p("031", @errmsg) if @errmsg;
 
-	mk_sysconffile(%FORM);
+	my %d;
+	$d{"__date"} = get_datetime(time);
+	for (qw(LANG_DEFAULT SENDMAIL_FLAG SENDMAIL SMTP_HOST)) {
+		$d{$_} = $FORM{$_};
+	}
+	$d{"ALLOW_FROM"} = [ split(/\r?\n/, $FORM{"ALLOW_FROM"})];
+	$d{"SENDFROM_SKIP"} = [ split(/\r?\n/, $FORM{"SENDFROM_SKIP"})];
 
-	printhtml("tmpl/admin/$p.html");
+	open(my $fh, ">", "data/sysconf.json") or error(get_errmsg("620", $!));
+	print $fh json_encode(\%d);
+	close($fh);
+
+	printhtml_admin("$p.html",
+		"errmsg" => \@errmsg,
+	);
 	exit;
 
 }
+
+1;

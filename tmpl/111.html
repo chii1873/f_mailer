@@ -1,54 +1,16 @@
 <!-- header -->
 
 <div id="to_page_title">フォーム設定登録フォーム</div>
-<script type="text/javascript">
-$(function() {
-	$("#tabs").tabs();
-//	$("#bottonset_auto_reply").controlgroup();
-	$(".btn_mail_format_type_1").on("click", function () {
-		$("#mail_format_type_1").dialog({ title: "タイプ1", width: 500 });
-	});
-	$(".btn_mail_format_type_2").on("click", function () {
-		$("#mail_format_type_2").dialog({ title: "タイプ2", width: 500 });
-	});
-	$(".btn_mail_format_type_3").on("click", function () {
-		$("#mail_format_type_3").dialog({ title: "タイプ3", width: 500 });
-	});
-	$(".btn_mail_format_type_0").on("click", function () {
-		$("#mail_format_type_0").dialog({ title: "フォーマット内で指定できる差し込み用文字列", width: 800 });
-	});
-	$(".btn_subject").on("click", function () {
-		$("#mail_format_type_0").dialog({ title: "件名内で指定できる差し込み用文字列", width: 800 });
-	});
-	$(".btn_output_filename").on("click", function () {
-		$("#output_filename").dialog({ title: "書き出すファイル名で指定できる差し込み用文字列", width: 400 });
-	});
-
-	$("[name=FILE_OUTPUT],[name=DO_NOT_SEND],[name=AUTO_REPLY],[name=show_caption]").on("click", function () {
-		display_sw_p111();
-	});
-	display_sw_p111();
-	$("#buttonset_show_caption").controlgroup();
-	$("#tbl-tab3 tbody").sortable();
-	$(".output_fields_pool").sortable({
-		connectWith: ".output_fields_pool"
-	});
-});
-function display_sw_p111 () {
-	$(".caption").toggle($("#show_caption_1").prop("checked"));
-	$("#tbl-tab4").toggle($("#DO_NOT_SEND_0").prop("checked"));
-	$("#tbl-tab5").toggle($("#AUTO_REPLY_1").prop("checked"));
-	$("#tbl-tab6").toggle($("#FILE_OUTPUT_1").prop("checked"));
-}
-function tab_select (offset) {
-}
-</script>
-
+<script type="text/javascript" src="js/p111.js"></script>
 
 <!-- errmsg -->
 
+<input type="hidden" name="confid" id="confid" value="">
+<input type="hidden" name="cond" id="cond" value="">
+<input type="hidden" name="__token_ignore" id="__token_ignore" value="">
+
 <div class="cf">
-<table style="float:right">
+<table style="float:right" class="message_sw">
 <tr>
 	<td style="padding-right:4px">説明テキスト</td>
 	<td id="buttonset_show_caption">
@@ -60,7 +22,9 @@ function tab_select (offset) {
 <table class="tbl" style="float:left">
 <tr>
 	<th class="bg_eef">フォームID</th>
-	<td style="padding:8px">##conf_id_dsp##</td>
+	<td style="padding:8px">##confid_dsp##</td>
+	<th class="bg_eef">設定名</th>
+	<td style="padding:8px" id="label_dsp"></td>
 </tr>
 </table>
 </div>
@@ -138,7 +102,7 @@ function tab_select (offset) {
 
 <div id="tabs-2">
 
-<table class="tbl">
+<table class="tbl" id="tbl-tab2">
 <tr>
 	<th>入力フォーム<span class="fn">(FORM_FLAG)</span></th>
 	<td>
@@ -314,219 +278,66 @@ function tab_select (offset) {
 
 <div id="tabs-3">
 
+<div id="tabs-3A">
+<input type="hidden" name="order_max" value="" id="order_max">
 <table class="tbl" id="tbl-tab3">
 <thead>
 <tr>
-	<th rowspan="2">　</th>
-	<th rowspan="2" class="c">フィールド名</th>
-	<th rowspan="2" class="c double_r">型</th>
-	<th colspan="11" class="c double_r">条件設定</th>
-	<th rowspan="2" class="c">操作</th>
+	<th colspan="3" class="c double_r">入力フィールド</th>
+	<th colspan="8" class="c">条件設定</th>
 </tr>
 <tr>
-	<th class="c">別名</th>
+	<th class="c">フィールド名</th>
+	<th class="c">型</th>
+	<th class="c double_r">別名</th>
 	<th>必須</th>
-	<th>添付</th>
 	<th>数値</th>
 	<th>かな</th>
 	<th>カナ</th>
-	<th>依存</th>
 	<th>URL</th>
-	<th>ﾒｰﾙ</th>
+	<th class="c">ﾒｰﾙ</th>
 	<th>照合</th>
 	<th class="c">他</th>
 </tr>
 </thead>
 <tbody>
-<tr id="tbl-tab3-row1">
-	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
-	<td><input type="text" name="cond_name_row1" value="name" class="cond_name" id="cond_name_row1"></td>
-	<td>
-		<select name="cond_type_row1" id="cond_type_row1" class="cond_type">
-		<option value="text">text</option>
-		<option value="radio">radio</option>
-		<option value="checkbox">checkbox</option>
-		<option value="email">email</option>
-		<option value="tel">tel</option>
-		<option value="textarea">textarea</option>
-		<option value="file">file</option>
-		</select>
-	</td>
-	<td><input type="text" name="cond_alt_row1" value="お名前" class="cond_alt" id="cond_alt_row1"></td>
-	<td><label><input type="checkbox" name="cond_required_row1" value="1" id="cond_required_row1" class="cond_required"></label></td>
-	<td><label><input type="checkbox" name="cond_att_row1" value="1" id="cond_att_row1" class="cond_att"></label></td>
-	<td><label><input type="checkbox" name="cond_d_only_row1" value="1" id="cond_d_only_row1" class="cond_d_only"></label></td>
-	<td><label><input type="checkbox" name="cond_hira_row1" value="1" id="cond_hira_row1" class="cond_hira"></label></td>
-	<td><label><input type="checkbox" name="cond_kata_row1" value="1" id="cond_kata_row1" class="cond_kata"></label></td>
-	<td><label><input type="checkbox" name="cond_rel_row1" value="1" id="cond_rel_row1" class="cond_rel"></label></td>
-	<td><label><input type="checkbox" name="cond_url_row1" value="1" id="cond_url_row1" class="cond_url"></label></td>
-	<td><label><input type="checkbox" name="cond_email_row1" value="1" id="cond_email_row1" class="cond_email"></label></td>
-	<td><label><input type="checkbox" name="cond_compare_row1" value="1" id="cond_compare_row1" class="cond_compare"></label></td>
-	<td>
-		<span class="cond_o_status" id="cond_o_status_row1">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
-		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row1">
-	</td>
-	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row1"></td>
-</tr>
-<tr id="tbl-tab3-row2">
-	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
-	<td><input type="text" name="cond_name_row2" value="kana" class="cond_name" id="cond_name_row2"></td>
-	<td>
-		<select name="cond_type_row2" id="cond_type_row2" class="cond_type">
-		<option value="text">text</option>
-		<option value="radio">radio</option>
-		<option value="checkbox">checkbox</option>
-		<option value="email">email</option>
-		<option value="tel">tel</option>
-		<option value="textarea">textarea</option>
-		<option value="file">file</option>
-		</select>
-	</td>
-	<td><input type="text" name="cond_alt_row2" value="フリガナ" class="cond_alt" id="cond_alt_row2"></td>
-	<td><label><input type="checkbox" name="cond_required_row2" value="1" id="cond_required_row2" class="cond_required"></label></td>
-	<td><label><input type="checkbox" name="cond_att_row2" value="1" id="cond_att_row2" class="cond_att"></label></td>
-	<td><label><input type="checkbox" name="cond_d_only_row2" value="1" id="cond_d_only_row2" class="cond_d_only"></label></td>
-	<td><label><input type="checkbox" name="cond_hira_row2" value="1" id="cond_hira_row2" class="cond_hira"></label></td>
-	<td><label><input type="checkbox" name="cond_kata_row2" value="1" id="cond_kata_row2" class="cond_kata"></label></td>
-	<td><label><input type="checkbox" name="cond_rel_row2" value="1" id="cond_rel_row2" class="cond_rel"></label></td>
-	<td><label><input type="checkbox" name="cond_url_row2" value="1" id="cond_url_row2" class="cond_url"></label></td>
-	<td><label><input type="checkbox" name="cond_email_row2" value="1" id="cond_email_row2" class="cond_email"></label></td>
-	<td><label><input type="checkbox" name="cond_compare_row2" value="1" id="cond_compare_row2" class="cond_compare"></label></td>
-	<td>
-		<span class="cond_o_status" id="cond_o_status_row2">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
-		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row2">
-	</td>
-	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row2"></td>
-</tr>
-<tr id="tbl-tab3-row3">
-	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
-	<td><input type="text" name="cond_name_row3" value="sex" class="cond_name" id="cond_name_row3"></td>
-	<td>
-		<select name="cond_type_row3" id="cond_type_row3" class="cond_type">
-		<option value="text">text</option>
-		<option value="radio">radio</option>
-		<option value="checkbox">checkbox</option>
-		<option value="email">email</option>
-		<option value="tel">tel</option>
-		<option value="textarea">textarea</option>
-		<option value="file">file</option>
-		</select>
-	</td>
-	<td><input type="text" name="cond_alt_row3" value="性別" class="cond_alt" id="cond_alt_row3"></td>
-	<td><label><input type="checkbox" name="cond_required_row3" value="1" id="cond_required_row3" class="cond_required"></label></td>
-	<td><label><input type="checkbox" name="cond_att_row3" value="1" id="cond_att_row3" class="cond_att"></label></td>
-	<td><label><input type="checkbox" name="cond_d_only_row3" value="1" id="cond_d_only_row3" class="cond_d_only"></label></td>
-	<td><label><input type="checkbox" name="cond_hira_row3" value="1" id="cond_hira_row3" class="cond_hira"></label></td>
-	<td><label><input type="checkbox" name="cond_kata_row3" value="1" id="cond_kata_row3" class="cond_kata"></label></td>
-	<td><label><input type="checkbox" name="cond_rel_row3" value="1" id="cond_rel_row3" class="cond_rel"></label></td>
-	<td><label><input type="checkbox" name="cond_url_row3" value="1" id="cond_url_row3" class="cond_url"></label></td>
-	<td><label><input type="checkbox" name="cond_email_row3" value="1" id="cond_email_row3" class="cond_email"></label></td>
-	<td><label><input type="checkbox" name="cond_compare_row3" value="1" id="cond_compare_row3" class="cond_compare"></label></td>
-	<td>
-		<span class="cond_o_status" id="cond_o_status_row3">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
-		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row3">
-	</td>
-	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row3"></td>
-</tr>
-<tr id="tbl-tab3-row4">
-	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
-	<td><input type="text" name="cond_name_row4" value="EMAIL" class="cond_name" id="cond_name_row4"></td>
-	<td>
-		<select name="cond_type_row4" id="cond_type_row4" class="cond_type">
-		<option value="text">text</option>
-		<option value="radio">radio</option>
-		<option value="checkbox">checkbox</option>
-		<option value="email">email</option>
-		<option value="tel">tel</option>
-		<option value="textarea">textarea</option>
-		<option value="file">file</option>
-		</select>
-	</td>
-	<td><input type="text" name="cond_alt_row4" value="メールアドレス" class="cond_alt" id="cond_alt_row4"></td>
-	<td><label><input type="checkbox" name="cond_required_row4" value="1" id="cond_required_row4" class="cond_required"></label></td>
-	<td><label><input type="checkbox" name="cond_att_row4" value="1" id="cond_att_row4" class="cond_att"></label></td>
-	<td><label><input type="checkbox" name="cond_d_only_row4" value="1" id="cond_d_only_row4" class="cond_d_only"></label></td>
-	<td><label><input type="checkbox" name="cond_hira_row4" value="1" id="cond_hira_row4" class="cond_hira"></label></td>
-	<td><label><input type="checkbox" name="cond_kata_row4" value="1" id="cond_kata_row4" class="cond_kata"></label></td>
-	<td><label><input type="checkbox" name="cond_rel_row4" value="1" id="cond_rel_row4" class="cond_rel"></label></td>
-	<td><label><input type="checkbox" name="cond_url_row4" value="1" id="cond_url_row4" class="cond_url"></label></td>
-	<td><label><input type="checkbox" name="cond_email_row4" value="1" id="cond_email_row4" class="cond_email"></label></td>
-	<td><label><input type="checkbox" name="cond_compare_row4" value="1" id="cond_compare_row4" class="cond_compare"></label></td>
-	<td>
-		<span class="cond_o_status" id="cond_o_status_row4">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
-		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row4">
-	</td>
-	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row4"></td>
-</tr>
-<tr id="tbl-tab3-row5">
-	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
-	<td><input type="text" name="cond_name_row5" value="EMAIL2" class="cond_name" id="cond_name_row5"></td>
-	<td>
-		<select name="cond_type_row5" id="cond_type_row5" class="cond_type">
-		<option value="text">text</option>
-		<option value="radio">radio</option>
-		<option value="checkbox">checkbox</option>
-		<option value="email">email</option>
-		<option value="tel">tel</option>
-		<option value="textarea">textarea</option>
-		<option value="file">file</option>
-		</select>
-	</td>
-	<td><input type="text" name="cond_alt_row5" value="メールアドレス確認用" class="cond_alt" id="cond_alt_row5"></td>
-	<td><label><input type="checkbox" name="cond_required_row5" value="1" id="cond_required_row5" class="cond_required"></label></td>
-	<td><label><input type="checkbox" name="cond_att_row5" value="1" id="cond_att_row5" class="cond_att"></label></td>
-	<td><label><input type="checkbox" name="cond_d_only_row5" value="1" id="cond_d_only_row5" class="cond_d_only"></label></td>
-	<td><label><input type="checkbox" name="cond_hira_row5" value="1" id="cond_hira_row5" class="cond_hira"></label></td>
-	<td><label><input type="checkbox" name="cond_kata_row5" value="1" id="cond_kata_row5" class="cond_kata"></label></td>
-	<td><label><input type="checkbox" name="cond_rel_row5" value="1" id="cond_rel_row5" class="cond_rel"></label></td>
-	<td><label><input type="checkbox" name="cond_url_row5" value="1" id="cond_url_row5" class="cond_url"></label></td>
-	<td><label><input type="checkbox" name="cond_email_row5" value="1" id="cond_email_row5" class="cond_email"></label></td>
-	<td><label><input type="checkbox" name="cond_compare_row5" value="1" id="cond_compare_row5" class="cond_compare"></label></td>
-	<td>
-		<span class="cond_o_status" id="cond_o_status_row5">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
-		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row5">
-	</td>
-	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row5"></td>
-</tr>
-<tr id="tbl-tab3-row6">
-	<td><img src="img/arrows.png" alt="ソート" class="btn_sort"></td>
-	<td><input type="text" name="cond_name_row6" value="message" class="cond_name" id="cond_name_row6"></td>
-	<td>
-		<select name="cond_type_row6" id="cond_type_row6" class="cond_type">
-		<option value="text">text</option>
-		<option value="radio">radio</option>
-		<option value="checkbox">checkbox</option>
-		<option value="email">email</option>
-		<option value="tel">tel</option>
-		<option value="textarea">textarea</option>
-		<option value="file">file</option>
-		</select>
-	</td>
-	<td><input type="text" name="cond_alt_row6" value="メッセージ" class="cond_alt" id="cond_alt_row6"></td>
-	<td><label><input type="checkbox" name="cond_required_row6" value="1" id="cond_required_row6" class="cond_required"></label></td>
-	<td><label><input type="checkbox" name="cond_att_row6" value="1" id="cond_att_row6" class="cond_att"></label></td>
-	<td><label><input type="checkbox" name="cond_d_only_row6" value="1" id="cond_d_only_row6" class="cond_d_only"></label></td>
-	<td><label><input type="checkbox" name="cond_hira_row6" value="1" id="cond_hira_row6" class="cond_hira"></label></td>
-	<td><label><input type="checkbox" name="cond_kata_row6" value="1" id="cond_kata_row6" class="cond_kata"></label></td>
-	<td><label><input type="checkbox" name="cond_rel_row6" value="1" id="cond_rel_row6" class="cond_rel"></label></td>
-	<td><label><input type="checkbox" name="cond_url_row6" value="1" id="cond_url_row6" class="cond_url"></label></td>
-	<td><label><input type="checkbox" name="cond_email_row6" value="1" id="cond_email_row6" class="cond_email"></label></td>
-	<td><label><input type="checkbox" name="cond_compare_row6" value="1" id="cond_compare_row6" class="cond_compare"></label></td>
-	<td>
-		<span class="cond_o_status" id="cond_o_status_row6">－</span><!-- その他の条件の設定の有無をアイコン表示 -->
-		<img src="img/edit.png" alt="設定" class="btn_cond_o" id="btn_cond_o_row6">
-	</td>
-	<td class="c"><img src="img/delete.png" alt="削除" class="btn_cond_del" id="btn_cond_del_row6"></td>
-</tr>
+##cond_list##
 </tbody>
 </table>
-<button class="btn_s btn_field_add"><img src="img/add.png" alt="追加">フィールド追加</button>
-<button class="btn_s btn_field_import"><img src="img/add.png" alt="追加">入力フォームからフィールド一括追加</button>
+<button type="button" class="btn_s btn_field_import"><img src="img/add.png" alt="追加">入力条件設定対象フォームの読み込み</button>
 
 <ul class="caption">
-	<li>v0.8から、入力フィールドの条件を手動で登録変更できるようになりました。</li>
-	<li>入力必須、入力文字種の制限などができます。</li>
+	<li>フォームのフィールドごとの入力条件設定をします。</li>
+	<li>設定をするフィールド名を登録するために、最初に「入力条件設定対象フォームの読み込み」ボタンを押して、入力条件設定対象フォームの読み込みをしてください。フォームの入力欄が変更になった場合も同様の手続きが必要となります。手動で設定をするフィールド名を登録する機能はありません。</li>
+	<li>フィールド名は、input(type=submit/buttonを除く)/select/textareaタグのname=""属性のことです。name属性には半角英数字のみを使うようにし、表示用の名称として別名指定することをおすすめします。</li>
 </ul>
+</div><!-- /tabs-3A -->
+<div id="tabs-3B" style="display:none">
+<h2>入力条件設定対象ファイルの読み込み</h2>
+<div id="tabs-3B_errmsg"></div>
+<p>
+	入力条件を設定する対象となるフォームを読み込みます。<br>
+	いずれかの方法で読み込んでください。
+</p>
+
+<p>
+	<label><input type="radio" name="import_method" value="1" id="import_method_1">URLを指定して読み込む</label><br>
+	　　<input type="text" name="import_method_url" size="70" id="import_method_url"><br>
+	<br>
+	<label><input type="radio" name="import_method" value="2" id="import_method_2">HTMLソースを貼りつけて読み込む</label><br>
+	　　<textarea name="import_method_source" cols="70" rows="12" id="import_method_source"></textarea>
+</p>
+<div class="navi">
+	<input type="button" class="btn_s" value="中止" id="btn_import_method_cancel">
+	<input type="button" value="読み込み" class="btn_s" id="btn_import_method_do">
+</div>
+<ul class="caption">
+	<li>フォームの各入力欄の入力条件を設定するには、対象ページのhtmlを読み込む必要があります。</li>
+	<li>URLを指定する方法では、本システムからそのURLへのアクセスが許可されている必要があります。</li>
+	<li>ソースを貼り付けて読み込む方法では、貼り付けたhtml内にあるすべてのinput(type=submit/buttonを除く)/select/textareaタグを取り込みます。1ページ内にformタグが複数あるなどの理由で、取り込む範囲を限定したいときは、取り込む範囲のソースのみを貼り付けてください。</li>
+</ul>
+
+</div><!-- /tabs-3B -->
 
 </div><!-- /tabs-3 -->
 
@@ -546,7 +357,7 @@ function tab_select (offset) {
 <tr>
 	<th>送信先<span class="fn">(SENDTO)</span></th>
 	<td>
-		<textarea name="SENDTO" size="60" rows="1" class="auto_height" id ="SENDTO"></textarea>
+		<textarea name="SENDTO" cols="60" rows="1" class="auto_height" id ="SENDTO"></textarea>
 		<ul class="caption">
 			<li>フォームメールの送り先となります。改行区切りで複数指定すると、すべてのアドレスに送ります。</li>
 			<li>同報送信先を指定する場合は、通常1つの送信先を指定してください。</li>
@@ -557,7 +368,7 @@ function tab_select (offset) {
 <tr>
 	<th>同報送信先<span class="fn">(CC)</span></th>
 	<td>
-		<textarea name="CC" size="60" rows="1" class="auto_height" id ="CC"></textarea>
+		<textarea name="CC" cols="60" rows="1" class="auto_height" id ="CC"></textarea>
 		<ul class="caption">
 			<li>フォームメールの送り先(CC)となります。1行に1つずつ複数指定できます。</li>
 		</ul>
@@ -566,7 +377,7 @@ function tab_select (offset) {
 <tr>
 	<th>隠し同報送信先<span class="fn">(BCC)</span></th>
 	<td>
-		<textarea name="BCC" size="60" rows="1" class="auto_height" id ="BCC">##BCC##</textarea>
+		<textarea name="BCC" cols="60" rows="1" class="auto_height" id ="BCC">##BCC##</textarea>
 		<ul class="caption">
 			<li>フォームメールの隠し送り先(BCC)となります。1行に1つずつ複数指定できます。</li>
 		</ul>
@@ -642,7 +453,7 @@ function tab_select (offset) {
 <tr>
 	<th>添付ファイルサイズ合計上限<span class="fn">(ATTACH_TSIZE_MAX)</span></th>
 	<td>
-		<input type="text" name="ATTACH_TSIZE_MAX" value="" id="" class="num" style="width:4em">キロバイトまで
+		<input type="text" name="ATTACH_TSIZE_MAX" value="" id="ATTACH_TSIZE_MAX" class="num" style="width:4em">キロバイトまで
 		<ul class="caption">
 			<li>添付ファイル合計サイズ上限を指定します。</li>
 		</ul>
@@ -716,7 +527,7 @@ function tab_select (offset) {
 <tr>
 	<th>同報送信先<span class="fn">(REPLY_CC)</span></th>
 	<td>
-		<textarea name="REPLY_CC" size="60" rows="1" class="auto_height" id="REPLY_CC"></textarea>
+		<textarea name="REPLY_CC" cols="60" rows="1" class="auto_height" id="REPLY_CC"></textarea>
 		<ul class="caption">
 			<li>自動返信メールの送り先<span class="fn">(CC)</span>となります。1行に1つずつ複数指定できます。</li>
 		</ul>
@@ -725,7 +536,7 @@ function tab_select (offset) {
 <tr>
 	<th>隠し同報送信先<span class="fn">(REPLY_BCC)</span></th>
 	<td>
-		<textarea name="REPLY_BCC" size="60" rows="1" class="auto_height" id="REPLY_BCC"></textarea>
+		<textarea name="REPLY_BCC" cols="60" rows="1" class="auto_height" id="REPLY_BCC"></textarea>
 		<ul class="caption">
 			<li>自動返信メールの隠し送り先<span class="fn">(BCC)</span>となります。1行に1つずつ複数指定できます。</li>
 		</ul>
@@ -856,22 +667,13 @@ function tab_select (offset) {
 <tr>
 	<th>書き出すフィールド<span class="fn">(OUTPUT_FIELDS)</span></th>
 	<td>
-		<input type="hidden" name="OUTPUT_FIELDS" id="OUTPUT_FIELDS">
+		<input type="hidden" name="OUTPUT_FIELDS" value="" id="OUTPUT_FIELDS">
 		<div class="cf">
 			<ul id="output_fields_pool1" class="output_fields_pool">
+##output_fields_pool1##
 			</ul>
 			<ul id="output_fields_pool0" class="output_fields_pool">
-				<li data-fieldname="name">お名前(name)</li>
-				<li data-fieldname="kana">フリガナ(kana)</li>
-				<li data-fieldname="sex">性別(sex)</li>
-				<li data-fieldname="EMAIL">メールアドレス(EMAIL)</li>
-				<li data-fieldname="EMAIL2">メールアドレス(確認用)(EMAIL2)</li>
-				<li data-fieldname="message">メッセージ(message)</li>
-				<li data-fieldname="SERIAL">受付番号(SERIAL)</li>
-				<li data-fieldname="REMOTE_HOST">受付番号(REMOTE_HOST)</li>
-				<li data-fieldname="REMOTE_ADDR">接続元ホスト(REMOTE_ADDR)</li>
-				<li data-fieldname="USER_AGENT">ブラウザ名(USER_AGENT)</li>
-				<li data-fieldname="NOW_DATE">送信日時(NOW_DATE)</li>
+##output_fields_pool0##
 			</ul>
 		</div>
 		<ul class="caption">
@@ -885,7 +687,7 @@ function tab_select (offset) {
 	<th>書き出すファイルの形式<span class="fn">(OUTPUT_SEPARATOR)</span></th>
 	<td>
 		<label><input type="radio" name="OUTPUT_SEPARATOR" value="1" id="OUTPUT_SEPARATOR_1">カンマ区切り形式(CSV)</label><br>
-		<label><input type="radio" name="OUTPUT_SEPARATOR" value="0" id="OUTPUT_SEPARATOR_0">タブ区切り形式(TSV)<br>
+		<label><input type="radio" name="OUTPUT_SEPARATOR" value="0" id="OUTPUT_SEPARATOR_0">タブ区切り形式(TSV)</label><br>
 		<label><input type="radio" name="OUTPUT_SEPARATOR" value="2" id="OUTPUT_SEPARATOR_2">JSON形式</label>
 	</td>
 </tr>
@@ -916,62 +718,130 @@ function tab_select (offset) {
 </div><!-- /tab-6 -->
 </div><!-- /tabs -->
 
-<p>
-	<input type="button" value="フォーム設定一覧へ" class="btn btn_confform_cancel">
-	<input type="button" value="設定確認画面へ" class="btn btn_confform_confirm">
-</p>
+<div class="navi">
+	<input type="button" class="btn btn_submit" value="フォーム設定一覧へ戻る" id="btn_submit_to_100" data-confirm="1" data-confirm_message="設定を登録／変更せずフォーム設定一覧に戻ります。よろしいですか？">
+	<input type="button" value="登録" class="btn btn_submit" id="btn_submit_to_##p_next##" data-confid="##confid##">
+</div>
 
+<div id="subject" class="caption_box">
+<table class="tbl">
+<tr>
+	<td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td>
+	<td>フィールド値</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;フィールド名:n&#35;&#35;</span></td>
+	<td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td>
+</tr>
+<tr>
+	<td class="nowrap"><span class="tt">&#35;&#35;フィールド名::h&#35;&#35;</span></td>
+	<td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;フィールド名:n:v&#35;&#35;</span></td>
+	<td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;SERIAL&#35;&#35;</span></td>
+	<td>シリアル番号</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;NOW_DATE&#35;&#35;</span></td>
+	<td>送信日時</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;REMOTE_HOST&#35;&#35;</span></td>
+	<td>接続元ホスト名</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;REMOTE_ADDR&#35;&#35;</span></td>
+	<td>接続元IPアドレス</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;USER_AGENT&#35;&#35;</span></td>
+	<td>使用ブラウザ名</td>
+</tr>
+</table>
+</div>
+<div id="mail_format_type_1" class="caption_box"><img src="img/type1.png" alt="タイプ1"></div>
+<div id="mail_format_type_2" class="caption_box"><img src="img/type2.png" alt="タイプ2"></div>
+<div id="mail_format_type_3" class="caption_box"><img src="img/type3.png" alt="タイプ3"></div>
+<div id="mail_format_type_0" class="caption_box">
+<table class="tbl">
+<tr>
+	<td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td>
+	<td>フィールド値</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;フィールド名:n&#35;&#35;</span></td>
+	<td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td>
+</tr>
+<tr>
+	<td class="nowrap"><span class="tt">&#35;&#35;フィールド名::h&#35;&#35;</span></td>
+	<td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;フィールド名:n:v&#35;&#35;</span></td>
+	<td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;SERIAL&#35;&#35;</span></td>
+	<td>シリアル番号</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;NOW_DATE&#35;&#35;</span></td>
+	<td>送信日時</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;REMOTE_HOST&#35;&#35;</span></td>
+	<td>接続元ホスト名</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;REMOTE_ADDR&#35;&#35;</span></td>
+	<td>接続元IPアドレス</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;USER_AGENT&#35;&#35;</span></td>
+	<td>使用ブラウザ名</td>
+</tr>
+</table>
+</div>
+<div id="output_filename" class="caption_box">
+<table class="tbl">
+<tr>
+	<td><span class="tt">%Y</span></td>
+	<td>西暦年(4ケタ)</td>
+</tr>
+<tr>
+	<td><span class="tt">%M</span></td>
+	<td>月(01～12)</td>
+</tr>
+<tr>
+	<td><span class="tt">%D</span></td>
+	<td>日(01～31)</td>
+</tr>
+<tr>
+	<td><span class="tt">%H</span></td>
+	<td>時(00～23)</td>
+</tr>
+<tr>
+	<td><span class="tt">%I</span></td>
+	<td>分(00～59)</td>
+</tr>
+<tr>
+	<td><span class="tt">%S</span></td>
+	<td>秒(00～59)</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td>
+	<td>フィールド値</td>
+</tr>
+</table>
+</div>
+<div id="cond_other">
+##cond_other##
+</div>
 </fieldset>
 </form>
-
-<div id="subject" style="display:none">
-<table class="tbl">
-<tr><td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td><td>フィールド値</td></tr>
-<tr><td><span class="tt">&#35;&#35;フィールド名:n&#35;&#35;</span></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
-<tr><td class="nowrap"><span class="tt">&#35;&#35;フィールド名::h&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
-<tr><td><span class="tt">&#35;&#35;フィールド名:n:v&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
-<tr><td><span class="tt">&#35;&#35;SERIAL&#35;&#35;</span></td><td>シリアル番号</td></tr>
-<tr><td><span class="tt">&#35;&#35;NOW_DATE&#35;&#35;</span></td><td>送信日時</td></tr>
-<tr><td><span class="tt">&#35;&#35;REMOTE_HOST&#35;&#35;</span></td><td>接続元ホスト名</td></tr>
-<tr><td><span class="tt">&#35;&#35;REMOTE_ADDR&#35;&#35;</span></td><td>接続元IPアドレス</td></tr>
-<tr><td><span class="tt">&#35;&#35;USER_AGENT&#35;&#35;</span></td><td>使用ブラウザ名</td></tr>
-</table>
-</div>
-
-<div id="mail_format_type_1" style="display:none">
-<img src="img/type1.png" alt="タイプ1">
-</div>
-
-<div id="mail_format_type_2" style="display:none">
-<img src="img/type2.png" alt="タイプ2">
-</div>
-<div id="mail_format_type_3" style="display:none">
-<img src="img/type3.png" alt="タイプ3">
-</div>
-<div id="mail_format_type_0" style="display:none">
-<table class="tbl">
-<tr><td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td><td>フィールド値</td></tr>
-<tr><td><span class="tt">&#35;&#35;フィールド名:n&#35;&#35;</span></td><td>nは、複数行にまたがる文字列のインデント(半角スペースの数)を指定できます。</td></tr>
-<tr><td class="nowrap"><span class="tt">&#35;&#35;フィールド名::h&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、改行せず横方向に並べて表示します。</td></tr>
-<tr><td><span class="tt">&#35;&#35;フィールド名:n:v&#35;&#35;</span></td><td>同じ項目名に複数の答えがある場合、1つずつ改行して表示します。nはインデントです。</td></tr>
-<tr><td><span class="tt">&#35;&#35;SERIAL&#35;&#35;</span></td><td>シリアル番号</td></tr>
-<tr><td><span class="tt">&#35;&#35;NOW_DATE&#35;&#35;</span></td><td>送信日時</td></tr>
-<tr><td><span class="tt">&#35;&#35;REMOTE_HOST&#35;&#35;</span></td><td>接続元ホスト名</td></tr>
-<tr><td><span class="tt">&#35;&#35;REMOTE_ADDR&#35;&#35;</span></td><td>接続元IPアドレス</td></tr>
-<tr><td><span class="tt">&#35;&#35;USER_AGENT&#35;&#35;</span></td><td>使用ブラウザ名</td></tr>
-</table>
-</div>
-<div id="output_filename" style="display:none">
-<table class="tbl">
-<tr><td><span class="tt">%Y</span></td><td>西暦年(4ケタ)</td></tr>
-<tr><td><span class="tt">%M</span></td><td>月(01～12)</td></tr>
-<tr><td><span class="tt">%D</span></td><td>日(01～31)</td></tr>
-<tr><td><span class="tt">%H</span></td><td>時(00～23)</td></tr>
-<tr><td><span class="tt">%I</span></td><td>分(00～59)</td></tr>
-<tr><td><span class="tt">%S</span></td><td>秒(00～59)</td></tr>
-<tr><td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td><td>フィールド値</td></tr>
-</table>
-</div>
-
 
 <!-- footer -->

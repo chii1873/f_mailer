@@ -2,15 +2,16 @@
 
 <div id="to_page_title">フォーム設定一覧</div>
 
+<input type="hidden" name="confid" id="confid" value="">
+<input type="hidden" name="__token_ignore" id="__token_ignore" value="">
+
 <table class="tbl" id="tbl-p100">
 <thead>
 <tr>
-	<th>設定名</th>
 	<th>CONFID</th>
-	<th>設定ﾌｧｲﾙ名</th>
-	<th>拡張設定ﾌｧｲﾙ名</th>
-	<th>言語モード</th>
-	<th>最終更新日時</th>
+	<th>設定名</th>
+	<th>言語</th>
+	<th>ｼﾘｱﾙNo</th>
 	<th>操作</th>
 </tr>
 </thead>
@@ -19,13 +20,10 @@
 </tbody>
 </table>
 
-<p>
-	<span class="link link-to_101">新規追加</span>　 |　
-	<span class="link link-to_031">システム設定</span>　 |　
-	<span class="link link-to_021">管理用パスワードの変更</span>
-</p>
-<p>
-	<span class="link link-to_002">ログアウト</span>
-</p>
+<input type="button" value="新規追加" class="btn_s btn_submit" id="btn_submit_to_102">
+
+<div class="navi">
+	<input type="button" class="btn btn_to_menu" value="管理メニューへ">
+</div>
 
 <!-- footer -->

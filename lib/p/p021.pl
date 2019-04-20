@@ -6,7 +6,11 @@ sub p021 {
 
 	my ($p, @errmsg) = @_;
 
-	printhtml("tmpl/admin/$p.html", \@errmsg);
+	printhtml_admin("$p.html",
+		"errmsg" => \@errmsg,
+	);
 	exit;
 
 }
+
+1;

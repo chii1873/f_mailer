@@ -35,13 +35,93 @@ sub comma {
 
 }
 
+sub conf_read {
+
+	my ($confid, $json, $p) = @_;
+
+	if ($confid) {
+		if ($confid !~ /^\d{6}|sample$/) {
+			error(get_errmsg("470"));
+		}
+		my $file = get_conffile_by_id($confid);
+		if (-e "data/conf/$file.json") {
+			open(my $fh, "<", "data/conf/$file.json") or error(get_errmsg("612", $!, $confid));
+			$json = <$fh>;
+			close($fh);
+		}
+	} elsif (! $json) {
+		error(get_errmsg("612", $!, $confid));
+	}
+
+	my %conf = %{ json_decode($json) };
+	$conf{"ATTACH_EXT"} = join(" ", @{$conf{"ATTACH_EXT"}});
+	$conf{"cond"} = join(",", map { $_->[0] } @{$conf{"COND"}});
+	my @check_list = get_checklist();
+	for my $i(0..@{$conf{"COND"}}-1) {
+		my $fname = $conf{"COND"}[$i][0];
+		$conf{qq|_cond_type_$fname|} = $conf{"COND"}[$i][1]{"type"};
+		for my $row(@check_list) {
+			$conf{qq|_cond_$row->{"name"}_$fname|} = $conf{"COND"}[$i][1]{$row->{"name"}};
+		}
+	}
+	for my $i(1..@{$conf{"OUTPUT_FIELDS"}}) {
+		$conf{"order_".$conf{"OUTPUT_FIELDS"}[$i-1]} = $i;
+	}
+	$conf{"OUTPUT_FIELDS"} = join(",", @{$conf{"OUTPUT_FIELDS"}});
+	$conf{"DO_NOT_SEND"} ||= 0;
+	$conf{"cond"} = join(",", map { $_->[0] } @{$conf{"COND"}});
+	return %conf;
+}
+
+sub conf_write {
+
+	my ($confid, $file, %d) = @_;
+	if ($confid !~ /^\d{6}|sample$/) {
+		error(get_errmsg("470"));
+	}
+#	my $file = get_conffile_by_id($confid);
+	$d{"ATTACH_FIELDNAME"} = [ split(/[,\s]+/, $d{"ATTACH_FIELDNAME"}) ];
+	$d{"ATTACH_EXT"} = [split(/[,\s]+/, $d{"ATTACH_EXT"})];
+	$d{"OUTPUT_FIELDS"} = [ split(/,/, $d{"OUTPUT_FIELDS"}) ];
+
+	my @check_list = get_checklist();
+	my @confmeta = get_confmeta();
+	my %skip = map { $_->[0] => 1 } @confmeta;
+	$d{"COND"} = [];
+	my $i = 0;
+	for my $fname(split(/,/, $d{"cond"})) {
+		$d{"COND"}[$i][0] = $fname;
+		if (! $skip{$fname}) {
+			$d{"COND"}[$i][1]{"type"} = $d{qq|_cond_type_$fname|};
+			delete $d{qq|_cond_type_$fname|};
+		}
+		for my $row(@check_list) {
+			next if ($skip{$fname} and $row->{"name"} ne "alt");
+			if ($d{qq|_cond_$row->{"name"}_$fname|} ne "") {
+				$d{"COND"}[$i][1]{$row->{"name"}} = $d{qq|_cond_$row->{"name"}_$fname|};
+			}
+			delete $d{qq|_cond_$row->{"name"}_$fname|};
+		}
+		$i++;
+	}
+	### labelと英大文字で始まるキー以外のデータは削除
+	for (keys %d) {
+		next if ($_ eq "label" or /^[A-Z]/);
+		delete $d{$_};
+	}
+	open(my $fh, ">", "data/conf/$file.json") or error(get_errmsg("620", $!, $confid));
+	(my $json = json_encode(\%d)) =~ s/\\r\\n/\\n/g;
+	print $fh $json;
+	close($fh);
+}
+
 sub data_convert {
 
 	my %form = @_;
 
-	my $code = $CONF{FORM_TMPL_CHARSET} eq "auto"
-	 ? ($form{GETCODE} ? Unicode::Japanese->new($form{GETCODE})->getcode() : "utf8")
-	 : $CONF{FORM_TMPL_CHARSET};
+	my $code = $CONF{"FORM_TMPL_CHARSET"} eq "auto"
+	 ? ($form{"GETCODE"} ? Unicode::Japanese->new($form{"GETCODE"})->getcode() : "utf8")
+	 : $CONF{"FORM_TMPL_CHARSET"};
 
 	my %form2;
 	while (my($key, $value) = each %form) {
@@ -101,40 +181,44 @@ sub get_checklist {
 
 sub get_conffile_by_id {
 
-	my $conf_id = shift;
-	open(my $fh, "<", "data/conflist.cgi")
+	my $confid = shift;
+	open(my $fh, "<", "data/conflist.json")
 	 or error_(get_errmsg("210", $!));
-	while (<$fh>) {
-		my($id, $file, $label) = split(/\t/);
-		return $file if $id eq $conf_id;
-	}
+	my $json = json_decode(<$fh>);
 	close($fh);
-	error_(get_errmsg("211", $conf_id));
+	for my $d(@$json) {
+		return $d->{"file"} if $d->{"id"} eq $confid;
+	}
+	error_(get_errmsg("211", $confid));
 
 }
 
 sub get_conflist {
 
-	open(my $fh, "<", "data/conflist.cgi")
-	 or error(get_errmsg("220", $!));
 	my $conflist;
 	my @list;
-	while (<$fh>) {
-		chomp;
-		my($id, $file, $label, $lang, $date) = split(/\t/);
-		$conflist .= qq{<option value="$id">$label($id)</option>\n};
-		push(@list, { id=>$id, file=>$file, label=>$label, lang=>$lang, date=>$date });
+	my $json = conflist_read();
+	for my $d(@$json) {
+		$conflist .= qq{<option value="$d->{"id"}">$d->{"label"}($d->{"id"})</option>\n};
+		push(@list, $d);
 	}
-	close($fh);
 	return wantarray ? @list : $conflist;
 
+}
+
+sub get_confmeta {
+
+	open(my $fh, "<", "data/confmeta.json") or error(get_errmsg("221", $!));
+	my $confmeta = json_decode(<$fh>);
+	close($fh);
+	return @$confmeta;
 }
 
 sub get_cookie {
 
 	my $cookie_name = shift;
 	error(get_errmsg("230")) if !$cookie_name;
-	foreach (split(/; /, $ENV{HTTP_COOKIE})) {
+	foreach (split(/; /, $ENV{"HTTP_COOKIE"})) {
 		my($name, $value) = split(/=/);
 		if ($name eq $cookie_name) {
 			my @cookie_data = split(/\!\!\!/, $value);
@@ -147,7 +231,7 @@ sub get_cookie {
 
 sub get_datetime {
 
-	my $time = shift;
+	my $time = shift || time;
 
 	my($sec,$min,$hour,$mday,$mon,$year,$wday) = localtime($time);
 	sprintf("%04d-%02d-%02d %02d:%02d:%02d",
@@ -308,6 +392,20 @@ sub is_ascii {
 
 }
 
+sub is_email {
+
+	return $_[0] =~ /^[-_.!*a-zA-Z0-9\/&+%\#]+\@[-_.a-zA-Z0-9]+\.(?:[a-zA-Z]{2,4})$/ ? 1 : 0;
+ 
+}
+
+sub is_url {
+
+	my $url = shift;
+	return 1 if $url =~ m|^s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+$|;
+	return 0;
+
+}
+
 sub is_valid_date {
 
 #日付が存在するかチェックする
@@ -326,10 +424,21 @@ sub is_valid_date {
 
 }
 
-sub is_email {
+### 2019-04-12 PHPライクなJSONデータ対応
+sub json_decode {
+	my $json = shift;
+	my $decoded;
+	eval { $decoded = from_json($json); };
+	if ($@) {
+		error($@, $json, caller());
+	}
+	return $decoded;  # JSONデータ
+}
 
-	return $_[0] =~ /^[-_.!*a-zA-Z0-9\/&+%\#]+\@[-_.a-zA-Z0-9]+\.(?:[a-zA-Z]{2,4})$/ ? 1 : 0;
- 
+sub json_encode {
+	my $d = shift; # ハッシュまたは配列のリファレンス
+#	return JSON->new->ascii(1)->utf8(1)->encode($d);
+	return to_json($d);
 }
 
 sub load_errmsg {
@@ -795,7 +904,7 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.75pre190412},
+		version   => q{0.8pre190417},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{https://www.psl.ne.jp/},
 		copyright => q{&copy;1997-2019},
@@ -818,6 +927,15 @@ STR
 ###              ここまで                  ###
 ##############################################
 	return %PROD;
+
+}
+
+sub sysconf_read {
+
+	open(my $fh, "<", "data/sysconf.json") or error(get_errmsg("621", $!));
+	my $json = <$fh>;
+	close($fh);
+	return %{ json_decode($json) };
 
 }
 
@@ -874,14 +992,6 @@ sub temp_write {
 	close($fh);
 
 	return $form{$temp};
-
-}
-
-sub uri_escape {
-
-	my $str = shift;
-	$str =~ s/(\W)/'%' . unpack('H2', $1)/eg;
-	return $str;
 
 }
 

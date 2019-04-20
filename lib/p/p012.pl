@@ -6,7 +6,11 @@ sub p012 {
 
 	my ($p, @errmsg) = @_;
 
-	temp_del(2);  ### 2時間経過したtempファイルを削除
+	### ID=adminかつパスワード=12345のとき、強制的にパスワード変更画面に移動
+	if ($CONF{"session"}->param("login_id") == "admin"
+	 and passwd_compare("12345", passwd_read($CONF{"session"}->param("login_id")))) {
+		p("021", get_errmsg("700"));
+	}
 
 	my $list;
 	my %lang = map { $_->[0] => $_->[1] } get_langlist();

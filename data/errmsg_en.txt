@@ -3,7 +3,8 @@
 001	Failed to load configuration files: <v1>
 002	This type of file could not be loaded: <v1>
 003	CONFID is not specified.
-004	<v2> file could not be loaded: <v1>
+004	ext_<v2>.pl file could not be loaded: <v1>
+005	The ext-conffile could not be saved: <v1>
 090	Invalid access(no token).
 091	Invalid access(invalid token).
 100	Unable to send <v1>, Because Attached (<v2>) file extention is out of support.
@@ -17,9 +18,10 @@
 120	Temp could not be opened: <v1>
 121	Failed to load the attachment: <v1>
 200	data/check.txt could not be opened: <v1>
-210	data/conflist.cgi could not be opened: <v1>
+210	data/conflist.json could not be opened: <v1>
 211	The data of ID=<v1> is not exited.
-220	data/conflist.cgi could not be opened: <v1>
+220	data/conflist.json could not be opened: <v1>
+221	data/confmeta.json could not be opened: <v1>
 230	Please specify Cookie Name.
 240	<v2> could not be saved: <v1>
 241	The filesize of the upoaded file is 0.
@@ -50,6 +52,8 @@
 320	temp/<v2>-<v3> could not be loaded: <v1>
 400	Please enter the new password.
 401	Please verify your password again.
+402	Please enter the current password.
+403	The current password is invalid.
 405	Access Denied.
 410	No configuration file specified.
 411	data/conf/<v2> could not be loaded: <v1>
@@ -60,17 +64,26 @@
 430	<font color=red>Not specified</font>
 431	New
 432	(New)
-440	Could not retrieve HTML source from inputted URL.
-441	Please enter URL or HTML source.
+440	Please select the reading method of form html.
+441	Please enter URL.
+442	URL is invalid.
+443	Please enter HTML source.
+444	No input field is found from the source HTML.
 450	Serial Number file could not opened: <v1>
 451	Failed to generate the serial number file.: <v1>
+452	Failed to generate the directory for data output file.: <v1>
+453	Failed to delete the directory for data output file(./data/output/<v1>). Please remove it manually.
 460	Serial Number file could not opened: <v1>
-470	CONFID is not specified.
-471	data/conflist.cgi could not be opened.
-472	data/conflist.cgi could not be written.
+461	Serial Number file is not specified or invalid;
+470	CONFID is not specified or invalid.
+471	data/conflist.json could not be opened.
+472	data/conflist.json could not be written.
 473	./data/conf/<v1> could not be deleted. Please remove it manually.
 474	./data/confext/ext_<v1> could not be deleted. Please remove it manually.
 475	./data/serial/<v1> could not be deleted. Please remove it manually.
+476	./data/conf/default.json could not be opened.
+477	Please select the conffile to copy.
+478	The file type of uploaded file is invalid.: <v1>
 480	Please set the text color code.
 481	Please set the background color.
 482	Please set the link color.
@@ -113,7 +126,7 @@
 521	Please check the <v2> box of <v1>.
 522	If the <v2> box of <v1> is checked, the other boxes except <v3> could not be checked.
 523	If the <v2> box of <v1> is checked, <v3> filed for confirmation is requried.
-524	There is a filed that filed type is not specified. It only happens when the older versions of the configuration file has been imported. Please do "Read the form to set the input conditions".
+524	There is a field that filed type is not specified. Please do "Read the form to set the input conditions".
 530	Please select the sending mode.
 531	Please specify the sendmail path.
 532	The sendmail path doesn't exit.
@@ -143,12 +156,21 @@
 572	Are you sure to delete this setting?
 573	Delete
 574	(No entry)
+580	Specify the filename to download.
+581	The filename to download is invalid.
+582	The file you specified is not found.
 600	./data/conffields.txt could not be opened: <v1>
 601	Error message file(English) is not found.
 602	Could not open ./data directory: <v1>
 603	Could not open error message file(<v1>): <v2>
-610	./data/confext/ext_<v2> could not be loaded: <v1>
-611	data/conf/<v2> could not be loaded.
-620	./f_mailer_sysconf.pl could not be loaded: <v1>
+610	Could not write to data/confext/ext_<v2>: <v1>
+611	Could not open data/conf/<v2>: <v1>
+612	Could not write to data/conf/<v2>: <v1>
+620	Could not write to data/sysconf.json: <v1>
+621	Could not open data/sysconf.json: <v1>
 630	Password file could not be opened: <v1>
 640	Could not write to the password file: <v1>
+700	Please change the initial password.
+701	You cannot specify the initial password as new password.
+900	Access from <v1> ( <v2> ) is forbidden.
+901	conffile
