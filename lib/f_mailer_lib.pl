@@ -502,9 +502,9 @@ sub printhtml {
 	my($filename, %tr) = @_;
 
 	my $charset;
-	if (exists $tr{CHARSET}) {
-		$charset = $tr{CHARSET};
-		delete $tr{CHARSET};
+	if (exists $tr{"CHARSET"}) {
+		$charset = $tr{"CHARSET"};
+		delete $tr{"CHARSET"};
 	}
 	$charset ||= "auto";
 
@@ -535,15 +535,15 @@ sub printhtml_getpage {
 	if ($opt{filename} =~ /^http/) {
 		eval "use LWP::Simple;";
 		error_(get_errmsg("260", $@)) if $@;
-		$opt{filename} =~ s/##([^#]+)##/uri_escape($FORM{$1})/eg;
-		$htmlstr = encode_utf8(get($opt{filename}));
+		$opt{"filename"} =~ s/##([^#]+)##/uri_escape($FORM{$1})/eg;
+		$htmlstr = encode_utf8(get($opt{"filename"}));
 	} else {
-		open(my $fh, "<", $opt{filename}) or error_(get_errmsg("261", $@, $opt{filename}));
+		open(my $fh, "<", $opt{"filename"}) or error_(get_errmsg("261", $@, $opt{"filename"}));
 		$htmlstr = join("", <$fh>);
 		close($fh);
 	}
 	my $code;
-	if ($ENV{SCRIPT_FILENAME} =~ m#admin# or $opt{filename} =~ m#\./tmpl/default/#) {
+	if ($ENV{"SCRIPT_FILENAME"} =~ m#admin# or $opt{filename} =~ m#\./tmpl/default/#) {
 		$charset = "utf8";
 	} else{
 		my $code = $charset || Unicode::Japanese->new($htmlstr)->getcode() || "utf8";
@@ -552,18 +552,18 @@ sub printhtml_getpage {
 	### 2013-10-30 常にコード変換する(utf-8→utf-8の文字化け回避)
 		$htmlstr = Unicode::Japanese->new($htmlstr, $charset)->get if $charset ne "utf8";
 	}
-	$htmlstr =~ s/<!-- header -->/$opt{header}/;
-	$htmlstr =~ s/<!-- footer -->/$opt{footer}/;
-	$htmlstr =~ s/<!-- errmsg -->/mk_errmsg($opt{errmsg})/e;
+	$htmlstr =~ s/<!-- header -->/$opt{"header"}/;
+	$htmlstr =~ s/<!-- footer -->/$opt{"footer"}/;
+	$htmlstr =~ s/<!-- errmsg -->/mk_errmsg($opt{"errmsg"})/e;
 	######################################################################
 	### 下の処理を変更しないでください。                               ###
 	### 各ページのフッタ部分の著作権表示をなくしたい場合は、届け出の上 ###
 	### 利用規約第10条第5項の料金をお支払いいただきます。              ###
 	### http://www.psl.ne.jp/lab/copyright.html                        ###
 	######################################################################
-	$htmlstr =~ s/##COPYRIGHT##/$ENV{SCRIPT_FILENAME} =~ m#admin# ? $CONF{copyright_html_footer_admin} : $CONF{copyright_html_footer}/eg;
-	$htmlstr =~ s/##prod_name##/$CONF{prod_name}/g;
-	$htmlstr =~ s/##version##/$CONF{version}/g;
+	$htmlstr =~ s/##COPYRIGHT##/$ENV{"SCRIPT_FILENAME"} =~ m#admin# ? $CONF{"copyright_html_footer_admin"} : $CONF{"copyright_html_footer"}/eg;
+	$htmlstr =~ s/##prod_name##/$CONF{"prod_name"}/g;
+	$htmlstr =~ s/##version##/$CONF{"version"}/g;
 	($charset, $htmlstr);
 }
 
@@ -585,11 +585,10 @@ sub printhtml_output {
 
 sub remote_host {
 
-	if ($ENV{REMOTE_HOST} eq $ENV{REMOTE_ADDR} or $ENV{REMOTE_HOST} eq '') {
-		gethostbyaddr(pack('C4',split(/\./,$ENV{REMOTE_ADDR})),2)
-		 or $ENV{REMOTE_ADDR};
+	if ($ENV{"REMOTE_HOST"} eq $ENV{"REMOTE_ADDR"} or $ENV{"REMOTE_HOST"} eq '') {
+		gethostbyaddr(pack('C4', split(/\./, $ENV{"REMOTE_ADDR"})), 2) or $ENV{"REMOTE_ADDR"};
 	} else {
-		$ENV{REMOTE_HOST};
+		$ENV{"REMOTE_HOST"};
 	}
 }
 
@@ -607,7 +606,7 @@ sub replace {
 		$value = nl2br($value);
 	}
 
-	$value eq '' ? $CONF{BLANK_STR} : $value;
+	$value eq '' ? $CONF{"BLANK_STR"} : $value;
 
 }
 
@@ -633,17 +632,17 @@ sub sendmail {
 
 	my %opt = @_;
 
-	$opt{envelope} = "-f $opt{envelope}" if $opt{envelope};
+	$opt{"envelope"} = qq|-f $opt{"envelope"}| if $opt{"envelope"};
 
 	if ($opt{fromname}) {
-		$opt{fromname} = qq{"$opt{fromname}" <$opt{from}>};
+		$opt{"fromname"} = qq{"$opt{"fromname"}" <$opt{"from"}>};
 	} else {
-		$opt{fromname} = $opt{from};
+		$opt{"fromname"} = $opt{"from"};
 	}
 	my $date = get_datetime_for_mailheader(time);
 
 	### Net::SMTPモード
-	if ($CONF{SENDMAIL_FLAG}) {
+	if ($CONF{"SENDMAIL_FLAG"}) {
 
 		eval qq{use Net::SMTP};
 		error_("Net::SMTPがインストールされていません。: $@") if $@;
@@ -654,53 +653,52 @@ sub sendmail {
 			error_("Authen::SASLがインストールされていません。: $@") if $@;
 		}
 
-		$smtp ||= Net::SMTP->new($CONF{SMTP_HOST})
+		$smtp ||= Net::SMTP->new($CONF{"SMTP_HOST"})
 		 or error("Net::SMTPで$CONF{SMTP_HOST}へ接続できませんでした。: $!");
 		my $date = get_datetime_for_mailheader(time);
 
 		if ($CONF{USE_SMTP_AUTH}) {
-			$smtp->auth($CONF{SMTP_AUTH_ID}, $CONF{SMTP_AUTH_PASSWD})
+			$smtp->auth($CONF{"SMTP_AUTH_ID"}, $CONF{"SMTP_AUTH_PASSWD"})
 			 or do { $smtp->quit; error('authメソッド失敗: ' .$!); };
 		}
-		$smtp->mail($opt{envelope} || $opt{from});
-		$smtp->to($opt{mailto});
-		if ($opt{cc}) {
-			$smtp->cc(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc}));
+		$smtp->mail($opt{"envelope"} || $opt{"from"});
+		$smtp->to($opt{"mailto"});
+		if ($opt{"cc"}) {
+			$smtp->cc(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"cc"}));
 		}
-		if ($opt{bcc}) {
-			$smtp->bcc(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{bcc}));
+		if ($opt{"bcc"}) {
+			$smtp->bcc(split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"bcc"}));
 		}
 		$smtp->data();
 		$smtp->datasend("Date: $date\n");
-		$smtp->datasend("To: $opt{mailto}\n");
+		$smtp->datasend(qq|To: $opt{"mailto"}\n|);
 		if ($opt{cc}) {
-			$smtp->datasend("Cc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc})). "\n");
+			$smtp->datasend("Cc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"cc"})). "\n");
 		}
 		if ($opt{bcc}) {
-			$smtp->datasend("Bcc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{bcc})). "\n");
+			$smtp->datasend("Bcc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"bcc"})). "\n");
 		}
-		$smtp->datasend("From: $opt{fromname}\n");
-		$smtp->datasend("Subject: $opt{subject}\n");
-		$smtp->datasend($opt{mailstr});
+		$smtp->datasend(qq|From: $opt{"fromname"}\n|);
+		$smtp->datasend(qq|Subject: $opt{"subject"}\n|);
+		$smtp->datasend($opt{"mailstr"});
 		$smtp->dataend();
 
 	### sendmailモード
 	} else {
 
-#		open(my $mail, "| $CONF{SENDMAIL} -t $opt{envelope}")
-		open(my $mail, "| $CONF{SENDMAIL} -t")
+		open(my $mail, qq#| $CONF{"SENDMAIL"} -t#)
 			 or error(get_errmsg("270", $!));
 		print $mail "Date: $date\n";
-		print $mail "To: $opt{mailto}\n";
-		if ($opt{cc}) {
-			print $mail "Cc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{cc})), "\n";
+		print $mail qq|To: $opt{"mailto"}\n|;
+		if ($opt{"cc"}) {
+			print $mail "Cc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"cc"})), "\n";
 		}
-		if ($opt{bcc}) {
-			print $mail "Bcc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{bcc})), "\n";
+		if ($opt{"bcc"}) {
+			print $mail "Bcc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"bcc"})), "\n";
 		}
-		print $mail "From: $opt{fromname}\n";
-		print $mail "Subject: $opt{subject}\n";
-		print $mail $opt{mailstr};
+		print $mail qq|From: $opt{"fromname"}\n|;
+		print $mail qq|Subject: $opt{"subject"}\n|;
+		print $mail $opt{"mailstr"};
 		close($mail) or error(get_errmsg("271", $!));
 
 	}
@@ -811,7 +809,7 @@ STR
 	my $indent = (" " x length($mark));
 	my %skip = map { $_ => 1 } reserved_words();
 	foreach my $name(@$name_list_ref) {
-		next if $CONF{BLANK_SKIP} and $FORM{$name} eq '';
+		next if $CONF{"BLANK_SKIP"} and $FORM{$name} eq '';
 		next if $skip{$name};
 		my $name_dsp = $alt{$name} || $name;
 		my $value_dsp = $FORM{$name};
@@ -846,8 +844,8 @@ STR
 sub set_errmsg {
 
 	my %opt = @_;
-	my $str = $CONF{errmsg}{$opt{key}};
-	$opt{str} =~ s/##f_name##/$opt{f_name}/g;
+	my $str = $CONF{"errmsg"}{$opt{"key"}};
+	$opt{"str"} =~ s/##f_name##/$opt{f_name}/g;
 	$str =~ s/##$_##/$opt{$_}/g for qw(f_name cond cond2 eval str);
 	return $str;
 
@@ -855,38 +853,36 @@ sub set_errmsg {
 
 sub set_errmsg_init {
 
-	%ERRMSG = load_errmsg($CONF{LANG});
+	%ERRMSG = load_errmsg($CONF{"LANG"});
 
 	### 2008-6-12 暫定的にこの位置に指定
 	### 管理画面で設定できるようにする
-	$CONF{errmsg} = {
-	# ##f_name##…フィールド名
-	# ##cond##…min/max条件で、上限あるいは下限値
-	# ##eval##…regex/regex2条件で、evalに失敗したときに返される$@の値
-	# ##str##…required条件で、
-	#           radio/checkbox/selectは「required_choose」
-	#           その他は「required_input」
-	compare  => get_errmsg("290",  "##f_name##"),
-	d_only   => get_errmsg("291",  "##f_name##"),
-#	deny_rel => q|##f_name##を正しく入力してください。|,
-	email    => get_errmsg("292",  "##f_name##"),
-	hira_only=> get_errmsg("293",  "##f_name##"),
-	kata_only=> get_errmsg("294",  "##f_name##"),
-#	len_max  => q|##f_name##は##cond##文字(半角)以下で入力してください。|,
-	len_max  => get_errmsg("295",  "##f_name##", "##cond2##"),
-	num_max  => get_errmsg("296",  "##f_name##", "##cond##"),
-	max      => get_errmsg("297",  "##f_name##", "##cond##"),
-	len_min  => get_errmsg("298",  "##f_name##", "##cond##"),
-	num_min  => get_errmsg("299",  "##f_name##", "##cond##"),
-	min      => get_errmsg("300",  "##f_name##", "##cond##"),
-	regex    => get_errmsg("292",  "##f_name##"),
-	regex2   => get_errmsg("292",  "##f_name##"),
-	regex_eval_error => get_errmsg("301",  "##f_name##", "##eval##"),
-	required => get_errmsg("302",  "##f_name##", "##str##"),
-	required_choose => get_errmsg("303"),
-	required_input  => get_errmsg("304"),
-	required_upload => get_errmsg("305"),
-	url      => get_errmsg("292",  "##f_name##"),
+	### ##f_name##…フィールド名
+	### ##cond##…min/max条件で、上限あるいは下限値
+	### ##eval##…regex/regex2条件で、evalに失敗したときに返される$@の値
+	### ##str##…required条件で、
+	###           radio/checkbox/selectは「required_choose」
+	###           その他は「required_input」
+	$CONF{"errmsg"} = {
+		"compare"		=> get_errmsg("290",  "##f_name##"),
+		"d_only"		=> get_errmsg("291",  "##f_name##"),
+		"email"			=> get_errmsg("292",  "##f_name##"),
+		"hira_only"		=> get_errmsg("293",  "##f_name##"),
+		"kata_only"		=> get_errmsg("294",  "##f_name##"),
+		"len_max"		=> get_errmsg("295",  "##f_name##", "##cond2##"),
+		"num_max"		=> get_errmsg("296",  "##f_name##", "##cond##"),
+		"max"			=> get_errmsg("297",  "##f_name##", "##cond##"),
+		"len_min"		=> get_errmsg("298",  "##f_name##", "##cond##"),
+		"num_min"		=> get_errmsg("299",  "##f_name##", "##cond##"),
+		"min"			=> get_errmsg("300",  "##f_name##", "##cond##"),
+		"regex"			=> get_errmsg("292",  "##f_name##"),
+		"regex2"		=> get_errmsg("292",  "##f_name##"),
+		"regex_eval_error"	=> get_errmsg("301",  "##f_name##", "##eval##"),
+		"required"		=> get_errmsg("302",  "##f_name##", "##str##"),
+		"required_choose"	=> get_errmsg("303"),
+		"required_input"	=> get_errmsg("304"),
+		"required_upload"	=> get_errmsg("305"),
+		"url"			=> get_errmsg("292",  "##f_name##"),
 	};
 
 }
@@ -894,7 +890,7 @@ sub set_errmsg_init {
 sub setalt {
 
 	my %alt;
-	foreach (@{$CONF{COND}}) { $alt{$_->[0]} = $_->[1]->{alt}; }
+	foreach (@{$CONF{"COND"}}) { $alt{$_->[0]} = $_->[1]->{"alt"}; }
 	return %alt;
 }
 
@@ -910,15 +906,15 @@ sub setver {
 		copyright => q{&copy;1997-2019},
 		copyright2 => q{(c)1997-2019},
 	);
-	chomp($PROD{copyright_html_footer} = <<STR);
-<a href="$PROD{a_url}" target="_blank"><strong>$PROD{prod_name} v$PROD{version}</strong></a>
+	chomp($PROD{"copyright_html_footer"} = <<STR);
+<a href="$PROD{"a_url"}" target="_blank"><strong>$PROD{"prod_name"} v$PROD{"version"}</strong></a>
 STR
-	chomp($PROD{copyright_html_footer_admin} = <<STR);
-<strong>$PROD{prod_name} v$PROD{version}</strong>
-$PROD{copyright} <a href="$PROD{a_url}" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
+	chomp($PROD{"copyright_html_footer_admin"} = <<STR);
+<strong>$PROD{"prod_name"} v$PROD{"version"}</strong>
+$PROD{"copyright"} <a href="$PROD{"a_url"}" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
 STR
 
-	chomp($PROD{copyright_mail_footer} = <<STR);
+	chomp($PROD{"copyright_mail_footer"} = <<STR);
 ----
 $PROD{"copyright2"} $PROD{"prod_name"} v$PROD{"version"}
 $PROD{"a_url"}
