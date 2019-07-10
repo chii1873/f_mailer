@@ -5,19 +5,21 @@
 <title>##TITLE##</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <link type="text/css" rel="stylesheet" href="css/style_custom.css" />
+<script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="js/f_mailer.js"></script>
 </head>
 <body>
 <div id="header">
 &nbsp;
 </div>
-
+<div id="page_title">##TITLE##</div>
+<div id="contents">
 <div id="main">
 
-<h2>##TITLE##</h2>
-
-<p>送信内容を確認します。<br />
-内容が正しい場合は<b>送信</b>ボタンを押してください。<br />
-訂正する場合は<b>戻る</b>ボタンで前のページへ戻って訂正してください。
+<p>
+	送信内容を確認します。<br />
+	内容が正しい場合は<span class="b">送信</span>ボタンを押してください。<br />
+	訂正する場合は<span class="b">戻る</span>ボタンで前のページへ戻って訂正してください。
 </p>
 
 <table class="tbl">
@@ -25,18 +27,22 @@
 </table>
 
 <!-- ###### 以下のタグは必ず指定してください ###### -->
-<form action="f_mailer.cgi" method="post">
+<form action="f_mailer.cgi" method="post" id="f0">
 <fieldset>
 <input type="hidden" name="CONFID" value="##CONFID##" />
 <input type="hidden" name="TEMP" value="##TEMP##" />
+<input type="hidden" name="__token" value="" id="__token" />
+<input type="hidden" name="__token_ignore" value="" id="__token_ignore" />
+<input type="hidden" name="FORM" value="" />
 <input type="hidden" name="SEND_FORCED" value="1" />
 
-<input type="submit" value="送　信" />
-<input type="button" value="戻　る" onclick="history.back()" />
+<input type="button" value="送　信" class="btn btn_send_default" />
+<input type="button" value="戻　る" class="btn btn_back_default" />
 </fieldset>
 </form>
 <!-- ###### ここまで ############################### -->
 
+</div>
 </div>
 
 <div id="footer">
