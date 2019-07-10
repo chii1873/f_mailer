@@ -6,145 +6,141 @@ use HTML::SimpleParse;
 
 sub get_output_form {
 
-    my($phase, $content, %d) = @_;   ### 差し込みデータ
-    {
-        my %d_;
-        while (my($k, $v) = each %d) {
-            $k = Unicode::Japanese->new($k, "utf8")->get;
-            $v = Unicode::Japanese->new($v, "utf8")->get;
-            $d_{$k} = $v;
-        }
-        %d = %d_;
-    }
+	my($phase, $content, %d) = @_;   ### 差し込みデータ
+	{
+		my %d_;
+		while (my($k, $v) = each %d) {
+			$k = Unicode::Japanese->new($k, "utf8")->get;
+			$v = Unicode::Japanese->new($v, "utf8")->get;
+			$d_{$k} = $v;
+		}
+		%d = %d_;
+	}
 
-    my $p = new HTML::SimpleParse($content);
-    my %is_formtag = map { $_ => 1 } qw(input select textarea);
-    my $output;   ### 出力用htmlデータ
-    my $select_flag = 0; # select/textareaの閉じ対応チェック用
-    my $option_flag = 0;
-    my $textarea_flag = 0;
-    my $now_name; # optionタグのname保持用
-    my $option_stack; # optionタグのvalue用コンテナ
+	my $p = new HTML::SimpleParse($content);
+	my %is_formtag = map { $_ => 1 } qw(input select textarea);
+	my $output;   ### 出力用htmlデータ
+	my $select_flag = 0; # select/textareaの閉じ対応チェック用
+	my $option_flag = 0;
+	my $textarea_flag = 0;
+	my $now_name; # optionタグのname保持用
+	my $option_stack; # optionタグのvalue用コンテナ
 
-    foreach ($p->tree) {
-        my %c = %$_;
-        @c{qw(tagname content_)} = split(/\s+/, $c{content}, 2);
-        $c{tagname} = lc($c{tagname});
-        if ($c{type} eq "starttag") {
-            my %h = $p->parse_args( $c{content_} );
-            { my %h_; for (keys %h) { $h_{lc($_)} = $h{$_} }; %h = %h_ }
-            if ($c{tagname} eq "input") {
-                $h{type} = lc($h{type});
-                if ($h{type} eq "" or $h{type} eq "text" or $h{type} eq "password" or $h{type} eq "email" or $h{type} eq "tel") {
-                    $h{value} = h($d{$h{name}});
-                } elsif ($h{type} eq "checkbox" or $h{type} eq "radio") {
-                    if (exists $d{"$h{name}\0$h{value}"}) {
-                        $h{checked} = q|checked|;
-                    } else {
-                        delete $h{checked} if exists $h{checked};
-                    }
-                } elsif ($h{type} eq "image") {
-                    $h{src} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{src}
-                     unless $h{src} =~ m#^(?:/|https*)#i;
-                } elsif ($h{type} eq "hidden") {
-                    unless (exists $h{value} and $d{$h{name}} eq "") {
-                        $h{value} = h($d{$h{name}});
-                    }
-                }
-                $output .= get_output_form_remake_tag($c{tagname}, %h);
-            } elsif ($c{tagname} eq "select") {
-                $select_flag = 1;
-                $now_name = $h{name};
-                $output .= "<$c{content}>";
-            } elsif ($c{tagname} eq "textarea") {
-                $textarea_flag = 1;
-                $now_name = $h{name};
-                $output .= "<$c{content}>";
-            } elsif ($c{tagname} eq "option") {
-                if ($option_stack) {
-                    %h = (%h, %$option_stack);
-                    $option_stack = undef;
-                    $output .= get_output_form_set_option_tag($now_name, \%h, \%d);
-                }
-                if (exists $h{value}) {
-                    $output .= get_output_form_set_option_tag($now_name, \%h, \%d);
-                } else {
-                    $option_stack = {%h};
-                }
-            } elsif ($c{tagname} eq "form" and $h{action} =~ /f_mailer\.cgi$/) {
-                $output .= get_output_form_remake_tag($c{tagname}, %h, action=>"f_mailer.cgi");
-            } elsif ($c{tagname} eq "a" or $c{tagname} eq "link") {
-                $h{href} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{href}
-                 unless $h{href} =~ m{^(?:/|https*|javascript|#)}i;
-                $output .= get_output_form_remake_tag($c{tagname}, %h);
-            } elsif ($c{tagname} eq "img" or $c{tagname} eq "script") {
-                $h{src} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{src}
-                 if defined $h{src} and $h{src} !~ m#^(?:/|https*)#i;
-                $output .= get_output_form_remake_tag($c{tagname}, %h);
-            } else {
-                $output .= "<$c{content}>"; # returns as-is
-            }
+	foreach ($p->tree) {
+		my %c = %$_;
+		@c{qw(tagname content_)} = split(/\s+/, $c{"content"}, 2);
+		$c{"tagname"} = lc($c{"tagname"});
+		if ($c{"type"} eq "starttag") {
+			my %h = $p->parse_args( $c{"content_"} );
+			{ my %h_; for (keys %h) { $h_{lc($_)} = $h{$_} }; %h = %h_ }
+			if ($c{"tagname"} eq "input") {
+				$h{"type"} = lc($h{"type"});
+				if ($h{"type"} =~ /^(?:|text|hidden|password|tel|email)$/) {
+					$h{"value"} = h($d{$h{"name"}});
+				} elsif ($h{"type"} eq "checkbox" or $h{"type"} eq "radio") {
+					if (exists $d{qq|$h{"name"}\0$h{"value"}|}) {
+						$h{"checked"} = q|checked|;
+					} else {
+						delete $h{"checked"} if exists $h{"checked"};
+					}
+				} elsif ($h{"type"} eq "image") {
+					$h{"src"} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{"src"} unless $h{"src"} =~ m#^(?:/|https*)#i;
+				} elsif ($h{"type"} eq "hidden") {
+					unless (exists $h{value} and $d{$h{"name"}} eq "") {
+						$h{"value"} = h($d{$h{"name"}});
+					}
+				}
+				$output .= get_output_form_remake_tag($c{"tagname"}, %h);
+			} elsif ($c{"tagname"} eq "select") {
+				$select_flag = 1;
+				$now_name = $h{"name"};
+				$output .= qq|<$c{"content"}>|;
+			} elsif ($c{"tagname"} eq "textarea") {
+				$textarea_flag = 1;
+				$now_name = $h{"name"};
+				$output .= qq|<$c{"content"}>|;
+			} elsif ($c{"tagname"} eq "option") {
+				if ($option_stack) {
+					%h = (%h, %$option_stack);
+					$option_stack = undef;
+					$output .= get_output_form_set_option_tag($now_name, \%h, \%d);
+				}
+				if (exists $h{"value"}) {
+					$output .= get_output_form_set_option_tag($now_name, \%h, \%d);
+				} else {
+					$option_stack = {%h};
+				}
+			} elsif ($c{"tagname"} eq "form" and $h{action} =~ /f_mailer\.cgi$/) {
+				$output .= get_output_form_remake_tag($c{"tagname"}, %h, action=>"f_mailer.cgi");
+			} elsif ($c{"tagname"} eq "a" or $c{"tagname"} eq "link") {
+				$h{"href"} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{"href"} unless $h{"href"} =~ m{^(?:/|https*|javascript|#)}i;
+				$output .= get_output_form_remake_tag($c{"tagname"}, %h);
+			} elsif ($c{"tagname"} eq "img" or $c{"tagname"} eq "script") {
+				$h{src} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{src}
+				 if defined $h{"src"} and $h{"src"} !~ m#^(?:/|https*)#i;
+				$output .= get_output_form_remake_tag($c{"tagname"}, %h);
+			} else {
+				$output .= qq|<$c{"content"}>|; # returns as-is
+			}
 
-        } elsif ($c{type} eq "text") {
-            if ($select_flag) {
-                if ($option_stack) {
-                    my ($content, $space) = $c{content} =~ /^(.*)(\s*)$/;
-                    $option_stack->{value} = $content;
-#                    $output .= get_output_form_set_option_tag($now_name, $option_stack, \%d);
-#                    $output .= $space;
-                } else {
-                    $output .= $c{content};
-                }
-            } elsif ($textarea_flag) {
-                1;  # skip -- endtagで処理
-            } else {
-                $output .= $c{content};
-            }
-        } elsif ($c{type} eq "endtag") {
-            if ($c{tagname} eq "/textarea") {
-                $output .= h($d{$now_name});
-                $textarea_flag = 0;
-            } elsif ($c{tagname} eq "/option" or $c{tagname} eq "/select") {
-                if ($option_stack) {
-                    my %h = %$option_stack;
-                    $option_stack = undef;
-                    $output .= get_output_form_set_option_tag($now_name, \%h, \%d);
-                }
-                $select_flag = 0;
-            }
-            $output .= qq|<$c{tagname}>|;
-        } else {
-            $output .= "<$c{content}>";
-        }
-    }
+		} elsif ($c{"type"} eq "text") {
+			if ($select_flag) {
+				if ($option_stack) {
+					my ($content, $space) = $c{"content"} =~ /^(.*)(\s*)$/;
+					$option_stack->{value} = $content;
+				} else {
+					$output .= $c{"content"};
+				}
+			} elsif ($textarea_flag) {
+				1;  # skip -- endtagで処理
+			} else {
+				$output .= $c{"content"};
+			}
+		} elsif ($c{"type"} eq "endtag") {
+			if ($c{"tagname"} eq "/textarea") {
+				$output .= h($d{$now_name});
+				$textarea_flag = 0;
+			} elsif ($c{"tagname"} eq "/option" or $c{"tagname"} eq "/select") {
+				if ($option_stack) {
+					my %h = %$option_stack;
+					$option_stack = undef;
+					$output .= get_output_form_set_option_tag($now_name, \%h, \%d);
+				}
+				$select_flag = 0;
+			}
+			$output .= qq|<$c{"tagname"}>|;
+		} else {
+			$output .= qq|<$c{"content"}>|;
+		}
+	}
 
-    return $output;
+	return $output;
 
 }
 
 sub get_output_form_remake_tag {
 
-    my($tagname, %h) = @_;
+	my($tagname, %h) = @_;
 
-    return "<$tagname "
-     . join(" ", (map { qq|$_="|.scalar($h{$_}=~s/"/&quot;/g,$h{$_}).qq|"| }
-      sort grep { $_ ne "/" } keys %h), $tagname =~ /(?:input|img|link)$/ ? "/" : ())
-     . ">";
+	return "<$tagname "
+	 . join(" ", (map { qq|$_="|.scalar($h{$_}=~s/"/&quot;/g,$h{$_}).qq|"| }
+	  sort grep { $_ ne "/" } keys %h), $tagname =~ /(?:input|img|link)$/ ? "/" : ())
+	 . ">";
 
 }
 
 sub get_output_form_set_option_tag {
 
-    my($now_name, $h, $d) = @_;
-    my %h = %$h;
-    my %d = %$d;
+	my($now_name, $h, $d) = @_;
+	my %h = %$h;
+	my %d = %$d;
 
-    if (exists $d{"$now_name\0$h{value}"}) {
-        $h{selected} = q|selected|;
-    } else {
-        delete $h{selected} if exists $h{selected};
-    }
-    return get_output_form_remake_tag("option", %h);
+	if (exists $d{qq|$now_name\0$h{"value"}|}) {
+		$h{"selected"} = "selected";
+	} else {
+		delete $h{"selected"} if exists $h{"selected"};
+	}
+	return get_output_form_remake_tag("option", %h);
 
 }
 
