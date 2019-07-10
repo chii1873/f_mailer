@@ -743,56 +743,6 @@ sub set_cookie {
 
 }
 
-sub set_default_confirm_format {
-
-	my $title = html_output_escape($CONF{TITLE});
-	my $default_confirm_format = <<STR;
-<html>
-<head>
-<title>$title</title>
-<style>
-$CONF{STYLE}
-</style>
-</head>
-<body text="$CONF{TEXT}" bgcolor="$CONF{BGCOLOR}" link="$CONF{LINK}" vlink="$CONF{VLINK}" alink="$CONF{ALINK}" background="$CONF{BACKGROUND}">
-<h2>$title</h2>
-
-送信内容を確認します。<br>
-内容が正しい場合は<b>送信</b>ボタンを押してください。<br>
-訂正する場合は<b>戻る</b>ボタンで前のページへ戻って訂正してください。<p>
-<form action=f_mailer.cgi method=post>
-<table border cellpadding=3 cellspacing=0>
-<tr><th>項　目</th><th>内　容</th></tr>
-STR
-
-	my %reserved_words = map { $_ => 1 } reserved_words();
-	foreach (@{$CONF{COND}}) {
-		my($f_name, $cond_hash) = @$_;
-		$reserved_words{"${f_name}2"} = 1 if $cond_hash->{verify};
-	}
-	foreach my $name(@{$CONF{name_list}}) {
-		next if $reserved_words{$name};
-		next if $CONF{BLANK_SKIP} and $FORM{$name} eq '';
-		my $name_dsp = $alt{$name} || $name;
-		$default_confirm_format .= <<STR;
-<tr><th>$name_dsp</th><td>##$name##</td></tr>
-STR
-	}
-
-	$default_confirm_format .= <<STR;
-</table><p>
-##VALUES##
-<input type=submit value=送　信>
-<input type=button value=戻　る onclick=history.back()>
-</form>
-$CONF{copyright_html_footer}
-</body></html>
-STR
-
-	$default_confirm_format;
-
-}
-
 sub set_default_mail_format {
 
 	my %opt = @_;
