@@ -10,7 +10,7 @@ sub p121 {
 		error(get_errmsg("470"));
 	}
 
-	%FORM = (%FORM, @errmsg ? %{ $CONF{"session"}->param("p111_data") } : conf_read($FORM{"confid"}));
+	%FORM = (%FORM, @errmsg ? %{ $CONF{"session"}->param("p111_data") } : conf_read_to_temp($FORM{"confid"}));
 
 	require "p/p111_mkcondlist.pl";
 	my %tmpl = p111_mkcondlist(%FORM);

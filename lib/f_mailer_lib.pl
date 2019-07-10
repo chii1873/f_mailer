@@ -53,7 +53,15 @@ sub conf_read {
 		error(get_errmsg("612", $!, $confid));
 	}
 
-	my %conf = %{ json_decode($json) };
+	return %{ json_decode($json) };
+}
+
+sub conf_read_to_temp {
+
+	my ($confid, $json, $p) = @_;
+
+	my %conf = conf_read($confid, $json, $p);
+
 	$conf{"ATTACH_EXT"} = join(" ", @{$conf{"ATTACH_EXT"}});
 	$conf{"cond"} = join(",", map { $_->[0] } @{$conf{"COND"}});
 	my @check_list = get_checklist();
@@ -71,6 +79,7 @@ sub conf_read {
 	$conf{"DO_NOT_SEND"} ||= 0;
 	$conf{"cond"} = join(",", map { $_->[0] } @{$conf{"COND"}});
 	return %conf;
+
 }
 
 sub conf_write {
@@ -153,6 +162,23 @@ sub decoding {
 		push(@name_list, $name) unless $form_name_cnt{$name}++;
 	}
 	return \@name_list, %form;
+
+}
+
+sub error {
+
+	error_(@_) unless $CONF{"LANG"};
+
+	output_form("ERROR", \@_) if $CONF{"ERROR_FLAG"};
+
+	my $errmsg = mk_errmsg(\@_);
+
+	printhtml(qq|./tmpl/default/@{[ $CONF{"LANG"} or $CONF{"LANG_DEFAULT"} ]}/error.html|,
+	 "CHARSET"=> "sjis",
+	 (map { $_ => $CONF{$_} } keys %CONF),
+	 "errmsg" => $errmsg,
+	);
+	 exit;
 
 }
 

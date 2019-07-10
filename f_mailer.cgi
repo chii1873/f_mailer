@@ -1,65 +1,57 @@
 #!/usr/bin/perl
+#BEGIN{ print "Content-type: text/html\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
 
 use strict;
 use lib qw(./module ./lib);
-use vars qw($q %FORM %CONF $name_list_ref %alt $conffile %ERRMSG);
+use vars qw($q %FORM %CONF $name_list_ref %alt %ERRMSG);
 #use utf8;
 use Encode;
 use CGI;
-use CGI::Carp qw(fatalsToBrowser);
 use Unicode::Japanese;
+use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session;
+use HTML::SimpleParse;
+use Data::Dumper;
+use JSON;
 use Fcntl ':flock';
 use String::Util qw(trim);
-use JSON;
-use URI::Escape;
 use Digest::MD5  qw(md5_hex);
-
-#BEGIN{ print "Content-type: text/html\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
-
-### for dedug
-use CGI::Carp qw(fatalsToBrowser);
-use Data::Dumper;
-sub d { die Dumper @_ }
-#error_(Dumper($CONF{"COND"}));
+use URI::Escape;
 use Carp 'verbose';
 $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
-
-require "f_mailer_lib.pl";
-require "f_mailer_sysconf.pl";
-require "f_mailer_condcheck.pl";
-
-$q = new CGI;
+sub d { die Dumper @_ }
 $ENV{"PATH"} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
-%CONF = (setver(), conf::sysconf());
-set_errmsg_init();
+require "f_mailer_lib.pl";
+require "f_mailer_condcheck.pl";
 umask 0;
 
+$q = new CGI;
+%CONF = (setver(), sysconf_read());
+set_errmsg_init();
+
 ($name_list_ref, %FORM) = decoding($q);
-error_(get_errmsg("000")) unless keys %FORM;
+error(get_errmsg("000")) unless keys %FORM;
 
 ### 設定ファイルのロード
+my %conf;
 if ($FORM{"CONFID"}) {
-	$conffile = get_conffile_by_id($FORM{"CONFID"});
-	($conffile) = $conffile =~ /^(.*\.pl)$/;
-	eval { require "./data/conf/$conffile"; };
-	error_(get_errmsg("001", $@)) if $@;
-	if (-e "./data/confext/ext_$conffile") {
-		eval { require "./data/confext/ext_$conffile"; };
-		error_(get_errmsg("002", $@)) if $@;
-	}
+	%conf = conf_read($FORM{"CONFID"});
 } else {
-	error_(get_errmsg("003"));
+	error(get_errmsg("003"));
 }
 
 ### 拡張ファイルのロード
-my %conflist = map { $_->{"id"} => $_->{"file"} } get_conflist();
-if (-e qq|./data/confext/ext_$conflist{$FORM{"CONFID"}}|) {
+my $file = get_conffile_by_id($FORM{"CONFID"});
+if (-e qq|./data/confext/ext_$file.pl|) {
 	$CONF{"EXTFILE_EXIST"} = 1;
-	eval qq|require qq[./data/confext/ext_$conflist{$FORM{"CONFID"}}];|;
-	error(get_errmsg("004", $@, $conflist{$FORM{"CONFID"}})) if $@;
+	eval qq|require qq[./data/confext/ext_$file.pl];|;
+	error(get_errmsg("004", $@, $file)) if $@;
 }
 
-%CONF = (%CONF, conf::conf());
+%CONF = (%CONF, %conf);
+$CONF{"CGISESSID"} = get_cookie("CGISESSID");
+$CONF{"session"} = new CGI::Session("driver:File", $CONF{"CGISESSID"}, { "Directory" => "./temp" });
+$CONF{"__token"} = get_sid();
 set_errmsg_init(); ### フォームの使用言語確定後ロード
 %FORM = data_convert(%FORM);
 $FORM{"REMOTE_HOST"} = remote_host();
@@ -67,20 +59,17 @@ $FORM{"REMOTE_ADDR"} = $ENV{"REMOTE_ADDR"};
 $FORM{"USER_AGENT"}  = $ENV{"HTTP_USER_AGENT"};
 $FORM{"NOW_DATE"}    = get_datetime(time);
 
+### CSRF対策 トークン発行処理
+### TEMPで扱えるようにする
+token_publish();
+ajax_token() if $FORM{"ajax_token"};
+
 %alt = setalt();
 
-temp_del(2);  ### 2時間経過したtempファイルを削除
-
 if ($FORM{"FORM"}) {
-	$FORM{"TEMP"} ||= time . $$;
-	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
+	%FORM = (%FORM, $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|));
 	form();
 }
-#print __LINE__, $FORM{"ajax_file_check"}, "\n";
-#$FORM{"TEMP"} = temp_write("formdata", %FORM) if (!$FORM{"TEMP"} or !$FORM{"SEND_FORCED"});
-#%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"})) if !$FORM{"SEND_FORCED"};
-
-#print __LINE__, $FORM{"ajax_file_check"}, "\n";
 
 $name_list_ref = [split(/,/, $FORM{"FIELDLIST"})] if exists $FORM{"FIELDLIST"};
 ajax_delete() if $FORM{"ajax_delete"};
@@ -89,14 +78,14 @@ ajax_upload() if $FORM{"ajax_upload"};
 
 if (($FORM{"SEND_FORCED"} or !$CONF{"CONFIRM_FLAG"} and !$FORM{"CONFIRM_FORCED"})) {
 
-	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
+	%FORM = (%FORM, $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|));
 	checkvalues();
 	sendmail_do();
 
 } else {
 
-	$FORM{"TEMP"} = temp_write("formdata", %FORM);
-	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
+	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, \%FORM);
+	%FORM = (%FORM, $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|));
 	checkvalues();
 	confirm();
 }
@@ -144,7 +133,7 @@ sub ajax_file_check {
 	my %opt = @_;
 
 	my %ATTACH_FIELDNAME = map { $_ => { "name" => "", "size" => 0 } } @{$CONF{"ATTACH_FIELDNAME"}};
-	$FORM{"TEMP"} ||= time . $$;
+	$FORM{"TEMP"} ||= sprintf("%s_%s", $FORM{"CONFID"}, $CONF{"session"}->id());
 
 	my %exists;
 	opendir(my $dir, "./temp") or ajax_error(get_errmsg("103", $!));
@@ -181,6 +170,14 @@ sub ajax_init {
 
 }
 
+sub ajax_token {
+
+	print "Content-Type: application/json\n\n";
+	print json_encode({ "__token" => $CONF{"__token"} });
+	exit;
+
+}
+
 sub ajax_upload {
 
 	my $ext = lc((split(/\./, $FORM{$FORM{"ajax_upload"}}))[-1]);
@@ -188,7 +185,7 @@ sub ajax_upload {
 
 	my $filename = (split(/[\\\/]/, $FORM{$FORM{"ajax_upload"}}))[-1];
 	if ($ext{$ext}) {
-		$FORM{"TEMP"} ||= time . $$;
+		$FORM{"TEMP"} ||= sprintf("%s_%s", $FORM{"CONFID"}, $CONF{"session"}->id());;
 		my $errmsg = imgsave($FORM{"TEMP"}, $FORM{"ajax_upload"});
 		ajax_error($errmsg) if $errmsg;
 
@@ -228,9 +225,7 @@ sub checkvalues {
 	### フィールドのグループ化
 	### 暫定的にこの位置に入れる
 	ext_sub0() if $CONF{"EXTFILE_EXIST"};
-#use Data::Dumper;
-#die Dumper \%condcheck;
-#die(@{$condcheck{__order}});
+
 	my %group_flag;
 	my %cond_hash = map { $_->[0]=>$_->[1] } @{$CONF{"COND"}};
 	foreach (@{$CONF{"COND"}}) {
@@ -301,12 +296,12 @@ sub checkvalues {
 		push(@name_list_new, $_);
 	}
 	$name_list_ref = \@name_list_new;
-#use Data::Dumper;
-#die Dumper $name_list_ref;
 
-	$FORM{"TEMP"} = temp_write("formdata", %FORM, "temp"=>$FORM{"TEMP"},
-	 "FIELDLIST"=>join(",", @$name_list_ref),
-	);
+
+	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, {
+		%FORM,
+		"FIELDLIST" => join(",", @$name_list_ref),
+	});
 
 }
 
@@ -317,8 +312,6 @@ sub checkvalues_condcheck {
 	my %errtype;
 	my %to_delete;
 
-#die($cond_hash);
-#    foreach my $key(keys %$cond_hash) {
 	foreach my $key(@{$condcheck->{__order}}) {
 		next if $key eq 'alt' or $key eq 'attach' or $key eq 'type';
 		next unless $cond_hash->{$key};
@@ -349,28 +342,15 @@ sub confirm {
 
 	output_form("CONFIRM") if $CONF{"CONFIRM_FLAG"} == 2;
 
-#die $FORM{"addr"};
 	printhtml(qq|./tmpl/default/@{[ $CONF{"LANG"} or $CONF{"LANG_DEFAULT"} ]}/confirm.html|,
-	 CHARSET=>"sjis",
-	 "list" => get_formdatalist(), "CONFID"=>$FORM{"CONFID"},
-	 "TEMP" => $FORM{"TEMP"}, (map { $_ => $CONF{$_} } keys %CONF),
-	 map { $_ => replace($_, "html", \%FORM) } map { $_->[0] } @{$CONF{"COND"}});
-	exit;
-
-}
-
-sub error {
-
-	output_form("ERROR", \@_) if $CONF{"ERROR_FLAG"};
-
-	my $errmsg = mk_errmsg(\@_);
-
-	printhtml(qq|./tmpl/default/@{[ $CONF{"LANG"} or $CONF{"LANG_DEFAULT"} ]}/error.html|,
-	 "CHARSET"=> "sjis",
-	 (map { $_ => $CONF{$_} } keys %CONF),
-	 "errmsg" => $errmsg,
+#		"CHARSET" =>"sjis",
+		"list" => get_formdatalist(),
+		"CONFID" =>$FORM{"CONFID"},
+		"TEMP" => $FORM{"TEMP"},
+		(map { $_ => $CONF{$_} } keys %CONF),
+		map { $_ => replace($_, "html", \%FORM) } map { $_->[0] } @{$CONF{"COND"}}
 	);
-	 exit;
+	exit;
 
 }
 
@@ -406,7 +386,7 @@ sub output_form {
 
 	my %d;
 	if (ref $errmsg_ref) {
-		%d = temp_read("formdata", $FORM{"TEMP"});
+		%d = { $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) };
 		$htmlstr =~ s|<!--\s*errmsg\s*-->|mk_errmsg($errmsg_ref)|ie;
 		$htmlstr =~ s|##errmsg##|mk_errmsg($errmsg_ref)|ie;
 	} else {
@@ -434,11 +414,11 @@ sub sendmail_do {
 		}
 	}
 
-	%FORM = (%FORM, temp_read("formdata", $FORM{"TEMP"}));
+	%FORM = (%FORM, %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) });
 	$name_list_ref = [split(/,/, $FORM{"FIELDLIST"})];
 
 	### 添付ファイル名の読み込み
-	my %exists;# = ajax_file_check("thru" => 1);
+	my %exists; # = ajax_file_check("thru" => 1);
 #	for my $fname(@{$CONF{"ATTACH_FIELDNAME"}}) {
 #		if ($exists{$fname}{"name"} ne "") {
 #			$FORM{$fname} = $exists{$fname}{"name"};
@@ -534,6 +514,9 @@ sub sendmail_do {
 
 	set_cookie($FORM{"CONFID"}, $CONF{"DENY_DUPL_SEND_MIN"}, 1)
 	 if $CONF{"DENY_DUPL_SEND"};
+
+	### セッションデータクリア
+	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, "");
 
 	if (!$CONF{"THANKS_FLAG"}) {
 		print qq|Location: $CONF{"THANKS"}\n\n|;

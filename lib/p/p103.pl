@@ -17,7 +17,7 @@ sub p103 {
 		if (! $FORM{"confid0"}) {
 			p("102", get_errmsg("477"));
 		}
-		my %conf = conf_read($FORM{"confid0"});
+		my %conf = conf_read_to_temp($FORM{"confid0"});
 		$CONF{"session"}->param("p111_data", \%conf);
 
 	### 既存の設定をコピー
@@ -31,7 +31,7 @@ sub p103 {
 		if ($@) {
 			p("102", get_errmsg("478", $@));
 		}
-		my %conf = conf_read("", $json, "102");
+		my %conf = conf_read_to_temp("", $json, "102");
 		$CONF{"session"}->param("p111_data", \%conf);
 
 	} else {

@@ -5,9 +5,10 @@
 <title>FORM MAILER 送信フォーム</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <link type="text/css" rel="stylesheet" href="css/style_custom.css" />
-<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="js/jquery-ui.js"></script>
+<script type="text/javascript" src="js/js.cookie.js"></script>
 <script type="text/javascript" src="js/charCount.js"></script>
-<script type="text/javascript" src="js/javascript.js"></script>
 <script type="text/javascript" src="js/sprintf.js"></script>
 <script type="text/javascript" src="js/f_mailer.js"></script>
 <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
@@ -17,10 +18,10 @@
 <div id="header">
 &nbsp;
 </div>
-
+<div id="page_title">FORM MAILER 送信フォーム</div>
+<div id="contents">
 <div id="main">
 
-<h2>FORM MAILER 送信フォーム</h2>
 
 <!-- errmsg -->
 
@@ -30,6 +31,8 @@
 <input type="hidden" name="GETCODE" value="文字コード" />
 <input type="hidden" name="CONFID" value="sample" id="CONFID" />
 <input type="hidden" name="TEMP" value="" id="TEMP" />
+<input type="hidden" name="__token" value="" id="__token" />
+<input type="hidden" name="__token_ignore" value="" id="__token_ignore" />
 <input type="hidden" name="DUMMY" value="" id="ajax_action" />
 
 <table class="tbl">
@@ -194,15 +197,12 @@
 
 <p>
 	<label><input type="checkbox" name="SEND_FORCED" value="1" />確認画面を出さずに送信</label><br />
-	<input type="button" value="送　信" class="btn_submit" />
+	<input type="button" value="送　信" class="btn btn_submit" />
 </p>
 </fieldset>
 </form>
 
 </div>
-<div id="footer">
-<strong>FORM MAILER v0.7</strong>
-&copy;1997-2015 <a href="http://www.psl.ne.jp/" onclick="this.target='_blank'">Perl Script Laboratory</a> All rights reserved.
 </div>
 </body>
 </html>

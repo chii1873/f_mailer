@@ -1,8 +1,30 @@
 $(function () {
 
+	// セッションIDの発行
+	$.ajax({
+		url: "f_mailer.cgi",
+		type: "GET",
+		dataType: "json",
+		async: false,
+		data:{
+			"CONFID": $("#CONFID").val(),
+			"ajax_token": 1
+		}
+	})
+	.done( (d) => {
+		$("#__token").val(d.__token);
+		file_check();
+		console.log(d);
+	})
+	.fail( (data) => {
+		alert("fail");
+		console.log(data);
+	});
+
 	$(".btn_submit").on("click", function () {
 		$("#f0").attr("target", "_self");
 		$("#f0").attr("enctype", "application/x-www-form-urlencoded");
+		$("#__token_ignore").val("");
 		$("#ajax_action").attr("name", "DUMMY").attr("value", "");
 		$("#f0").submit();
 	});
@@ -11,6 +33,7 @@ $(function () {
 		var name = $(this).attr("name");
 		$("#f0").attr("target", "if");
 		$("#f0").attr("enctype", "multipart/form-data");
+		$("#__token_ignore").val("1");
 		$("#ajax_action").attr("name", "ajax_upload").attr("value", name);
 		$("#f0").submit();
 	});
@@ -19,6 +42,7 @@ $(function () {
 		var name = $(this).attr("id").match(/^btn_delete-(.+)$/)[1];
 		$("#f0").attr("target", "if");
 		$("#f0").attr("enctype", "application/x-www-form-urlencoded");
+		$("#__token_ignore").val("1");
 		$("#ajax_action").attr("name", "ajax_delete").attr("value", name);
 		$("#f0").submit();
 	});
@@ -30,7 +54,16 @@ $(function () {
 
 	$("input[type=file]").css({ "display":"inline-block", "width":"1px", "height":"1px", "overflow" : "hidden" });
 
-	file_check();
+	$(".btn_send_default").on("click", function () {
+		$("#FORM").val("");
+		$("#SEND_FORCED").val("1");
+		$("#f0").submit();
+	});
+	$(".btn_back_default").on("click", function () {
+		$("#FORM").val("1");
+		$("#SEND_FORCED").val("");
+		$("#f0").submit();
+	});
 
 });
 
@@ -44,6 +77,7 @@ function file_check() {
 		data: {
 			"CONFID" : $("#CONFID").val(),
 			"TEMP" : $("#TEMP").val(),
+			"__token_ignore" : 1,
 			"ajax_file_check"  : 1
 		},
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
