@@ -17,6 +17,12 @@ sub get_output_form {
 		%d = %d_;
 	}
 
+	for my $k (keys %d) {
+		for my $v (split(/\!\!\!/, $d{$k})) {
+			$d{join("\0", $k, $v)} = $v;
+		}
+	}
+
 	my $p = new HTML::SimpleParse($content);
 	my %is_formtag = map { $_ => 1 } qw(input select textarea);
 	my $output;   ### 出力用htmlデータ
@@ -87,7 +93,7 @@ sub get_output_form {
 			if ($select_flag) {
 				if ($option_stack) {
 					my ($content, $space) = $c{"content"} =~ /^(.*)(\s*)$/;
-					$option_stack->{value} = $content;
+					$option_stack->{"value"} = $content;
 				} else {
 					$output .= $c{"content"};
 				}
