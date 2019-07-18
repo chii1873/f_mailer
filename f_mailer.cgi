@@ -122,42 +122,6 @@ sub form {
 
 }
 
-sub output_form {
-
-	require "f_mailer_get_output_form.pl";
-
-	my($phase, $errmsg_ref) = @_;
-#die "$phase,$errmsg," , caller();
-#d(mk_errmsg($errmsg_ref));
-
-	my($code, $htmlstr) = printhtml_getpage(
-	 ($CONF{"${phase}_TMPL_CHARSET"} || "auto"),
-	 {
-	   "filename" => $CONF{"${phase}_TMPL"},
-	   "errmsg" => ($errmsg_ref || []),
-	 }
-	);
-
-	my %d;
-	if (ref $errmsg_ref) {
-		%d = { $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) };
-		$htmlstr =~ s|<!--\s*errmsg\s*-->|mk_errmsg($errmsg_ref)|ie;
-		$htmlstr =~ s|##errmsg##|mk_errmsg($errmsg_ref)|ie;
-	} else {
-		%d = %FORM;
-	}
-#d(\%d);
-	$htmlstr =~ s/##list##/get_formdatalist()/e;
-	$htmlstr = get_output_form($phase, $htmlstr, %d, "TEMP"=>$FORM{"TEMP"});
-	foreach my $key(keys %d) {
-		eval { $htmlstr =~ s/##\Q$key\E##/Unicode::Japanese->new(($phase eq "CONFIRM" or $phase eq "THANKS") ? replace($key,'html',\%d) : $d{$key}, "utf8")->get/eg; };
-		error_("$key, $d{$key}, $@") if $@;
-	}
-	printhtml_output($code, $htmlstr);
-	exit;
-
-}
-
 sub sendmail_do {
 
 	my @errmsg;
