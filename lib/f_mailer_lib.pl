@@ -317,13 +317,17 @@ sub get_errmsg {
 
 sub get_formdatalist {
 
-	my %ignore_name = map { $_ => 1 } reserved_words();
+	my %ignore_name = map { $_ => 1 } reserved_words(), reserved_words3();
 	my $list;
-	foreach my $name(@$name_list_ref) {
-		next if $ignore_name{$name};
-		my $name_dsp = $alt{$name} || $name;
+	for my $d(@{$CONF{"COND"}}) {
+		my ($fname, $cond) = @$d;
+		next if $ignore_name{$fname};
+		my $name_dsp = $cond->{"alt"} || $fname;
 		$list .= <<STR;
-<tr><th class="l">$name_dsp</th><td>##$name##</td></tr>
+<tr>
+	<th class="l">$name_dsp</th>
+	<td>##$fname##</td>
+</tr>
 STR
 	}
 
@@ -675,7 +679,7 @@ sub replace {
 
 sub reserved_words {
 
-	qw(CONF CONFID TEMP VALUES CREDIT SEND_FORCED GETCODE DUMMY);
+	qw(CONF CONFID TEMP VALUES CREDIT SEND_FORCED GETCODE DUMMY __token __token_ignore);
 }
 
 sub reserved_words2 {
