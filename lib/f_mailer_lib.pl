@@ -88,10 +88,10 @@ sub conf_write {
 	if ($confid !~ /^\d{6}|sample$/) {
 		error(get_errmsg("470"));
 	}
-#	my $file = get_conffile_by_id($confid);
-	$d{"ATTACH_FIELDNAME"} = [ split(/[,\s]+/, $d{"ATTACH_FIELDNAME"}) ];
+
 	$d{"ATTACH_EXT"} = [split(/[,\s]+/, $d{"ATTACH_EXT"})];
 	$d{"OUTPUT_FIELDS"} = [ split(/,/, $d{"OUTPUT_FIELDS"}) ];
+	$d{"ATTACH_FIELDNAME"} = [];
 
 	my @check_list = get_checklist();
 	my @confmeta = get_confmeta();
@@ -104,6 +104,7 @@ sub conf_write {
 			$d{"COND"}[$i][1]{"type"} = $d{qq|_cond_type_$fname|};
 			delete $d{qq|_cond_type_$fname|};
 		}
+		push(@{$d{"ATTACH_FIELDNAME"}}, $fname) if $d{"_cond_attach_$fname"};
 		for my $row(@check_list) {
 			next if ($skip{$fname} and $row->{"name"} ne "alt");
 			if ($d{qq|_cond_$row->{"name"}_$fname|} ne "") {
@@ -397,7 +398,7 @@ sub imgsave {
 		my @path = split(/\\/, $filename);
 		$filename = $path[-1];
 		my $filename_enc = uri_escape($filename);
-		(my $filename_enc_clean) = $filename_enc =~ /^([\da-zA-Z_.,%-]+)$/;
+		(my $filename_enc_clean) = $filename_enc =~ /^([^\/]+)$/;
 		return "taint check error: $filename"
 		 unless $filename_enc_clean eq $filename_enc;
 		my $filename_path_enc = "./temp/$temp-$param_enc-$filename_enc_clean";
