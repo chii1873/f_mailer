@@ -62,13 +62,13 @@ $FORM{"NOW_DATE"}    = get_datetime(time);
 
 ### CSRF対策 トークン発行処理
 ### TEMPで扱えるようにする
-token_publish();
+token_publish($FORM{"CONFID"});
 ajax_token() if $FORM{"ajax_token"};
 
 %alt = setalt();
 
 if ($FORM{"FORM"}) {
-	%FORM = (%FORM, $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|));
+	%FORM = (%FORM, %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) });
 	form();
 }
 
@@ -79,14 +79,14 @@ ajax_upload() if $FORM{"ajax_upload"};
 
 if (($FORM{"SEND_FORCED"} or !$CONF{"CONFIRM_FLAG"} and !$FORM{"CONFIRM_FORCED"})) {
 
-	%FORM = (%FORM, $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|));
+	%FORM = (%FORM, %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) });
 	checkvalues();
 	sendmail_do();
 
 } else {
 
 	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, \%FORM);
-	%FORM = (%FORM, $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|));
+	%FORM = (%FORM, %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) });
 	checkvalues();
 	confirm();
 }
@@ -234,7 +234,7 @@ sub sendmail_do {
 	 if $CONF{"DENY_DUPL_SEND"};
 
 	### セッションデータクリア
-	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, "");
+	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, {});
 
 	if (!$CONF{"THANKS_FLAG"}) {
 		print qq|Location: $CONF{"THANKS"}\n\n|;

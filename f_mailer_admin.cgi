@@ -45,7 +45,7 @@ $q = new CGI;
 ($name_list_ref, %FORM) = decoding($q);
 
 ### CSRF対策 トークン発行処理
-token_publish();
+token_publish("admin");
 
 login() if $FORM{"login"};
 p("002") if $FORM{"p"} eq "002";

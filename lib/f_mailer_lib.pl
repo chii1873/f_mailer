@@ -1006,17 +1006,19 @@ sub temp_write {
 ### CSRF対策 トークン発行処理
 sub token_publish {
 
+	my $id = shift or error(caller());
+
 	if ($ENV{"REQUEST_METHOD"} eq "POST" and ! $FORM{"__token_ignore"}) {
 		if (! exists $FORM{"__token"}) {
 			error(get_errmsg("090"));
 		}
-		if ($FORM{"__token"} ne $CONF{"session"}->param("__token")) {
+		if ($FORM{"__token"} ne $CONF{"session"}->param("__token-$id")) {
 #			error(get_errmsg("091").qq|$FORM{"__token"} :: |.$CONF{"session"}->param("__token"));
 			error(get_errmsg("091"));
 		}
 	}
 	if (! $FORM{"__token_ignore"}) {
-		$CONF{"session"}->param("__token", $CONF{"__token"});
+		$CONF{"session"}->param("__token-$id", $CONF{"__token"});
 		$FORM{"__token"} = $CONF{"__token"};
 	}
 	set_cookie("CGISESSID", "", $CONF{"session"}->id());
