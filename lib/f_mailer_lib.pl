@@ -27,6 +27,130 @@ sub base64_subj {
 
 }
 
+sub checkvalues {
+
+	my @errmsg;
+	my %condcheck = condcheck_init();
+	my @checklist = map { $_->{"name"} } get_checklist();
+	my %to_delete;
+	my %exists = ajax_file_check("thru"=>1);
+
+	### フィールドのグループ化
+	### 暫定的にこの位置に入れる
+	ext_sub0() if $CONF{"EXTFILE_EXIST"};
+
+	my %group_flag;
+	my %cond_hash = map { $_->[0]=>$_->[1] } @{$CONF{"COND"}};
+	foreach (@{$CONF{"COND"}}) {
+		my($f_name, $cond_hash) = @$_;
+		$FORM{$f_name} = $FORM{$f_name};
+
+		if ($CONF{"field_group_rev"}{$f_name}) {
+			my @group_errmsg;
+			my %errtype;
+			next if $group_flag{$CONF{"field_group_rev"}{$f_name}}++;
+			for my $group_field(@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$f_name}}{"list"}}) {
+				my($errmsg_ref, $to_delete_ref, $errtype_ref)
+				 = checkvalues_condcheck(\%condcheck, $group_field, $cond_hash{$group_field}, "group"=>1);
+				%errtype = (%errtype, %$errtype_ref);
+				push(@group_errmsg, @$errmsg_ref) if @$errmsg_ref;
+			}
+			for my $key(grep { $errtype{$_} } @checklist) {
+				push(@errmsg, set_errmsg(
+					"key"=>$key,
+					"f_name"=>$CONF{"field_group"}{$CONF{"field_group_rev"}{$f_name}}{"alt"},
+					"str"=>$CONF{"errmsg"}{"required_input"},
+				));
+			}
+			push(@errmsg, @group_errmsg) if @group_errmsg;
+		} else {
+			my($errmsg_ref, $to_delete_ref)
+			 = checkvalues_condcheck(\%condcheck, $f_name, $cond_hash, "exists"=>($exists{$f_name}{"name"} ? 1 : 0));
+			%to_delete = (%to_delete, %$to_delete_ref);
+			push(@errmsg, @$errmsg_ref) if @$errmsg_ref;
+		}
+	}
+
+	### 拡張コードの実行
+	### エラーメッセージのリストを受け取ります。
+	if ($CONF{"EXTFILE_EXIST"}) {
+		my @xerrmsg = ext_sub();
+		if (ref($xerrmsg[0])) {
+			@xerrmsg = @{$xerrmsg[0]};
+		}
+		push(@errmsg, @xerrmsg) if @xerrmsg;
+	}
+
+	error_formcheck(@errmsg) if @errmsg;
+
+	### グループ指定した元のフィールドを削除
+	### 代わりにグループ指定したフィールドを追加
+	### グループ内で連結した文字列を生成
+
+	my @name_list_new;
+	%group_flag = ();
+	foreach (keys %to_delete) { delete $FORM{"${_}2"} }
+	for (@$name_list_ref) {
+		next if /^(.*)2$/ and $to_delete{$1};
+		if ($CONF{"field_group_rev"}{$_}) {
+			next if $group_flag{$CONF{"field_group_rev"}{$_}}++;
+			push(@name_list_new, $CONF{"field_group_rev"}{$_});
+			my $vchk = 0;
+			for (@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"list"}}) {
+				$vchk++ if $_ ne "";
+			}
+			$FORM{$CONF{"field_group_rev"}{$_}}
+			 = join($CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"constr"},
+			  @FORM{@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"list"}}})
+			 if $vchk;
+			$alt{$CONF{"field_group_rev"}{$_}} = $CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"alt"};
+			next;
+		}
+		push(@name_list_new, $_);
+	}
+	$name_list_ref = \@name_list_new;
+
+
+	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, {
+		%FORM,
+		"FIELDLIST" => join(",", @$name_list_ref),
+	});
+
+}
+
+sub checkvalues_condcheck {
+
+	my($condcheck, $f_name, $cond_hash, %opt) = @_;
+	my @errmsg;
+	my %errtype;
+	my %to_delete;
+
+	foreach my $key(@{$condcheck->{__order}}) {
+		next if $key eq 'alt' or $key eq 'attach' or $key eq 'type';
+		next unless $cond_hash->{$key};
+#		$to_delete{$f_name} = $f_name."2" if $key eq "compare";
+		($FORM{$f_name}, my @errmsg_) = &{$condcheck->{$key}}(
+		 $f_name,
+		 $alt{$f_name},
+		 $FORM{$f_name},
+		 ($key eq "compare" ? $FORM{"${f_name}2"} : $cond_hash->{$key}),
+		 $cond_hash->{"type"},
+		 $cond_hash->{"d_only"},
+		 $opt{"exists"}, ### 添付ファイルアップロード有無
+		);
+		if (@errmsg_) {
+			if ($opt{"group"} and $key !~ /^(?:min|max)$/) {
+				$errtype{$key} = 1;
+			} else {
+				push(@errmsg, @errmsg_);
+			}
+		}
+	}
+	$to_delete{$f_name} = 1 if $opt{"group"};
+	return \@errmsg, \%to_delete, \%errtype;
+
+}
+
 sub comma {
 
 	my $num = shift;
