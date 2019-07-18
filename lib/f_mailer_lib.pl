@@ -1076,62 +1076,6 @@ sub sysconf_read {
 
 }
 
-sub temp_del {
-
-	my $hours = shift;
-
-	my $now = time;
-	opendir(DIR, "temp")
-	 or error(get_errmsg("310", $!));
-	foreach my $file(grep(!/^\.\.?/, readdir(DIR))) {
-		($file) = $file =~ /^(\d+.*)$/;
-		unlink("temp/$file") if (stat("temp/$file"))[10] < $now - $hours * 3600;
-	}
-
-}
-
-sub temp_read {
-
-	my($page, $temp) = @_;
-	open(my $fh, "<", "temp/$temp-$page")
-#     or error("temp/$temp-$pageを開けませんでした。: $!");
-	;
-	my %form;
-	while (<$fh>) {
-		chomp;
-		my($k, $v) = split(/:/, $_, 2);
-		$v =~ s/\x0b/\n/g;
-		$form{$k} = $v;
-		for my $v_(split(/\!\!\!/, $v)) {
-			$form{"$k\0$v_"} = $v_;
-		}
-	}
-	close($fh);
-
-	return %form;
-
-}
-
-sub temp_write {
-
-	my($page, %form) = @_;
-	my $temp = $ENV{"SCRIPT_FILENAME"} =~ /admin/ ? "temp" : "TEMP";
-	$form{$temp} ||= time . $$;
-
-	($form{$temp}) = $form{$temp} =~ /^(\d+)$/;
-#    ($page) = $page =~ /^(\w+)$/;
-	open(my $fh, ">",  "temp/$form{$temp}-$page")
-	 or error(get_errmsg("320", $!));
-	foreach ($page eq "confform" ? ("label", get_conffields()) : keys %form) {
-		$form{$_} =~ s/\r?\n/\x0b/g;
-		print $fh "$_:$form{$_}\n";
-	}
-	close($fh);
-
-	return $form{$temp};
-
-}
-
 ### CSRF対策 トークン発行処理
 sub token_publish {
 
