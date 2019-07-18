@@ -87,6 +87,7 @@ function file_check() {
 
 			$.each(d, function(k, v) {
 				if (k == "__TOTAL__") return true;
+console.log(k);
 				if (v.size > 0) {
 //					$("#"+k).hide();
 					$("#"+k).next("span").remove();
