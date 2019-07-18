@@ -6,6 +6,7 @@
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <link type="text/css" rel="stylesheet" href="css/style_custom.css" />
 <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="js/sprintf.js"></script>
 <script type="text/javascript" src="js/f_mailer.js"></script>
 </head>
 <body>
@@ -29,12 +30,12 @@
 <!-- ###### 以下のタグは必ず指定してください ###### -->
 <form action="f_mailer.cgi" method="post" id="f0">
 <fieldset>
-<input type="hidden" name="CONFID" value="##CONFID##" />
-<input type="hidden" name="TEMP" value="##TEMP##" />
+<input type="hidden" name="CONFID" value="##CONFID##" id="CONFID" />
+<input type="hidden" name="TEMP" value="##TEMP##" id="TEMP" />
 <input type="hidden" name="__token" value="" id="__token" />
 <input type="hidden" name="__token_ignore" value="" id="__token_ignore" />
-<input type="hidden" name="FORM" value="" />
-<input type="hidden" name="SEND_FORCED" value="1" />
+<input type="hidden" name="FORM" value="" id="FORM" />
+<input type="hidden" name="SEND_FORCED" value="1" id="SEND_FORCED" />
 
 <input type="button" value="送　信" class="btn btn_send_default" />
 <input type="button" value="戻　る" class="btn btn_back_default" />
