@@ -3,7 +3,7 @@
 
 use strict;
 use lib qw(./module ./lib);
-use vars qw($q %FORM %CONF %alt $name_list_ref %ERRMSG);
+use vars qw($q %FORM %CONF %alt %ERRMSG);
 use CGI;
 use Unicode::Japanese;
 use CGI::Carp qw(fatalsToBrowser);
@@ -42,7 +42,7 @@ $CONF{"ERROR_TMPL"} = "tmpl/error.html";
 }
 
 $q = new CGI;
-($name_list_ref, %FORM) = decoding($q);
+%FORM = decoding($q);
 
 ### CSRF対策 トークン発行処理
 token_publish("admin");
