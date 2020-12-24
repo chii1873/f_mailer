@@ -81,7 +81,7 @@ sub get_output_form {
 			} elsif ($c{"tagname"} eq "a" or $c{"tagname"} eq "link") {
 				$h{"href"} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{"href"} unless $h{"href"} =~ m{^(?:/|https*|javascript|#)}i;
 				$output .= get_output_form_remake_tag($c{"tagname"}, %h);
-			} elsif ($c{"tagname"} eq "img" or $c{"tagname"} eq "script") {
+			} elsif ($c{"tagname"} eq "img" or $c{"tagname"} eq "script" or $c{"tagname"} eq "iframe") {
 				$h{src} = $CONF{"${phase}_TMPL_BASE_URL"}.$h{src}
 				 if defined $h{"src"} and $h{"src"} !~ m#^(?:/|https*)#i;
 				$output .= get_output_form_remake_tag($c{"tagname"}, %h);
