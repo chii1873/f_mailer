@@ -10,6 +10,8 @@ sub p124 {
 		error(get_errmsg("470"));
 	}
 
+	my %conf = conf_read_to_temp($FORM{"confid"});
+
 	open(my $fh, "<", qq|data/serial/$FORM{"confid"}|) or error(get_errmsg("450", $!));
 	my $serial = <$fh> || "-";
 	close($fh);
@@ -17,6 +19,7 @@ sub p124 {
 	printhtml_admin("$p.html",
 		"errmsg" => \@errmsg,
 		"confid" => $FORM{"confid"},
+		"label"  => $conf{"label"},
 		"SERIAL" => $serial,
 	);
 	exit;

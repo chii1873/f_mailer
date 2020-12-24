@@ -14,6 +14,8 @@ sub p125 {
 		p("124", get_errmsg("461"));
 	}
 
+	my %conf = conf_read_to_temp($FORM{"confid"});
+
 	open(my $fh, "+<", qq|./data/serial/$FORM{"confid"}|) or error(get_errmsg("450", $!));
 	flock($fh, LOCK_EX);
 	seek($fh, 0, 0);
@@ -36,6 +38,7 @@ sub p125 {
 	printhtml_admin("$p.html",
 		"errmsg" => \@errmsg,
 		"confid" => $FORM{"confid"},
+		"label"  => $conf{"label"},
 		"SERIAL" => $FORM{"SERIAL"},
 	);
 	exit;
