@@ -1,9 +1,9 @@
 #!/usr/bin/perl
-#BEGIN{ print "Content-type: text/html\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
+#BEGIN{ print "Content-type: text/html; charset=utf-8\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
 
 use strict;
 use lib qw(./module ./lib);
-use vars qw($q %FORM %CONF $name_list_ref %alt %ERRMSG);
+use vars qw($q %FORM %CONF %alt %ERRMSG);
 #use utf8;
 use Encode;
 use CGI;
@@ -30,7 +30,7 @@ $q = new CGI;
 %CONF = (setver(), sysconf_read());
 set_errmsg_init();
 
-($name_list_ref, %FORM) = decoding($q);
+%FORM = decoding($q);
 error(get_errmsg("000")) unless keys %FORM;
 
 ### 設定ファイルのロード
@@ -72,7 +72,7 @@ if ($FORM{"FORM"}) {
 	form();
 }
 
-$name_list_ref = [split(/,/, $FORM{"FIELDLIST"})] if exists $FORM{"FIELDLIST"};
+ajax_checkvalues() if $FORM{"ajax_checkvalues"};
 ajax_delete() if $FORM{"ajax_delete"};
 ajax_file_check() if $FORM{"ajax_file_check"};
 ajax_upload() if $FORM{"ajax_upload"};
@@ -133,7 +133,6 @@ sub sendmail_do {
 	}
 
 	%FORM = (%FORM, %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) });
-	$name_list_ref = [split(/,/, $FORM{"FIELDLIST"})];
 
 	### 添付ファイル名の読み込み
 	my %exists; # = ajax_file_check("thru" => 1);
@@ -144,6 +143,20 @@ sub sendmail_do {
 #			$FORM{$fname} = "";
 #		}
 #	}
+
+	### 2020-02-21 特定のアドレスを登録したフォームを管理者に送らない
+	my $to_be_skipped = 0;
+	for my $sendfrom_skip (@{$CONF{"SENDFROM_SKIP"}}) {
+		if ($FORM{"EMAIL"} =~ /\Q$sendfrom_skip\E$/) {
+			$to_be_skipped = 1;
+			last;
+		}
+	}
+	if ($to_be_skipped) {
+		open(my $fh, ">>", "data/f_mailer_skip_log.txt");
+		print $fh join("\t", get_datetime(time), $FORM{"CONFID"}, $FORM{"EMAIL"}), "\n";
+		goto DONE;
+	}
 
 	### 拡張コードの実行
 	### エラーメッセージのリストを受け取ります。
@@ -171,9 +184,10 @@ sub sendmail_do {
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
 		my $subject = $CONF{"SUBJECT"};
 		$subject =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
+		(my $sendfromname = $CONF{"SENDFROMNAME"}) =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
 		my %str = sendmail_mkstr(
 			"subject"	=> $subject,
-			"fromname"	=> $CONF{"SENDFROMNAME"},
+			"fromname"	=> $sendfromname,
 			"mailstr"	=> $format,
 			"credit"	=> $CONF{"copyright_mail_footer"},
 			"charset"	=>$CONF{"CHARSET"},
@@ -187,6 +201,7 @@ sub sendmail_do {
 				"mailto"	=> $mailto,
 				"cc"		=> $CONF{"CC"},
 		                "bcc"		=> $CONF{"BCC"},
+				"reply_to"	=> ($CONF{"SENDFROM_EMAIL_FORCED"} or ! $FORM{"EMAIL"}) ? "" : $FORM{"EMAIL"},
 				"from"		=> $sendfrom,
 				"subject"	=> $str{"subject"},
 				"mailstr"	=> $str{"mailstr"},
@@ -203,9 +218,10 @@ sub sendmail_do {
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
 		my $subject = $CONF{"REPLY_SUBJECT"};
 		$subject =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
+		(my $sendfromname = $CONF{"REPLY_SENDFROMNAME"}) =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
 		my %str = sendmail_mkstr(
 			"subject"	=> $subject,
-			"fromname"	=> $CONF{"REPLY_SENDFROMNAME"},
+			"fromname"	=> $sendfromname,
 			"mailstr"	=> $format,
 			"credit"	=> $CONF{"copyright_mail_footer"},
 			"charset"	=> $CONF{"REPLY_CHARSET"},
@@ -218,6 +234,7 @@ sub sendmail_do {
 				"mailto"	=> $mailto,
 				"cc"		=> $CONF{"REPLY_CC"},
 		                "bcc"		=> $CONF{"REPLY_BCC"},
+				"reply_to"	=> "",
 				"from"		=> ($CONF{"REPLY_SENDFROM"} || $CONF{"SENDFROM"}),
 				"subject"	=> $str{"subject"},
 				"mailstr"	=> $str{"mailstr"},
@@ -230,11 +247,20 @@ sub sendmail_do {
 	### ファイル書き出し処理
 	sendmail_file_output() if $CONF{"FILE_OUTPUT"};
 
+	### 2020-02-21 メール送信をスキップする場合のジャンプ先
+	DONE:
+
 	set_cookie($FORM{"CONFID"}, $CONF{"DENY_DUPL_SEND_MIN"}, 1)
 	 if $CONF{"DENY_DUPL_SEND"};
 
 	### セッションデータクリア
 	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, {});
+	### 2020-12-23 セッションに紐付く添付ファイルも削除する
+	my $session_id = $CONF{"session"}->id();
+	opendir(my $dir, "temp") or die $!;
+	for my $file (grep(/^$FORM{"CONFID"}_$session_id-/, readdir($dir))) {
+		unlink("temp/$file");
+	}
 
 	if (!$CONF{"THANKS_FLAG"}) {
 		print qq|Location: $CONF{"THANKS"}\n\n|;
@@ -246,8 +272,10 @@ sub sendmail_do {
 		my $str;
 		printhtml(qq|./tmpl/default/@{[ $CONF{"LANG"} or $CONF{"LANG_DEFAULT"} ]}/thanks.html|,
 		 "CHARSET"=>($CONF{"THANKS_TMPL_CHARSET"} || "auto"),
-		 (map { $_ => $CONF{$_} } keys %CONF),
 		 "list" => get_formdatalist(),
+		 "CONFID" =>$FORM{"CONFID"},
+		 "TEMP" => $FORM{"TEMP"},
+		 (map { $_ => $CONF{$_} } keys %CONF),
 		 map { $_ => replace($_,"html",\%FORM) } map { $_->[0] } @{$CONF{"COND"}});
 	}
 	exit;
@@ -415,6 +443,8 @@ STR
 
 	foreach my $filename(keys %{$opt{"attachdata"}}) {
 #        my $content_type = $filename =~ /\.html?$/ ? "text/html" : "application/octet-stream";
+#		my $filename_enc = $filename =~ /\P{ascii}/ ? qq|filename*=UTF-8''| . uri_escape_utf8($filename) : qq|filename="$filename"|;
+		my $filename_enc = qq|filename*=UTF-8''| . uri_escape_utf8($filename);
 		my $content_type = "application/octet-stream";
 		my $encoding_type = $opt{"encoding"} eq "uuencode"
 		 ? "X-uuencode" : "base64";
@@ -423,9 +453,9 @@ STR
 		 : base64($opt{"attachdata"}->{$filename});
 		$str .= <<STR;
 --$boundary
-Content-Type: $content_type; name="$filename"
+Content-Type: $content_type
 Content-Disposition: attachment;
- filename="$filename"
+ $filename_enc
 Content-Transfer-Encoding: $encoding_type
 
 $attachdata

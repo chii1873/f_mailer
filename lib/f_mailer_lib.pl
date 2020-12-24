@@ -1,6 +1,6 @@
 
 use strict;
-use vars qw(%CONF %FORM %alt $q $name_list_ref %ERRMSG $smtp);
+use vars qw(%CONF %FORM %alt $q %ERRMSG $smtp);
 use POSIX qw(SEEK_SET);
 require "f_mailer_get_output_form.pl";
 
@@ -29,6 +29,7 @@ sub base64_subj {
 
 sub checkvalues {
 
+	my %opt = @_;
 	my @errmsg;
 	my %condcheck = condcheck_init();
 	my @checklist = map { $_->{"name"} } get_checklist();
@@ -81,40 +82,36 @@ sub checkvalues {
 		push(@errmsg, @xerrmsg) if @xerrmsg;
 	}
 
+	return @errmsg if $opt{"ajax"} == 1;
 	error_formcheck(@errmsg) if @errmsg;
+
 
 	### グループ指定した元のフィールドを削除
 	### 代わりにグループ指定したフィールドを追加
 	### グループ内で連結した文字列を生成
 
-	my @name_list_new;
-	%group_flag = ();
-	foreach (keys %to_delete) { delete $FORM{"${_}2"} }
-	for (@$name_list_ref) {
-		next if /^(.*)2$/ and $to_delete{$1};
-		if ($CONF{"field_group_rev"}{$_}) {
-			next if $group_flag{$CONF{"field_group_rev"}{$_}}++;
-			push(@name_list_new, $CONF{"field_group_rev"}{$_});
-			my $vchk = 0;
-			for (@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"list"}}) {
-				$vchk++ if $_ ne "";
-			}
-			$FORM{$CONF{"field_group_rev"}{$_}}
-			 = join($CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"constr"},
-			  @FORM{@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"list"}}})
-			 if $vchk;
-			$alt{$CONF{"field_group_rev"}{$_}} = $CONF{"field_group"}{$CONF{"field_group_rev"}{$_}}{"alt"};
-			next;
-		}
-		push(@name_list_new, $_);
-	}
-	$name_list_ref = \@name_list_new;
-
-
-	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, {
-		%FORM,
-		"FIELDLIST" => join(",", @$name_list_ref),
-	});
+#	my @name_list_new;
+#	%group_flag = ();
+#	foreach (keys %to_delete) { delete $FORM{"${_}2"} }
+#	for my $d (@{$CONF{"COND"}}) {
+#		my($fname, $cond) = @$d;
+#		if ($CONF{"field_group_rev"}{$fname}) {
+#			next if $group_flag{$CONF{"field_group_rev"}{$fname}}++;
+#			push(@name_list_new, $CONF{"field_group_rev"}{$fname});
+#			my $vchk = 0;
+#			for (@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$fname}}{"list"}}) {
+#				$vchk++ if $fname ne "";
+#			}
+#			$FORM{$CONF{"field_group_rev"}{$fname}}
+#			 = join($CONF{"field_group"}{$CONF{"field_group_rev"}{$fname}}{"constr"},
+#			  @FORM{@{$CONF{"field_group"}{$CONF{"field_group_rev"}{$fname}}{"list"}}})
+#			 if $vchk;
+#			$alt{$CONF{"field_group_rev"}{$fname}} = $CONF{"field_group"}{$CONF{"field_group_rev"}{$fname}}{"alt"};
+#			next;
+#		}
+#	}
+#
+#	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, \%FORM);
 
 }
 
@@ -125,7 +122,7 @@ sub checkvalues_condcheck {
 	my %errtype;
 	my %to_delete;
 
-	foreach my $key(@{$condcheck->{__order}}) {
+	foreach my $key(@{$condcheck->{"__order"}}) {
 		next if $key eq 'alt' or $key eq 'attach' or $key eq 'type';
 		next unless $cond_hash->{$key};
 #		$to_delete{$f_name} = $f_name."2" if $key eq "compare";
@@ -142,7 +139,7 @@ sub checkvalues_condcheck {
 			if ($opt{"group"} and $key !~ /^(?:min|max)$/) {
 				$errtype{$key} = 1;
 			} else {
-				push(@errmsg, @errmsg_);
+				push(@errmsg, map { [ $f_name, $_ ] } @errmsg_);
 			}
 		}
 	}
@@ -263,19 +260,15 @@ sub data_convert {
 		$value = Unicode::Japanese->new($value, $code)->get if $code ne "utf8";
 		$form2{$key} = $value;
 	}
-	if ($code ne "utf8") {
-		for (@$name_list_ref) { $_ = Unicode::Japanese->new($_, $code)->get }
-	}
-	%form2;
+
+	return %form2;
 
 }
 
 sub decoding {
 
 	my $q = shift;
-	my @name_list;
 	my %form;
-	my %form_name_cnt;
 	foreach my $name($q->param()) {
 		foreach my $each($q->param($name)) {
 			if (defined($form{$name})) {
@@ -284,9 +277,8 @@ sub decoding {
 				$form{$name} = $each . "";
 			}
 		}
-		push(@name_list, $name) unless $form_name_cnt{$name}++;
 	}
-	return \@name_list, %form;
+	return %form;
 
 }
 
@@ -616,11 +608,52 @@ sub mk_errmsg {
 
 	my $errmsg_ref = shift || [];
 
-	my $errmsg = join("\n", map { qq|<li $CONF{"ERRMSG_STYLE_LI"}>$_</li>| } map { h($_) } @$errmsg_ref);
-	if ($errmsg ne "") {
-		return qq|<ul $CONF{"ERRMSG_STYLE_UL"}>\n$errmsg\n</ul>|;
+	my $errmsg_li_style = $CONF{"ERRMSG_STYLE_LI"} ne "" ? qq| style="$CONF{"ERRMSG_STYLE_LI"}"| : "";
+	my $errmsg_li_class = $CONF{"ERRMSG_STYLE_LI_CLASS"} ne "" ? qq| class="$CONF{"ERRMSG_STYLE_LI_CLASS"}"| : "";
+	my $errmsg_ul_style = $CONF{"ERRMSG_STYLE_UL"} ne "" ? qq| style="$CONF{"ERRMSG_STYLE_UL"}"| : "";
+	my $errmsg_ul_class = $CONF{"ERRMSG_STYLE_UL_CLASS"} ne "" ? qq| class="$CONF{"ERRMSG_STYLE_UL_CLASS"}"| : "";
+	my $errmsg_ul_id = $CONF{"ERRMSG_STYLE_UL_ID"} ne "" ? qq| id="$CONF{"ERRMSG_STYLE_UL_ID"}"| : "";
+
+	# @$errmsg_refでループ
+	# ref == ARRAYのとき
+	# 	FORM_TMPL_ERRMSG_DISPLAY == 2 のとき、入力欄に表示
+	# 		id="f_mailer_errmsg_label_bg-[フィールド名]" に addCLass "f_mailer_errmsg_label_bg"
+	# 		id="f_mailer_errmsg_bg-[フィールド名]" に addCLass "f_mailer_errmsg_bg"
+	# 		name=[フィールド名] に addCLass "f_mailer_errmsg_border"　※赤枠をつける
+	# 		id="f_mailer_errmsg-[フィールド名]" の中に addCLass "f_mailer_errmsg"、 メッセージテキストを入れる
+	#		jQuery必須
+	#	
+	my @errmsg_list;
+	my @sel;
+	my $errmsg_js = "";
+	for my $d (@$errmsg_ref) {
+		if (ref $d eq "ARRAY") {
+			my ($f_name, $errmsg) = @$d;
+			$errmsg = h($errmsg);
+			if ($CONF{"FORM_TMPL_ERRMSG_DISPLAY"} == 2) {
+				push(@sel, $f_name);
+				$errmsg_js .= qq|\t\$("#f_mailer_errmsg-$f_name").text("$errmsg");\n|;
+			} else {
+				push(@errmsg_list, $errmsg);
+			}
+		} else {
+			push(@errmsg_list, $d);
+		}
 	}
-	return;
+	if (@sel) {
+		$errmsg_js .= qq|\t\$("| . join(",", map { "#f_mailer_errmsg_label_bg-$_" } @sel) . qq|").addClass("f_mailer_errmsg_label_bg");\n|;
+		$errmsg_js .= qq|\t\$("| . join(",", map { "#f_mailer_errmsg_bg-$_" } @sel) . qq|").addClass("f_mailer_errmsg_bg");\n|;
+		$errmsg_js .= qq|\t\$("| . join(",", map { "[name=$_]" } @sel) . qq|").addClass("f_mailer_errmsg_border");\n|;
+		$errmsg_js .= qq|\t\$("| . join(",", map { "#f_mailer_errmsg-$_" } @sel) . qq|").addClass("f_mailer_errmsg");\n|;
+	}
+	if ($errmsg_js ne "") {
+		$errmsg_js = qq|\n<script type="text/javascript">\n<!--\n\$(function () {\n$errmsg_js});\n// -->\n</script>\n|;
+	}
+	my $errmsg = "";
+	if (@errmsg_list) {
+		$errmsg = qq|<ul$errmsg_ul_style$errmsg_ul_class$errmsg_ul_id>\n| . join("\n", map { qq|<li$errmsg_li_style$errmsg_li_class>$_</li>| } map { h($_) } @errmsg_list) .qq|\n</ul>|;
+	}
+	return $errmsg . $errmsg_js;
 
 }
 
@@ -825,7 +858,7 @@ sub sendmail {
 
 	$opt{"envelope"} = qq|-f $opt{"envelope"}| if $opt{"envelope"};
 
-	if ($opt{fromname}) {
+	if ($opt{"fromname"}) {
 		$opt{"fromname"} = qq{"$opt{"fromname"}" <$opt{"from"}>};
 	} else {
 		$opt{"fromname"} = $opt{"from"};
@@ -837,7 +870,7 @@ sub sendmail {
 
 		eval qq{use Net::SMTP};
 		error_("Net::SMTPがインストールされていません。: $@") if $@;
-		if ($CONF{USE_SMTP_AUTH}) {
+		if ($CONF{"USE_SMTP_AUTH"}) {
 			eval qq{use MIME::Base64};
 			error_("MIME::Base64がインストールされていません。: $@") if $@;
 			eval qq{use Authen::SASL};
@@ -848,7 +881,7 @@ sub sendmail {
 		 or error("Net::SMTPで$CONF{SMTP_HOST}へ接続できませんでした。: $!");
 		my $date = get_datetime_for_mailheader(time);
 
-		if ($CONF{USE_SMTP_AUTH}) {
+		if ($CONF{"USE_SMTP_AUTH"}) {
 			$smtp->auth($CONF{"SMTP_AUTH_ID"}, $CONF{"SMTP_AUTH_PASSWD"})
 			 or do { $smtp->quit; error('authメソッド失敗: ' .$!); };
 		}
@@ -863,11 +896,14 @@ sub sendmail {
 		$smtp->data();
 		$smtp->datasend("Date: $date\n");
 		$smtp->datasend(qq|To: $opt{"mailto"}\n|);
-		if ($opt{cc}) {
+		if ($opt{"cc"}) {
 			$smtp->datasend("Cc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"cc"})). "\n");
 		}
-		if ($opt{bcc}) {
+		if ($opt{"bcc"}) {
 			$smtp->datasend("Bcc: ". join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"bcc"})). "\n");
+		}
+		if ($opt{"reply_to"}) {
+			$smtp->datasend("Reply-To: ". $opt{"reply_to"}. "\n");
 		}
 		$smtp->datasend(qq|From: $opt{"fromname"}\n|);
 		$smtp->datasend(qq|Subject: $opt{"subject"}\n|);
@@ -886,6 +922,9 @@ sub sendmail {
 		}
 		if ($opt{"bcc"}) {
 			print $mail "Bcc: ", join(",\n\t", split(/[ \t]*(?:\r\n|\r|\n|,)[ \t]*/, $opt{"bcc"})), "\n";
+		}
+		if ($opt{"reply_to"}) {
+			print $mail "Reply-To: ", $opt{"reply_to"}, "\n";
 		}
 		print $mail qq|From: $opt{"fromname"}\n|;
 		print $mail qq|Subject: $opt{"subject"}\n|;
@@ -937,48 +976,48 @@ sub set_cookie {
 sub set_default_mail_format {
 
 	my %opt = @_;
-	my($mark, $sepr, $oft) = $opt{reply}
+	my($mark, $sepr, $oft) = $opt{"reply"}
 	 ? @CONF{qw(REPLY_MARK REPLY_SEPR REPLY_OFT)}
 	 : @CONF{qw(MARK SEPR OFT)};
 
 	my $default_mail_format = <<STR;
 ------------------------------------------------------------
-$CONF{TITLE}
+$CONF{"TITLE"}
 ------------------------------------------------------------
 STR
 
 	my $indent = (" " x length($mark));
-	my %skip = map { $_ => 1 } reserved_words();
-	foreach my $name(@$name_list_ref) {
-		next if $CONF{"BLANK_SKIP"} and $FORM{$name} eq '';
-		next if $skip{$name};
-		my $name_dsp = $alt{$name} || $name;
-		my $value_dsp = $FORM{$name};
+	my %skip = map { $_ => 1 } reserved_words(), reserved_words3();
+	for my $d(@{$CONF{"COND"}}) {
+		my ($fname, $cond) = @$d;
+		next if $CONF{"BLANK_SKIP"} and $FORM{$fname} eq '';
+		next if $skip{$fname};
+		my $name_dsp = $cond->{"alt"} || $fname;
+		my $value_dsp = $FORM{$fname};
 
-		if ($opt{type} == 1) {
+		if ($opt{"type"} == 1) {
 			$value_dsp =~ s/\!\!\!|\n/\n$indent/g;
 			$default_mail_format .= "$mark$name_dsp$sepr\n$indent$value_dsp\n\n";
-		} elsif ($opt{type} == 2) {
+		} elsif ($opt{"type"} == 2) {
 			$value_dsp =~ s/\!\!\!/ /g;
 			$value_dsp =~ s/\n/\n$indent/g;
 			$default_mail_format .= "$mark$name_dsp$sepr$value_dsp\n";
 		} else {
 			$value_dsp =~ s/\!\!\!/ /g;
 			$value_dsp =~ s/\n/"\n".(" " x ($oft+length($sepr)))/eg;
-			$default_mail_format .= sprintf("%-${oft}s","$mark$name_dsp").
-									"$sepr$value_dsp\n";
+			$default_mail_format .= sprintf("%-${oft}s","$mark$name_dsp") . "$sepr$value_dsp\n";
 		}
 	}
 
 	$default_mail_format .= <<STR;
 ------------------------------------------------------------
-送信日時    ：$FORM{NOW_DATE}
-接続元ホスト：$FORM{REMOTE_HOST}
-使用ブラウザ：$FORM{USER_AGENT}
+送信日時    ：$FORM{"NOW_DATE"}
+接続元ホスト：$FORM{"REMOTE_HOST"}
+使用ブラウザ：$FORM{"USER_AGENT"}
 ------------------------------------------------------------
 STR
 
-	$default_mail_format;
+	return $default_mail_format;
 
 }
 
@@ -1041,11 +1080,11 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.8pre190417},
+		version   => q{0.8pre201223},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{https://www.psl.ne.jp/},
-		copyright => q{&copy;1997-2019},
-		copyright2 => q{(c)1997-2019},
+		copyright => q{&copy;1997-2020},
+		copyright2 => q{(c)1997-2020},
 	);
 	chomp($PROD{"copyright_html_footer"} = <<STR);
 <a href="$PROD{"a_url"}" target="_blank"><strong>$PROD{"prod_name"} v$PROD{"version"}</strong></a>

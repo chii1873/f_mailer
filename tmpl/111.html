@@ -96,6 +96,18 @@
 		</ul>
 	</td>
 </tr>
+<tr>
+	<th>CSRFトークン機能<span class="fn">(CSRF_TOKEN)</span></th>
+	<td>
+		<label><input type="radio" name="CSRF_TOKEN" value="1" id="CSRF_TOKEN_1">使用する</label><br>
+		<label><input type="radio" name="CSRF_TOKEN" value="0" id="CSRF_TOKEN_0">使用しない</label>
+
+		<ul class="caption">
+			<li>CSRFトークンとは、ページへのアクセスごとにトークン(ユニークな文字列)をhiddenタグとサーバ上のセッションデータにそれぞれ保存しておき、フォームを送信したときにその両者を照合し、一致しない場合は処理を停止するしくみです。これにより、ブラウザの戻るボタンで戻って再送信したり、送信処理をリロードしたり、パラメータを指定してf_mailer.cgiを直接呼び出す方法で処理を実行することができなくなります。</li>
+			<li>この機能を使用する場合は、所定のタグをページ内に埋めこみ、f_mailer.jsを読み込む必要があります。詳しくは、導入ガイドを参照してください。</li>
+		</ul>
+	</td>
+</tr>
 </table>
 
 </div><!-- /tabs-1 -->
@@ -127,10 +139,17 @@
 			<td><input type="text" name="FORM_TMPL_BASE_URL" value="" id="FORM_TMPL_BASE_URL"></td>
 		</tr>
 		<tr>
-			<th>入力エラー<br>表示<span class="fn">(FORM_FLAG)</span></th>
+			<th>入力エラー表示<span class="fn">(FORM_FLAG)</span></th>
 			<td>
 				<label><input type="radio" name="FORM_FLAG" value="0" id="FORM_FLAG_0">システムエラー画面を表示する</label><br>
 				<label><input type="radio" name="FORM_FLAG" value="1" id="FORM_FLAG_1">フォームを再表示する</label><br>
+			</td>
+		</tr>
+		<tr>
+			<th>入力エラー<br>メッセージの<br>表示場所<span class="fn">(FORM_TMPL_ERRMSG_DISPLAY)</span></th>
+			<td>
+				<label><input type="radio" name="FORM_TMPL_ERRMSG_DISPLAY" value="1" id="FORM_TMPL_ERRMSG_DISPLAY_1">&lt;!-- errmsg -- &gt;を埋めこんだ場所</label><br>
+				<label><input type="radio" name="FORM_TMPL_ERRMSG_DISPLAY" value="2" id="FORM_TMPL_ERRMSG_DISPLAY_2">各入力欄</label>
 			</td>
 		</tr>
 		</table>
@@ -141,6 +160,7 @@
 			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
 			<li>付加URLとは、f_mailer.cgi経由でページを表示した際、相対パスで指定されているstyle/script/img/inputタグのsrc属性、aタグのhref属性が相対パスであった際に冒頭に付加するURLです。リンクや外部ファイルの参照ができなくなるのを防ぎます。なお、cssファイル内で呼び出しているimg()プロパティのパスは書き換わりませんのでご注意ください。</li>
 			<li>「フォームを再表示する」を選択すると、フォーム入力後に送信ボタンを押したとき、入力フォームそのものを再表示し、入力内容をそのまま維持して、エラーメッセージを表示します。これにより、戻るボタンで戻ったときに入力内容が消えてしまう問題が回避できます。</li>
+			<li>エラーメッセージの表示場所は、従来は、テンプレート内に &lt;!-- errmsg --&gt; を埋めこんでおくとその位置にリスト形式でまとめてメッセージを表示していましたが、その他に、入力欄の直上・直下などにあらかじめ指定した所定のclass属性を指定しておくことで、各種のハイライト表示およびエラーメッセージの表示ができるようになりました。詳しくは導入ガイドをご覧ください。</li>
 		</ul>
 	</td>
 </tr>
@@ -259,11 +279,52 @@
 		<table class="tbl">
 		<tr>
 			<th>&lt;ul&gt;タグに設定するスタイル<br><span class="fn">(ERRMSG_STYLE_UL)</span></th>
-			<td><input type="text" name="ERRMSG_STYLE_UL" value="" id="ERRMSG_STYLE_UL"></td>
+			<td>
+				<input type="text" name="ERRMSG_STYLE_UL" value="" id="ERRMSG_STYLE_UL">
+				<ul class="caption">
+					<li>エラーメッセージを表示する全体のスタイルを設定します。</li>
+					<li>ここで指定したスタイル指定をタグ内で style=&quot;****&quot; で挟んで出力します。</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<th>&lt;ul&gt;タグに設定するスタイル(class属性)<br><span class="fn">(ERRMSG_STYLE_UL_CLASS)</span></th>
+			<td>
+				<input type="text" name="ERRMSG_STYLE_UL_CLASS" value="" id="ERRMSG_STYLE_UL_CLASS">
+				<ul class="caption">
+					<li>エラーメッセージを表示する全体のスタイル(class属性)を設定します。</li>
+					<li>class名が複数ある場合は半角スペースで区切って指定してください。</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<th>&lt;ul&gt;タグに設定するスタイル(id属性)<br><span class="fn">(ERRMSG_STYLE_UL_ID)</span></th>
+			<td>
+				<input type="text" name="ERRMSG_STYLE_UL_ID" value="" id="ERRMSG_STYLE_UL_ID">
+				<ul class="caption">
+					<li>エラーメッセージを表示する全体のスタイル(id属性)を設定します。</li>
+				</ul>
+			</td>
 		</tr>
 		<tr>
 			<th>&lt;li&gt;タグに設定するスタイル<br><span class="fn">(ERRMSG_STYLE_LI)</span></th>
-			<td><input type="text" name="ERRMSG_STYLE_LI" value="" id="ERRMSG_STYLE_LI"></td>
+			<td>
+				<input type="text" name="ERRMSG_STYLE_LI" value="" id="ERRMSG_STYLE_LI">
+				<ul class="caption">
+					<li>個別のエラーメッセージのスタイルを設定します。</li>
+					<li>ここで指定したスタイル指定をタグ内で style=&quot;****&quot; で挟んで出力します。</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<th>&lt;li&gt;タグに設定するスタイル(class属性)<br><span class="fn">(ERRMSG_STYLE_LI_CLASS)</span></th>
+			<td>
+				<input type="text" name="ERRMSG_STYLE_LI_CLASS" value="" id="ERRMSG_STYLE_LI_CLASS">
+				<ul class="caption">
+					<li>個別のエラーメッセージのスタイル(class属性)を設定します。</li>
+					<li>class名が複数ある場合は半角スペースで区切って指定してください。</li>
+				</ul>
+			</td>
 		</tr>
 		</table>
 
@@ -384,13 +445,25 @@
 	</td>
 </tr>
 <tr>
-	<th>送信元アドレス<span class="fn">(SENDFROM)</span></th>
+	<th>送信元</th>
 	<td>
-		<input type="text" name="SENDFROM" value="##SENDFROM##" id ="SENDFROM"><br>
-		<label ><input type="checkbox" name="SENDFROM_EMAIL_FORCED" value="1" id="SENDFROM_EMAIL_FORCED_1">name=&quot;EMAIL&quot;の値を優先する<span class="fn">(SENDFROM_EMAIL_FORCED)</span></label>
+		<table class="tbl">
+		<tr>
+			<th>送信元アドレス<span class="fn">(SENDFROM)</span></th>
+			<td><input type="text" name="SENDFROM" value="" id="SENDFROM"></td>
+		</tr>
+		<tr>
+			<th>送信元名<span class="fn">(SENDFROMNAME)</span></th>
+			<td><input type="text" name="SENDFROMNAME" value="" id="SENDFROMNAME"></td>
+		</tr>
+		</table>
+		<label><input type="checkbox" name="SENDFROM_EMAIL_FORCED" value="1" id="SENDFROM_EMAIL_FORCED_1">name=&quot;EMAIL&quot;の値を優先する<span class="fn">(SENDFROM_EMAIL_FORCED)</span></label><br>
+		<label><input type="checkbox" name="REPLY_TO_EMAIL" value="1" id="REPLY_TO_EMAIL_1">name=&quot;EMAIL&quot;のアドレスをReply-Toヘッダに指定する<span class="fn">(REPLY_TO_EMAIL)</span></label>
 		<ul class="caption">
 			<li>フォームメールのFromヘッダとなります。</li>
 			<li>今までは、フォーム中に name=&quot;EMAIL&quot; の入力欄があって、その値がある場合は、EMAILの値が優先されていましたが、v0.72より、SENDFROMの値を優先します。name=&quot;EMAIL&quot;の値を優先する場合はSENDFROM_EMAIL_FORCEDをチェックしてください。</li>
+			<li>name=&quot;EMAIL&quot;の値を優先する場合は、送信元名は使用されません。</li>
+			<li>送信元アドレスを指定したとき、管理者へ届くメールに返信すると宛先が送信元アドレスになってしまいます。REPLY_TO_EMAILにチェックすると、name=&quot;EMAIL&quot;のアドレスをReply-Toヘッダに指定します。※SENDFROM_EMAIL_FORCEDをチェックしているときはこの指定は無視されます。</li>
 		</ul>
 	</td>
 </tr>

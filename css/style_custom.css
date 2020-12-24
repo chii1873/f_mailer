@@ -19,7 +19,10 @@
 #ERROR_TMPL                   { width: 500px; }
 #ERROR_TMPL_BASE_URL          { width: 500px; }
 #ERRMSG_STYLE_UL              { width: 500px; }
+#ERRMSG_STYLE_UL_CLASS        { width: 500px; }
+#ERRMSG_STYLE_UL_ID           { width: 500px; }
 #ERRMSG_STYLE_LI              { width: 500px; }
+#ERRMSG_STYLE_LI_CLASS        { width: 500px; }
 #tabs-3 .cond_order           { width: 2em; }
 #tabs-3 .cond_name            { width: 140px; }
 #tabs-3 .cond_alt             { width: 260px; }

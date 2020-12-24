@@ -1,0 +1,13 @@
+.f_mailer_errmsg_label_bg {
+	background: pink !important;
+}
+.f_mailer_errmsg_bg {
+	background: lavenderblush !important;
+}
+.f_mailer_errmsg_border {
+	border: 2px red solid !important;
+}
+.f_mailer_errmsg {
+	color: red !important;
+	font-weight: bold !important;
+}

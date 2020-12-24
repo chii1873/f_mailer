@@ -101,18 +101,6 @@ input[type="checkbox"] {
 	margin: 0 3px;
 	background: lightgoldenrodyellow;
 }
-.tbl,
-table.tbl th,
-table.tbl td {
-	border-collapse: collapse;
-	border: 1px #666 solid;
-	padding: 3px;
-}
-table.tbl th {
-	text-align: left;
-	background-color: #f0f0f0;
-	font-weight:normal;
-}
 .cf,
 .clearfix {
 	zoom:1;
@@ -286,6 +274,19 @@ span.ui-checkboxradio-icon {
 	margin: 20px 0;
 }
 
+#contents #main .tbl,
+#contents #main table.tbl th,
+#contents #main table.tbl td {
+	border-collapse: collapse;
+	border: 1px #666 solid;
+	padding: 3px;
+}
+#contents #main table.tbl th {
+	text-align: left;
+	background-color: #f0f0f0;
+	font-weight:normal;
+}
+
 #footer {
 	background: #ddd;
 	font-size: 12px;
@@ -297,8 +298,8 @@ span.ui-checkboxradio-icon {
 }
 
 /* PCモード */
-/* @media screen and (min-width: 1024px) { */
-@media screen and (min-width: 2px) {
+@media screen and (min-width: 1024px) {
+/* @media screen and (min-width: 2px) { */
 
 	.sp,
 	.sp_block,
@@ -372,6 +373,7 @@ span.ui-checkboxradio-icon {
 		margin: 20px 0 0;
 		min-height: 10rem;
 	}
+
 	#admin_menu {
 		margin: 30px 0;
 	}
@@ -420,11 +422,12 @@ span.ui-checkboxradio-icon {
 		float: left;
 		margin: 10px 10px 10px 0;
 	}
+
 }
 
 /* スマホモード */
-/* @media screen and (max-width: 1023px) { */
-@media screen and (max-width: 1px) {
+@media screen and (max-width: 1023px) {
+/* @media screen and (max-width: 1px) { */
 
 	input[type=text],
 	input[type=password],
@@ -476,7 +479,13 @@ span.ui-checkboxradio-icon {
 	table.tbl_sp thead {
 		display: none;
 	}
-	table.tbl_sp th,
+	table.tbl_sp th {
+		display: block;
+		border: 0 !important;
+		padding: 4px;
+		border-radius: 8px;
+		background: #eee !important;
+	}
 	table.tbl_sp td {
 		display: block;
 		border: 0 !important;
@@ -514,6 +523,7 @@ span.ui-checkboxradio-icon {
 		margin: 20px 0 0;
 		min-height: 6rem;
 	}
+
 	#admin_menu div {
 		display: block;
 		width: calc(100vw - 60px);
@@ -536,4 +546,6 @@ span.ui-checkboxradio-icon {
 		border-color: #99c;
 		background: #fafaff;
 	}
+
+
 }
