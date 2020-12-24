@@ -1,0 +1,19 @@
+<!-- header -->
+
+<h2>送信先アドレス設定ツール</h2>
+
+<p>設定対象のフォームを選択してください。</p>
+
+<form action="sendto.cgi" method="post">
+<input type="hidden" name="action" value="form" />
+
+<select name="formlist">
+<option value="">選択してください...</option>
+##list##
+</select>
+
+<input type="submit" value="選択" />
+
+</form>
+
+<!-- footer -->

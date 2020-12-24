@@ -1,0 +1,52 @@
+<!-- header -->
+
+<h2>送信先アドレス設定ツール</h2>
+
+<table class="tbl">
+<tr>
+	<th style="background-color:#eef">CONFID</th>
+	<td>##CONFID##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">設定ファイル名</th>
+	<td>##label##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">フォームの場所</th>
+	<td>##path##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">エレメント名</th>
+	<td style="background-color:#ffd;color:red">##element_name##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">デフォルト送信先</th>
+	<td>##SENDTO##</td>
+</tr>
+</table><br />
+
+<p>
+上記のエレメント名の項目がとる値（選択肢）により送信先アドレスを振り分ける設定をします。<br />
+送信先アドレスが指定されていない場合、また設定されている選択肢以外の値の場合は、上記デフォルト送信先が適用されます。<br />
+送信先アドレスのテキストボックス内に1行に1アドレスを設定してください。<br />
+メールアドレスの前後に「空白（スペース）」「,（カンマ）」などが入らないようにご注意ください。<br />
+入力が終わりましたら、「確認画面へ進む」ボタンをクリックしてください。
+</p>
+
+<form action="sendto.cgi" method="post">
+<input type="hidden" name="action" value="confirm" />
+<input type="hidden" name="temp" value="##temp##" />
+
+<table class="tbl">
+<tr style="background-color:#eef">
+	<th>選択肢</th>
+	<th>送信先アドレス</th>
+</tr>
+##list##
+</table><br />
+
+<input type="submit" value="確認画面へ進む" />
+
+</form>
+
+<!-- footer -->

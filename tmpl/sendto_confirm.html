@@ -1,0 +1,47 @@
+<!-- header -->
+
+<h2>送信先アドレス設定ツール</h2>
+
+<table class="tbl">
+<tr>
+	<th style="background-color:#eef">CONFID</th>
+	<td>##CONFID##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">設定ファイル名</th>
+	<td>##label##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">フォームの場所</th>
+	<td>##path##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">エレメント名</th>
+	<td style="background-color:#ffd;color:red">##element_name##</td>
+</tr>
+<tr>
+	<th style="background-color:#eef">デフォルト送信先</th>
+	<td>##SENDTO##</td>
+</tr>
+</table><br />
+
+<p>以下の内容を確認の上「設定」ボタンを押してください。</p>
+
+<form action="sendto.cgi" method="post">
+<input type="hidden" name="action" value="done" />
+<input type="hidden" name="temp" value="##temp##" />
+
+<table class="tbl">
+<tr style="background-color:#eef">
+	<th>選択肢</th>
+	<th>送信先アドレス</th>
+</tr>
+##list##
+</table><br />
+
+<input type="button" value="戻る" onclick="history.back()" />
+<input type="submit" value="上記の内容で設定する" />
+
+</form>
+
+<!-- footer -->
