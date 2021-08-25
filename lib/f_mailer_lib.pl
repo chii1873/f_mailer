@@ -371,6 +371,25 @@ sub get_cookie {
 	return undef;
 
 }
+sub get_data_from_keyfile {
+
+	my($confid, %opt) = @_;
+
+	unless (-e "data/key/$confid/keys_$confid.csv") {
+		error(get_errmsg("011"));
+	}
+	open(my $fh, "<", "data/key/$confid/keys_$confid.csv");
+	chomp(my $h = <$fh>);
+	my @f = split(/,/, $h);
+	my $exists = 0;
+	while (<$fh>) {
+		chomp;
+		my %d;
+		@d{@f} = split(/,/);
+		return %d if ($opt{"ID"} ne "" and $d{"ID"} eq $opt{"ID"} or $opt{"KEY"} ne "" and $d{"KEY"} eq $opt{"KEY"});
+	}
+	return;
+}
 
 sub get_datetime {
 
@@ -588,6 +607,13 @@ sub json_encode {
 	return to_json($d);
 }
 
+sub json_output {
+	my $d = shift;
+	print "Content-type: text/json\n\n";
+	print json_encode($d);
+	exit;
+}
+
 sub load_errmsg {
 
 	my $lang = shift || "en";
@@ -693,17 +719,16 @@ sub output_form {
 #die "$phase,$errmsg," , caller();
 #d(mk_errmsg($errmsg_ref));
 
-	my($code, $htmlstr) = printhtml_getpage(
-	 ($CONF{"${phase}_TMPL_CHARSET"} || "auto"),
-	 {
-	   "filename" => $CONF{"${phase}_TMPL"},
-	   "errmsg" => ($errmsg_ref || []),
-	 }
-	);
+	my($code, $htmlstr) = printhtml_getpage(($CONF{"${phase}_TMPL_CHARSET"} || "auto"), {
+		"filename" => $CONF{"${phase}_TMPL"},
+		"errmsg" => ($errmsg_ref || []),
+	});
 
 	my %d;
 	if (ref $errmsg_ref) {
-		%d = %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) };
+		if (ref $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) eq "HASH") {
+			%d = %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) };
+		}
 		$htmlstr =~ s|<!--\s*errmsg\s*-->|mk_errmsg($errmsg_ref)|ie;
 		$htmlstr =~ s|##errmsg##|mk_errmsg($errmsg_ref)|ie;
 	} else {
@@ -965,11 +990,28 @@ sub serial_increment {
 
 sub set_cookie {
 
-	my($cookie_name, $expire, @cookie_data) = @_;
-	my($cookie_data) = join('!!!', @cookie_data);
-	$expire = "expires=". get_datetime_for_cookie($expire) . "; "
-	 if $expire;
-	print "Set-Cookie: $cookie_name=$cookie_data; $expire\n";
+	my($cookie_name, $cookie_data, $opt) = @_;
+	### 2021-01-14 PATH_INFOがあってもf_mailer.cgiの位置にパスを統一するためにパスを取得
+	(my $cookie_path) = $ENV{"REQUEST_URI"} =~ m#^(.*)/\Q$0\E#;
+	$opt = {
+		"Path" => $cookie_path,
+		"Secure" => 1,
+		"HttpOnly" => 1,
+		"SameSite" => "Lax",
+		ref $opt eq "HASH" ? %$opt : ()
+	};
+	if (ref $cookie_data eq "ARRAY") {
+		$cookie_data = join("!!!", @$cookie_data);
+	}
+	my @opt;
+	push(@opt, "$cookie_name=$cookie_data");
+	push(@opt, "Expires=". get_datetime_for_cookie($opt->{"Expires"})) if $opt->{"Expires"};
+	push(@opt, "Domain=". $opt->{"Domain"}) if $opt->{"Domain"};
+	push(@opt, "Path=". $opt->{"Path"}) if $opt->{"Path"};
+	push(@opt, "SameSite=". $opt->{"SameSite"}) if $opt->{"SameSite"};
+	push(@opt, "Secure") if $opt->{"Secure"};
+	push(@opt, "HttpOnly") if $opt->{"HttpOnly"};
+	print "Set-Cookie: ", join("; ", @opt), "\n";
 
 }
 
@@ -1080,11 +1122,11 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.8pre201223},
+		version   => q{0.8pre210115},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{https://www.psl.ne.jp/},
-		copyright => q{&copy;1997-2020},
-		copyright2 => q{(c)1997-2020},
+		copyright => q{&copy;1997-2021},
+		copyright2 => q{(c)1997-2021},
 	);
 	chomp($PROD{"copyright_html_footer"} = <<STR);
 <a href="$PROD{"a_url"}" target="_blank"><strong>$PROD{"prod_name"} v$PROD{"version"}</strong></a>
@@ -1120,20 +1162,22 @@ sub token_publish {
 
 	my $id = shift or error(caller());
 
-	if ($ENV{"REQUEST_METHOD"} eq "POST" and ! $FORM{"__token_ignore"}) {
-		if (! exists $FORM{"__token"}) {
-			error(get_errmsg("090"));
+	if ($CONF{"CSRF_TOKEN"}) {
+		if ($ENV{"REQUEST_METHOD"} eq "POST" and ! $FORM{"__token_ignore"}) {
+			if (! exists $FORM{"__token"}) {
+				error(get_errmsg("090"));
+			}
+			if ($FORM{"__token"} ne $CONF{"session"}->param("__token-$id")) {
+#				error(get_errmsg("091").qq|$FORM{"__token"} :: |.$CONF{"session"}->param("__token"));
+				error(get_errmsg("091"));
+			}
 		}
-		if ($FORM{"__token"} ne $CONF{"session"}->param("__token-$id")) {
-#			error(get_errmsg("091").qq|$FORM{"__token"} :: |.$CONF{"session"}->param("__token"));
-			error(get_errmsg("091"));
+		if (! $FORM{"__token_ignore"}) {
+			$CONF{"session"}->param("__token-$id", $CONF{"__token"});
+			$FORM{"__token"} = $CONF{"__token"};
 		}
 	}
-	if (! $FORM{"__token_ignore"}) {
-		$CONF{"session"}->param("__token-$id", $CONF{"__token"});
-		$FORM{"__token"} = $CONF{"__token"};
-	}
-	set_cookie("CGISESSID", "", $CONF{"session"}->id());
+	set_cookie("CGISESSID".($id eq "admin" ? "_ADMIN" : ""), $CONF{"session"}->id());
 }
 
 sub uuencode {

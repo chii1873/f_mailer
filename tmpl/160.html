@@ -1,0 +1,166 @@
+<!-- header -->
+
+<div id="to_page_title">ID・キー登録</div>
+<script type="text/javascript" src="js/p160.js"></script>
+
+<input type="hidden" name="confid" id="confid" value="">
+<input type="hidden" name="filename" id="filename" value="">
+<input type="hidden" name="__token_ignore" id="__token_ignore" value="">
+
+<div class="cf">
+<table style="float:right" class="message_sw">
+<tr>
+	<td style="padding-right:4px">説明テキスト</td>
+	<td id="buttonset_show_caption">
+		<label><input type="radio" name="show_caption" value="1" id="show_caption_1">表示する</label>
+		<label><input type="radio" name="show_caption" value="0" id="show_caption_0">表示しない</label>
+	</td>
+</tr>
+</table>
+<table class="tbl" style="float:left">
+<tr>
+	<th class="bg_eef">フォームID</th>
+	<td style="padding:8px">##confid##</td>
+	<th class="bg_eef">設定名</th>
+	<td style="padding:8px">##label##</td>
+</tr>
+</table>
+</div>
+<br>
+
+<div id="tabs">
+<ul>
+	<li><a href="#tabs-1">ID・ユニークキー</a></li>
+	<li><a href="#tabs-2">一括生成</a></li>
+</ul>
+
+<div id="tabs-1">
+
+<textarea name="USERDATA" id="USERDATA" cols="40" rows="15" style="width:98%"></textarea>
+<p>
+	<button type="button" class="btn btn_submit_ajax" id="btn_submit_ajax_to_162" data-confid="##confid##" disabled="disabled">登録／更新</button>
+</p>
+
+<div class="caption" style="background:#f0f0ff;padding:5px 10px 10px;margin-bottom:20px">
+<h4>ID・ユニークキー登録の手順</h4>
+
+<ol class="caption">
+	<li>自動生成ツールを使ってID・パスワード、またはユニークキーのリストを一括生成します。</li>
+	<li>生成したデータを全選択＋コピーして、Excelのワークシートに貼り付けます。</li>
+	<li>1行目はID(=ログインID)、PW(=パスワード)、KEY(=ユニークキー)のいずれかとなります。2行目以降がデータとなります。</li>
+	<li>必要なら、氏名、メールアドレスなど適宜項目名を1行目に設定し、対応する値を全部のキーについて作成します。</li>
+	<li>作成したデータを選択します(1行目のフィールド行も含めてください)。</li>
+	<li>上のフォームに貼り付けます。</li>
+	<li>「登録／更新」ボタンを押して登録します。</li>
+</ol>
+
+<ul class="caption">
+	<li>ID・パスワード、またはユニークキーの桁数はそれぞれ4～24とします。</li>
+	<li>データの1行目は常にフィールド名とみなします。</li>
+	<li>フォーム設定登録の「ログイン機能」で「ユニークキーによるログイン」を選択したときはKEY列が必須となります。また、「ID・パスワードによるログイン」を選択したときはIDおよびPW列が必須となります。</li>
+	<li>ここで指定したフィールド値は、フォーム内にname="フィールド名"のフォームエレメントがあった場合、初期値として使用されます。</li>
+	<li>このデータは、いつでも制限なく書き換えができます。ログインしたタイミングで、IDまたはユニークキーに紐付けて登録されているデータを初期値として扱います。</li>
+</ul>
+</div>
+
+<div>
+	<button type="button" class="btn btn_submit_ajax" id="btn_submit_ajax_to_163" data-confid="##confid##">回答済みフラグをリセット</button>
+	<ul class="caption">
+		<li>回答済みフラグをすべて削除します。</li>
+	</ul>
+</div>
+
+</div><!-- /tabs-1 -->
+
+<div id="tabs-2">
+
+<table class="tbl">
+<tr>
+	<th colspan="2">アカウント個数</th>
+	<td style="padding-left:2rem;padding-right:2rem"><input type="number" name="iterator_number" value="" id="iterator_number" style="width:6rem" min="1">個</td>
+</tr>
+</table><br>
+
+<table class="tbl" id="tbl-iterator">
+<tr>
+	<th>生成する</th>
+	<td><label><input type="checkbox" name="iterator_generate_id" id="iterator_generate_id" value="1">ログインＩＤ</label></td>
+	<td><label><input type="checkbox" name="iterator_generate_pw" id="iterator_generate_pw" value="1">パスワード</label></td>
+	<td><label><input type="checkbox" name="iterator_generate_key" id="iterator_generate_key" value="1">ユニークキー</label></td>
+</tr>
+<tr>
+	<th>生成方法</th>
+	<td class="col1">
+		<label><input type="radio" name="iterator_method_id" id="iterator_method_id_1" value="1">ランダム</label><br>
+		<label><input type="radio" name="iterator_method_id" id="iterator_method_id_2" value="2">連番(数字のみ)</label><br>
+		（ 付加テキスト：<input type="text" name="iterator_prefix_id" id="iterator_prefix_id" value="" style="width:5em"> ）
+	</td>
+	<td class="col2">
+		<label><input type="radio" name="iterator_method_pw" id="iterator_method_pw_1" value="1">ランダム</label><br>
+		<label><input type="radio" name="iterator_method_pw" id="iterator_method_pw_2" value="2">連番(数字のみ)</label><br>
+		（ 付加テキスト：<input type="text" name="iterator_prefix_pw" id="iterator_prefix_pw" value="" style="width:5em"> ）
+	</td>
+	<td class="col3">
+		<label><input type="radio" name="iterator_method_key" id="iterator_method_key_1" value="1">ランダム</label><br>
+		<label><input type="radio" name="iterator_method_key" id="iterator_method_key_2" value="2">連番(数字のみ)</label><br>
+		（ 付加テキスト：<input type="text" name="iterator_prefix_key" id="iterator_prefix_key" value="" style="width:5em"> ）
+	</td>
+</tr>
+<tr>
+	<th>ケタ数</th>
+	<td class="c col1">
+		<input type="number" name="iterator_digits_id" id="iterator_digits_id" value="" min="4" max="24" style="width:4em">ケタ
+	</td>
+	<td class="c col2">
+		<input type="number" name="iterator_digits_pw" id="iterator_digits_pw" value="" min="4" max="24" style="width:4em">ケタ
+	</td>
+	<td class="c col3">
+		<input type="number" name="iterator_digits_key" id="iterator_digits_key" value="" min="4" max="24" style="width:4em">ケタ
+	</td>
+</tr>
+<tr>
+	<th>使用文字種</th>
+	<td class="col1">
+		<label><input type="checkbox" name="iterator_charn_id" id="iterator_charn_id" value="1">数字(0-9)</label><br>
+		<label><input type="checkbox" name="iterator_charl_id" id="iterator_charl_id" value="1">英小文字(a-z)</label><br>
+		<label><input type="checkbox" name="iterator_charu_id" id="iterator_charu_id" value="1">英大文字(A-Z)</label><br>
+		<label><input type="checkbox" name="iterator_charc_id" id="iterator_charc_id" value="1">カスタム</label><br>
+		　　<input type="text" name="iterator_charo_id" id="iterator_charo_id" value="" style="width:10em"><br>　　(半角英数字のみ可)
+	</td>
+	<td class="col2">
+		<label><input type="checkbox" name="iterator_charn_pw" id="iterator_charn_pw" value="1">数字(0-9)</label><br>
+		<label><input type="checkbox" name="iterator_charl_pw" id="iterator_charl_pw" value="1">英小文字(a-z)</label><br>
+		<label><input type="checkbox" name="iterator_charu_pw" id="iterator_charu_pw" value="1">英大文字(A-Z)</label><br>
+		<label><input type="checkbox" name="iterator_charc_pw" id="iterator_charc_pw" value="1">カスタム</label><br>
+		　　<input type="text" name="iterator_charo_pw" id="iterator_charo_pw" value="" style="width:10em"><br>　　(半角英数字のみ可)
+	</td>
+	<td class="col3">
+		<label><input type="checkbox" name="iterator_charn_key" id="iterator_charn_key" value="1">数字(0-9)</label><br>
+		<label><input type="checkbox" name="iterator_charl_key" id="iterator_charl_key" value="1">英小文字(a-z)</label><br>
+		<label><input type="checkbox" name="iterator_charu_key" id="iterator_charu_key" value="1">英大文字(A-Z)</label><br>
+		<label><input type="checkbox" name="iterator_charc_key" id="iterator_charc_key" value="1">カスタム</label><br>
+		　　<input type="text" name="iterator_charo_key" id="iterator_charo_key" value="" style="width:10em"><br>　　(半角英数字のみ可)
+	</td>
+</tr>
+</table>
+<p>
+	<input type="button" value="一括生成" class="btn" id="btn_iterate">
+</p>
+
+<textarea cols="40" rows="10" style="width:50%" id="iterator_result"></textarea>
+<ul class="caption">
+	<li>この中に生成されたデータをコピーしてお使いください。</li>
+</ul>
+
+</div><!-- /tabs-2 -->
+
+</div><!-- /tabs -->
+
+
+
+<div class="navi">
+	<input type="button" class="btn btn_submit" value="フォーム設定一覧へ" id="btn_submit_to_100">
+	<input type="button" class="btn btn_to_menu" value="管理メニューへ">
+</div>
+
+<!-- footer -->

@@ -2,7 +2,7 @@
 #BEGIN{ print "Content-type: text/html\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
 
 use strict;
-use lib qw(./module ./lib);
+use lib qw(./ ./module ./lib);
 use vars qw($q %FORM %CONF %alt %ERRMSG);
 use CGI;
 use Unicode::Japanese;
@@ -14,6 +14,7 @@ use Data::Dumper;
 use JSON;
 use Fcntl ':flock';
 use Digest::MD5 qw(md5_hex);
+use Archive::Zip;
 use URI::Escape;
 sub d { die Dumper($_[0]) }
 $ENV{"PATH"} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
@@ -22,7 +23,7 @@ require "f_mailer_lib_admin.pl";
 umask 0;
 
 %CONF = (setver(), sysconf_read());
-$CONF{"CGISESSID"} = get_cookie("CGISESSID");
+$CONF{"CGISESSID"} = get_cookie("CGISESSID_ADMIN") || undef;
 $CONF{"session"} = new CGI::Session("driver:File", $CONF{"CGISESSID"}, { "Directory" => "./temp" });
 $CONF{"__token"} = get_sid();
 %ERRMSG = load_errmsg($CONF{"LANG_DEFAULT"} || "ja");
@@ -80,8 +81,9 @@ sub login {
 	 if ($password_encrypted eq "" or passwd_compare($FORM{"passwd"}, $password_encrypted) == 0);
 
 	$CONF{"session"}->param("login_id", $FORM{"login_id"});
-	set_cookie("FORM_MAILER_ADMIN_CACHE", 30 * 86400,
-	 ($FORM{"do_cache"} ? join("!!!", $FORM{"login_id"}, $FORM{"passwd"}) : ""));
+	set_cookie("FORM_MAILER_ADMIN_CACHE", $FORM{"do_cache"} ? [$FORM{"login_id"}, $FORM{"passwd"}] : "", {
+		"Expires" => 30 * 86400,
+	});
 	print "Location: f_mailer_admin.cgi\n\n";
 	exit;
 

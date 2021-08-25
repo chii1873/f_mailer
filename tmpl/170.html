@@ -1,0 +1,60 @@
+<!-- header -->
+
+<div id="to_page_title">アップロード済み添付ファイル一覧</div>
+<script type="text/javascript" src="js/p170.js"></script>
+
+<input type="hidden" name="confid" id="confid" value="">
+<input type="hidden" name="filename" id="filename" value="">
+<input type="hidden" name="__token_ignore" id="__token_ignore" value="">
+
+<div class="cf">
+<table style="float:right" class="message_sw">
+<tr>
+	<td style="padding-right:4px">説明テキスト</td>
+	<td id="buttonset_show_caption">
+		<label><input type="radio" name="show_caption" value="1" id="show_caption_1">表示する</label>
+		<label><input type="radio" name="show_caption" value="0" id="show_caption_0">表示しない</label>
+	</td>
+</tr>
+</table>
+<table class="tbl" style="float:left">
+<tr>
+	<th class="bg_eef">フォームID</th>
+	<td style="padding:8px">##confid##</td>
+	<th class="bg_eef">設定名</th>
+	<td style="padding:8px">##label##</td>
+</tr>
+</table>
+</div>
+<br>
+<!-- errmsg -->
+<table class="tbl" id="tbl-p170">
+<thead>
+<tr>
+	<th class="c"><input type="checkbox" id="chkall"></th>
+	<th>添付ファイル名</th>
+	<th>最終更新日時</th>
+	<th>操作</th>
+</tr>
+</thead>
+<tbody>
+##list##
+</tbody>
+</table>
+<p>
+	<button type="button" class="btn btn_submit" id="btn_submit_to_173" data-token_ignore="1" data-confid="##confid##">一括ダウンロード</button>
+	<button type="button" class="btn btn_submit" id="btn_submit_to_174" data-token_ignore="1" data-confid="##confid##" data-confirm="1" data-confirm_message="選択されたファイルを一括削除します。一度削除すると元には戻せません。よろしいですか？">一括削除</button>
+</p>
+
+
+<ul class="caption">
+	<li>フォーム設定の「管理者宛メール」タブで、添付ファイルのメール添付を「サーバに保存する」に設定していると、アップロードされたファイルがサーバ内に保存されます。</li>
+	<li>アップロードされたファイルのファイル名は、「ファイル名フォーマット」で指定します。変更した場合、変更後に送信されたフォームから反映します。変更前のデータは影響を受けません。</li>
+</ul>
+
+<div class="navi">
+	<input type="button" class="btn btn_submit" value="フォーム設定一覧へ" id="btn_submit_to_100">
+	<input type="button" class="btn btn_to_menu" value="管理メニューへ">
+</div>
+
+<!-- footer -->

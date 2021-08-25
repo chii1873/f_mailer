@@ -44,7 +44,7 @@
 
 <table class="tbl">
 <tr>
-	<th>言語モード<span class="fn">(LANG)</span></th>
+	<th style="min-width:160px">言語モード<span class="fn">(LANG)</span></th>
 	<td>
 		<select name="LANG" id="LANG">
 ##langlist##
@@ -108,6 +108,23 @@
 		</ul>
 	</td>
 </tr>
+<tr>
+	<th>ログイン機能<span class="fn">(USE_LOGIN)</span></th>
+	<td>
+		<label><input type="radio" name="USE_LOGIN" value="2" id="USE_LOGIN_2">ユニークキーによるログイン</label><br>
+		<label><input type="radio" name="USE_LOGIN" value="1" id="USE_LOGIN_1">ID・パスワードによるログイン</label><br>
+		<label><input type="radio" name="USE_LOGIN" value="0" id="USE_LOGIN_0">使用しない</label><br>
+		<label><input type="checkbox" name="SEND_ONCE" value="1" id="SEND_ONCE">1回のみ送信可</label>
+
+		<ul class="caption">
+			<li>「ユニークキーによるログイン」を選択すると、f_mailer.cgi/XXXXX (※XXXXXはユニークキー)の形での呼び出し以外受け付けなくなります。</li>
+			<li>「ID・パスワードによるログイン」を選択すると、f_mailer.cgiにアクセスするとログイン画面が表示され、ログイン後にフォームを表示します。「画面設定」タブのログインフォームの設定が必須となります。</li>
+			<li>「使用しない」は従来の使用方法です。最初にフォームhtmlのURLに直接アクセスします。</li>
+			<li>ログイン機能を使用する場合は、フォーム設定一覧の「ID・キー」ボタンからID・キー登録画面に進み、ID・パスワード(PW)、または、ユニークキー(KEY)を登録しておく必要があります。</li>
+			<li>「1回のみ送信可」にチェックすると、送信は1回のみ可能で、再度の送信ができないようになります。</li>
+		</ul>
+	</td>
+</tr>
 </table>
 
 </div><!-- /tabs-1 -->
@@ -115,6 +132,55 @@
 <div id="tabs-2">
 
 <table class="tbl" id="tbl-tab2">
+<tr>
+	<th>ログインフォーム</th>
+	<td>
+		<table class="tbl">
+		<tr>
+			<th>テンプレート<span class="fn">(LOGIN_TMPL)</span></th>
+			<td><input type="text" name="LOGIN_TMPL" value="" id="LOGIN_TMPL"></td>
+		</tr>
+		<tr>
+			<th>文字コード<span class="fn">(LOGIN_TMPL_CHARSET)</span></th>
+			<td>
+				<select name="LOGIN_TMPL_CHARSET" id="LOGIN_TMPL_CHARSET">
+				<option value="utf8">UTF-8</option>
+				<option value="sjis">SJIS</option>
+				<option value="euc">EUC</option>
+				</select>
+			</td>
+		</select></td>
+		</tr>
+		<tr>
+			<th>付加URL<span class="fn">(LOGIN_TMPL_BASE_URL)</span></th>
+			<td><input type="text" name="LOGIN_TMPL_BASE_URL" value="" id="LOGIN_TMPL_BASE_URL"></td>
+		</tr>
+		<tr>
+			<th>入力エラー表示<span class="fn">(FORM_FLAG)</span></th>
+			<td>
+				<label><input type="radio" name="LOGIN_FLAG" value="0" id="LOGIN_FLAG_0">システムエラー画面を表示する</label><br>
+				<label><input type="radio" name="LOGIN_FLAG" value="1" id="LOGIN_FLAG_1">フォームを再表示する</label><br>
+			</td>
+		</tr>
+		<tr>
+			<th>入力エラー<br>メッセージの<br>表示場所<span class="fn">(FORM_TMPL_ERRMSG_DISPLAY)</span></th>
+			<td>
+				<label><input type="radio" name="LOGIN_TMPL_ERRMSG_DISPLAY" value="1" id="LOGIN_TMPL_ERRMSG_DISPLAY_1">&lt;!-- errmsg -- &gt;を埋めこんだ場所</label><br>
+				<label><input type="radio" name="LOGIN_TMPL_ERRMSG_DISPLAY" value="2" id="LOGIN_TMPL_ERRMSG_DISPLAY_2">各入力欄</label>
+			</td>
+		</tr>
+		</table>
+
+		<ul class="caption">
+			<li>テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。置き場所は<span class="tt">./tmpl/custom/</span>を推奨します。</li>
+			<li>テンプレートにURL指定できるようになりました。http(s)://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
+			<li>付加URLとは、f_mailer.cgi経由でページを表示した際、相対パスで指定されているstyle/script/img/inputタグのsrc属性、aタグのhref属性が相対パスであった際に冒頭に付加するURLです。リンクや外部ファイルの参照ができなくなるのを防ぎます。なお、cssファイル内で呼び出しているimg()プロパティのパスは書き換わりませんのでご注意ください。</li>
+			<li>「フォームを再表示する」を選択すると、フォーム入力後に送信ボタンを押したとき、入力フォームそのものを再表示し、入力内容をそのまま維持して、エラーメッセージを表示します。これにより、戻るボタンで戻ったときに入力内容が消えてしまう問題が回避できます。</li>
+			<li>エラーメッセージの表示場所は、テンプレート内に &lt;!-- errmsg --&gt; を埋めこんだ位置にリスト形式でまとめてメッセージを表示する方式の他、入力欄の直上・直下などにあらかじめ指定した所定のclass属性を指定しておくことで、各種のハイライト表示およびエラーメッセージの表示することができます。詳しくは導入ガイドをご覧ください。</li>
+		</ul>
+	</td>
+</tr>
 <tr>
 	<th>入力フォーム<span class="fn">(FORM_FLAG)</span></th>
 	<td>
@@ -126,13 +192,12 @@
 		<tr>
 			<th>文字コード<span class="fn">(FORM_TMPL_CHARSET)</span></th>
 			<td>
-				<select name="FORM_TMPL_CHARSET" id="ERROR_TMPL_CHARSET">
+				<select name="FORM_TMPL_CHARSET" id="FORM_TMPL_CHARSET">
 				<option value="utf8">UTF-8</option>
 				<option value="sjis">SJIS</option>
 				<option value="euc">EUC</option>
 				</select>
 			</td>
-		</select></td>
 		</tr>
 		<tr>
 			<th>付加URL<span class="fn">(FORM_TMPL_BASE_URL)</span></th>
@@ -156,11 +221,11 @@
 
 		<ul class="caption">
 			<li>テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。置き場所は<span class="tt">./tmpl/custom/</span>を推奨します。</li>
-			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>テンプレートにURL指定できるようになりました。http(s)://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
 			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
 			<li>付加URLとは、f_mailer.cgi経由でページを表示した際、相対パスで指定されているstyle/script/img/inputタグのsrc属性、aタグのhref属性が相対パスであった際に冒頭に付加するURLです。リンクや外部ファイルの参照ができなくなるのを防ぎます。なお、cssファイル内で呼び出しているimg()プロパティのパスは書き換わりませんのでご注意ください。</li>
 			<li>「フォームを再表示する」を選択すると、フォーム入力後に送信ボタンを押したとき、入力フォームそのものを再表示し、入力内容をそのまま維持して、エラーメッセージを表示します。これにより、戻るボタンで戻ったときに入力内容が消えてしまう問題が回避できます。</li>
-			<li>エラーメッセージの表示場所は、従来は、テンプレート内に &lt;!-- errmsg --&gt; を埋めこんでおくとその位置にリスト形式でまとめてメッセージを表示していましたが、その他に、入力欄の直上・直下などにあらかじめ指定した所定のclass属性を指定しておくことで、各種のハイライト表示およびエラーメッセージの表示ができるようになりました。詳しくは導入ガイドをご覧ください。</li>
+			<li>エラーメッセージの表示場所は、テンプレート内に &lt;!-- errmsg --&gt; を埋めこんだ位置にリスト形式でまとめてメッセージを表示する方式の他、入力欄の直上・直下などにあらかじめ指定した所定のclass属性を指定しておくことで、各種のハイライト表示およびエラーメッセージの表示することができます。詳しくは導入ガイドをご覧ください。</li>
 		</ul>
 	</td>
 </tr>
@@ -196,7 +261,7 @@
 			<li>確認画面を出すかどうかを指定してください。</li>
 			<li>システム内蔵ページとは、<span class="tt">./tmpl/default/confirm.html</span>のことです。</li>
 			<li>テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。置き場所は<span class="tt">./tmpl/custom/</span>を推奨します。</li>
-			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>テンプレートにURL指定できるようになりました。http(s)://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
 			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
 			<li>付加URLとは、f_mailer.cgi経由でページを表示した際、相対パスで指定されているstyle/script/img/inputタグのsrc属性、aタグのhref属性が相対パスであった際に冒頭に付加するURLです。リンクや外部ファイルの参照ができなくなるのを防ぎます。なお、cssファイル内で呼び出しているimg()プロパティのパスは書き換わりませんのでご注意ください。</li>
 		</ul>
@@ -233,7 +298,7 @@
 
 		<ul class="caption">
 			<li>システム内蔵ページとは、<span class="tt">./tmpl/default/thanks.html</span>のことです。</li>
-			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>テンプレートにURL指定できるようになりました。http(s)://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
 			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
 		</ul>
 	</td>
@@ -268,7 +333,7 @@
 		<ul class="caption">
 			<li>システム内蔵ページとは、<span class="tt">./tmpl/default/error.html</span>のことです。</li>
 			<li>テンプレート指定欄には、サーバに置いたテンプレートhtmlのファイル名を指定します。相対パスで指定する場合は、f_mailer.cgiのある場所を起点としてください。</li>
-			<li>テンプレートにURL指定できるようになりました。http://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
+			<li>テンプレートにURL指定できるようになりました。http(s)://からURLを指定すると、そのURLへアクセスしてページを取得して、テンプレートとして使用します。</li>
 			<li>指定したテンプレートの文字コードを指定できるようになりました。</li>
 		</ul>
 	</td>
@@ -529,6 +594,24 @@
 		<input type="text" name="ATTACH_TSIZE_MAX" value="" id="ATTACH_TSIZE_MAX" class="num" style="width:4em">キロバイトまで
 		<ul class="caption">
 			<li>添付ファイル合計サイズ上限を指定します。</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<th>添付ファイルのメール添付<span class="fn">(DO_ATTACH)</span></th>
+	<td>
+		<input type="radio" name="DO_ATTACH" value="2" id="DO_ATTACH_2"><label for="DO_ATTACH_2">メールに添付する＋サーバに保存する</label><br>
+		<input type="radio" name="DO_ATTACH" value="1" id="DO_ATTACH_1"><label for="DO_ATTACH_1">メールに添付する＋サーバに保存しない</label><br>
+		<input type="radio" name="DO_ATTACH" value="0" id="DO_ATTACH_0"><label for="DO_ATTACH_0">メールに添付しない＋サーバに保存する</label><br>
+		　ファイル名フォーマット：<input type="text" name="ATTACH_DOWNLOAD_FORMAT" value="" id="ATTACH_DOWNLOAD_FORMAT" style="40em"><br>
+		　<input type="button" value="フォーマット内で指定できる差し込み用文字列の一覧表示" class="btn_s btn_attach_download_1">
+
+		<ul class="caption">
+			<li>アップロードされたファイルをメールに添付するか、サーバ上に保存して管理画面からダウンロードできるようにするかを選択します。</li>
+			<li>添付ファイルのサイズ上限を大きく設定しているなど、メールに直接添付して送れない場合は「メールに添付しない＋サーバに保存する」を選択してください。</li>
+			<li>アップロードされたファイルをサーバ上に保存しておいて、あとからダウンロードしたい場合は「メールに添付する＋サーバに保存する」にチェックしてください。</li>
+			<li>メールに添付するのみでサーバにファイルを残したくない場合は「メールに添付する＋サーバに保存しない」にチェックしてください。※従来の動作です。</li>
+			<li>アップロードされたファイルのダウンロードは、フォーム設定一覧の各設定の「添付ファイル」ボタンから行うことができます。</li>
 		</ul>
 	</td>
 </tr>
@@ -908,6 +991,22 @@
 <tr>
 	<td><span class="tt">&#35;&#35;フィールド名&#35;&#35;</span></td>
 	<td>フィールド値</td>
+</tr>
+</table>
+</div>
+<div id="attach_filename" class="caption_box">
+<table class="tbl">
+<tr>
+	<td><span class="tt">&#35;&#35;SERIAL&#35;&#35;</span></td>
+	<td>シリアル番号</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;ID&#35;&#35;</span></td>
+	<td>ID</td>
+</tr>
+<tr>
+	<td><span class="tt">&#35;&#35;FILENAME&#35;&#35;</span></td>
+	<td class="nowrap">アップロード時のファイル名</td>
 </tr>
 </table>
 </div>

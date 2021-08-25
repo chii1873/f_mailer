@@ -10,11 +10,11 @@ sub p142 {
 		error(get_errmsg("470"));
 	}
 	if ($FORM{"filename"} eq "") {
-		error(get_errmsg("580"));
+		error(get_errmsg("584"));
 	} elsif ($FORM{"filename"} =~ m#/#) {
-		error(get_errmsg("581"));
+		error(get_errmsg("585"));
 	} elsif (! -e qq|data/output/$FORM{"confid"}/$FORM{"filename"}|) {
-		error(get_errmsg("582"));
+		error(get_errmsg("586"));
 	}
 
 	unlink(qq|data/output/$FORM{"confid"}/$FORM{"filename"}|);

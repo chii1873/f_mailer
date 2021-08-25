@@ -23,6 +23,9 @@ $(function() {
 	$(".btn_output_filename").on("click", function () {
 		$("#output_filename").dialog({ title: "書き出すファイル名で指定できる差し込み用文字列", width: 400 });
 	});
+	$(".btn_attach_download_1").on("click", function () {
+		$("#attach_filename").dialog({ title: "サーバ上に保存する添付ファイル名で指定できる差し込み用文字列", width: 400 });
+	});
 
 	$("[name=FILE_OUTPUT],[name=DO_NOT_SEND],[name=AUTO_REPLY]").on("click", function () {
 		display_sw_p111();

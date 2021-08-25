@@ -17,10 +17,11 @@ sub p100 {
 	<td>$d->{"id"}</td>
 	<td>$d->{"label"}</td>
 	<td>($d->{"lang"})$lang{$d->{"lang"}}</td>
-	<td class="r"><span class="serial_number">$serial</span><button class="btn_s btn_submit" id="btn_submit_to_124" data-confid="$d->{"id"}">変更</button></td>
+	<td class="r"><span class="serial_number">$serial</span><button type="button" class="btn_s btn_submit" id="btn_submit_to_124" data-confid="$d->{"id"}">変更</button></td>
 	<td>
-		<!-- button class="btn_s btn_submit" id="btn_submit_to_101" data-confid="$d->{"id"}">確認</button --><button class="btn_s btn_submit" id="btn_submit_to_121" data-confid="$d->{"id"}">修正</button><button class="btn_s btn_submit" id="btn_submit_to_132" data-confid="$d->{"id"}" data-confirm="1" data-confirm_message="この設定を削除します。一度削除すると元には戻せません。よろしいですか？">削除</button> |
-		<button class="btn_s btn_submit" id="btn_submit_to_140" data-confid="$d->{"id"}">送信データ</button><button class="btn_s btn_submit" id="btn_submit_to_150" data-confid="$d->{"id"}" data-token_ignore="1">エクスポート</button>
+		<!-- button type="button" class="btn_s btn_submit" id="btn_submit_to_101" data-confid="$d->{"id"}">確認</button --><button type="button" class="btn_s btn_submit" id="btn_submit_to_121" data-confid="$d->{"id"}">修正</button><button type="button" class="btn_s btn_submit" id="btn_submit_to_132" data-confid="$d->{"id"}" data-confirm="1" data-delete="1" data-confirm_message="この設定を削除します。ID・キー、添付ファイル、送信データもすべて削除されます。一度削除すると元には戻せません。よろしいですか？">削除</button> |
+		<button type="button" class="btn_s btn_submit" id="btn_submit_to_160" data-confid="$d->{"id"}">ID・キー</button><button type="button" class="btn_s btn_submit" id="btn_submit_to_170" data-confid="$d->{"id"}">添付ファイル</button><button type="button" class="btn_s btn_submit" id="btn_submit_to_140" data-confid="$d->{"id"}">送信データ</button> |
+		<button type="button" class="btn_s btn_submit" id="btn_submit_to_150" data-confid="$d->{"id"}" data-token_ignore="1">エクスポート</button>
 	</td>
 </tr>
 STR

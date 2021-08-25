@@ -43,6 +43,12 @@ sub p113 {
 	### 送信データファイルディレクトリ生成
 	mkdir("data/output/$confid") or error(get_errmsg("452", $!));
 
+	### ログイン・初期値データディレクトリ生成
+	mkdir("data/key/$confid") or error(get_errmsg("454", $!));
+
+	### 回答済みフラグファイル用ディレクトリ生成
+	mkdir("data/key/$confid/done") or error(get_errmsg("456", $!));
+
 	### 設定一覧データ追加
 	my $conflist = conflist_read();
 	push(@$conflist, \%newconf);

@@ -1,8 +1,31 @@
+var lang;
+var current = (function() {
+	if (document.currentScript) {
+		return document.currentScript.src;
+	} else {
+		var scripts = document.getElementsByTagName('script'),
+		script = scripts[scripts.length-1];
+		if (script.src) {
+			return script.src;
+		}
+	}
+})();
+var f_mailer_url = current.replace(new RegExp("(?:\\\/+[^\\\/]*)?$"), "/").replace(new RegExp("\\\/[^\\\/]+\\\/$"), "");
 $(function () {
+
+	if (typeof LANG === "undefined") LANG = "ja";
+
+	$.ajaxSetup({ async: false });
+	$.getJSON(f_mailer_url + "/js/lang/f_mailer_"+LANG+".json", function (data) {
+		lang = data;
+//		console.log(lang);
+	});
+	$.ajaxSetup({ async: true });
+//	console.log(lang);
 
 	// セッションIDの発行
 	$.ajax({
-		url: "f_mailer.cgi",
+		url: f_mailer_url + "/f_mailer.cgi",
 		type: "GET",
 		dataType: "json",
 		async: false,
@@ -11,12 +34,12 @@ $(function () {
 			"ajax_token": 1
 		}
 	})
-	.done( (d) => {
+	.done(function (d) {
 		$("#__token").val(d.__token);
 		file_check();
 		console.log(d);
 	})
-	.fail( (data) => {
+	.fail(function (data) {
 		alert("fail");
 		console.log(data);
 	});
@@ -26,12 +49,12 @@ $(function () {
 		$("#ajax_action").attr("name", "ajax_checkvalues").attr("value", "1");
 		$.ajax({
 			type: "POST",
-			url: "f_mailer.cgi",
+			url: f_mailer_url + "/f_mailer.cgi",
 			dataType: "json",
 			async: false,
 			data: $("form").serialize()
 		})
-		.done( (d) => {
+		.done(function (d) {
 
 			// 初期化
 			$("*").each(function () {
@@ -51,12 +74,12 @@ $(function () {
 				$("#f0").submit();
 			}
 			// エラーがある
-			let errmsg_list = [];
-			let sel = [];
-			for (let i=0; i<d.errmsg.length; i++) {
+			var errmsg_list = [];
+			var sel = [];
+			for (var i=0; i<d.errmsg.length; i++) {
 				if ($.isArray(d.errmsg[i])) {
-					let f_name = d.errmsg[i][0];
-					let val = d.errmsg[i][1];
+					var f_name = d.errmsg[i][0];
+					var val = d.errmsg[i][1];
 					if (d.FORM_TMPL_ERRMSG_DISPLAY == 2) {
 						sel.push(f_name);
 						$("#f_mailer_errmsg-"+f_name).text(val);
@@ -68,7 +91,7 @@ $(function () {
 				}
 			}
 			if (sel.length > 0) {
-				for (let i=0; i<sel.length; i++) {
+				for (var i=0; i<sel.length; i++) {
 					$("#f_mailer_errmsg_label_bg-"+sel[i]).addClass("f_mailer_errmsg_label_bg");
 					$("#f_mailer_errmsg_bg-"+sel[i]).addClass("f_mailer_errmsg_bg");
 					$("#f_mailer_errmsg_border-"+sel[i]).addClass("f_mailer_errmsg_border");
@@ -77,13 +100,13 @@ $(function () {
 			}
 			if (errmsg_list.length > 0) {
 				console.log(errmsg_list);
-				let errmsg_li_style = d.ERRMSG_STYLE_LI != "" ? ' style="' + d.ERRMSG_STYLE_LI + '"' : "";
-				let errmsg_li_class = d.ERRMSG_STYLE_LI_CLASS != "" ? ' class="' + d.ERRMSG_STYLE_LI_CLASS + '"' : "";
-				let errmsg_ul_style = d.ERRMSG_STYLE_UL != ""  ? ' style="' + d.ERRMSG_STYLE_UL + '"' : "";
-				let errmsg_ul_class = d.ERRMSG_STYLE_UL_CLASS != ""  ? ' class="' + d.ERRMSG_STYLE_UL_CLASS + '"' : "";
-				let errmsg_ul_id = d.ERRMSG_STYLE_UL_ID != ""  ? ' id="' + d.ERRMSG_STYLE_UL_ID + '"' : "";
-				let errmsg_html = "<ul"+ errmsg_ul_style + errmsg_ul_class + errmsg_ul_id + ">\n";
-				for (let i=0; i<errmsg_list.length; i++) {
+				var errmsg_li_style = d.ERRMSG_STYLE_LI != "" ? ' style="' + d.ERRMSG_STYLE_LI + '"' : "";
+				var errmsg_li_class = d.ERRMSG_STYLE_LI_CLASS != "" ? ' class="' + d.ERRMSG_STYLE_LI_CLASS + '"' : "";
+				var errmsg_ul_style = d.ERRMSG_STYLE_UL != ""  ? ' style="' + d.ERRMSG_STYLE_UL + '"' : "";
+				var errmsg_ul_class = d.ERRMSG_STYLE_UL_CLASS != ""  ? ' class="' + d.ERRMSG_STYLE_UL_CLASS + '"' : "";
+				var errmsg_ul_id = d.ERRMSG_STYLE_UL_ID != ""  ? ' id="' + d.ERRMSG_STYLE_UL_ID + '"' : "";
+				var errmsg_html = "<ul"+ errmsg_ul_style + errmsg_ul_class + errmsg_ul_id + ">\n";
+				for (var i=0; i<errmsg_list.length; i++) {
 					errmsg_html += "<li" + errmsg_li_style + errmsg_li_class + ">" + errmsg_list[i] + "</li>\n";
 				}
 				errmsg_html += "</ul>";
@@ -92,13 +115,13 @@ $(function () {
 				$("#f_mailer_errmsg_area").html("").hide();
 			}
 		})
-		.fail( (data) => {
+		.fail(function (data) {
 			alert("fail");
 			console.log(data);
 		});
 	});
 
-	$(".btn_submit").on("click", function () {
+	$(".btn_submit_self").on("click", function () {
 		$("#f0").attr("target", "_self");
 		$("#f0").attr("enctype", "application/x-www-form-urlencoded");
 		$("#__token_ignore").val("");
@@ -148,7 +171,7 @@ function file_check() {
 
 	$.ajax({
 		type: "POST",
-		url: "f_mailer.cgi",
+		url: f_mailer_url + "/f_mailer.cgi",
 		dataType: "json",
 		async: false,
 		data: {
@@ -156,38 +179,40 @@ function file_check() {
 			"TEMP" : $("#TEMP").val(),
 			"__token_ignore" : 1,
 			"ajax_file_check"  : 1
-		},
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			alert(textStatus);
-                },
-		success: function(d) {
-
-			$.each(d, function(k, v) {
-				if (k == "__TOTAL__") return true;
-console.log(k);
-				if (v.size > 0) {
-//					$("#"+k).hide();
-					$("#"+k).next("span").remove();
-					$("#"+k).after("<span>"
-						+ (
-							v.size > 1024 * 1024 ? sprintf("%s (%.1fMバイト)", v.name, v.size / 1024 / 1024)
-							: v.size > 1024 ? sprintf("%s (%.1fKバイト)", v.name, v.size / 1024)
-							: sprintf("%s (%dバイト)", v.name, v.size)
-						)
-						+ '　<input type="button" value="削除" id="btn_delete-'
-						+ k + '" class="btn_delete" \/><\/span>' 
-					);
-
-				} else if ($("#"+k)) {
-					$("#"+k).next("span").remove();
-					$("input[type=file]#"+k).after("<span>"
-						+ '<input type="button" value="アップロード" id="btn_upload-'
-						+ k + '" class="btn_upload" \/><\/span>' );
-//					$("#"+k).show();
-				}
-			});
-			$("#TEMP").val(d.TEMP);
 		}
+	})
+	.done(function (d) {
+		$.each(d, function(k, v) {
+			if (k == "__TOTAL__") return true;
+console.log(k);
+			if (v.size > 0) {
+//				$("#"+k).hide();
+				$("#"+k).next("span").remove();
+				$("#"+k).after("<span>"
+					+ (
+						v.size > 1024 * 1024 ? sprintf("%s (%.1fM%s)", v.name, v.size / 1024 / 1024, lang.bytes)
+						: v.size > 1024 ? sprintf("%s (%.1fK%s)", v.name, v.size / 1024, lang.bytes)
+						: sprintf("%s (%d%s)", v.name, v.size, lang.bytes)
+					)
+					+ '　<input type="button" value="' + lang.delete + '" id="btn_delete-'
+					+ k + '" class="btn_delete" \/><\/span>' 
+				);
+
+			} else if ($("#"+k)) {
+				$("#"+k).next("span").remove();
+				$("input[type=file]#"+k).after("<span>"
+					+ '<input type="button" value="' + lang.upload + '" id="btn_upload-'
+					+ k + '" class="btn_upload" \/><\/span>' );
+//				$("#"+k).show();
+			}
+		});
+		$("#TEMP").val(d.TEMP);
+		$(".f_mailer_upload_loading").hide();
+		$(".f_mailer_upload_area").show();
+	})
+	.fail(function (data) {
+		console.log(data);
+		alert(lang.file_check_error);
 	}); 
 
 }

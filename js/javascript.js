@@ -47,22 +47,36 @@ $(function () {
 
 	$(".btn_to_menu").on("click", function () {
 		if ($(this).attr("data-confirm")) {
-			if (confirm("処理を中止して管理メニューに戻ります。よろしいですか？")) location.href = "f_mailer_admin.cgi";
+			Swal.fire({
+				"text": "処理を中止して管理メニューに戻ります。よろしいですか？",
+				"icon": "warning",
+				"showCancelButton": true,
+				"confirmButtonText": "はい",
+				"denyButtonText": "いいえ",
+			})
+			.then(function(result) {
+				if (result.isConfirmed) location.href = "f_mailer_admin.cgi";
+			});
 		} else {
 			location.href = "f_mailer_admin.cgi";
 		}
 	});
 	$(".btn_submit").on("click", function () {
 		var to = $(this).attr("id").match(/btn_submit_to_(\d+)/)[1];
-		var flag = $(this).attr("data-confirm") == 1 ? confirm($(this).attr("data-confirm_message")) : 1;
-		if (flag) {
-			$("#p").val(to);
-			if ($("#confid").get(0)) $("#confid").val($(this).attr("data-confid")); 
-			if ($("#filename").get(0)) $("#filename").val($(this).attr("data-filename")); 
-			if ($("#__token_ignore").get(0)) $("#__token_ignore").val($(this).attr("data-token_ignore") || 0); 
-			if ($("#mode").get(0)) $("#mode").val($(this).attr("data-mode") || 0); 
-			if ($(this).hasClass("upload")) $("#f0").attr("enctype", "multipart/form-data");
-			$("#f0").submit();
+		var __this = $(this);
+		if (__this.attr("data-confirm")) {
+			Swal.fire({
+				"text": __this.attr("data-confirm_message"),
+				"icon": "warning",
+				"showCancelButton": true,
+				"confirmButtonText": "はい",
+				"cancelButtonText": "いいえ",
+			})
+			.then(function(result) {
+				if (result.isConfirmed) __btn_submit(__this, to);
+			});
+		} else {
+			__btn_submit(__this, to);
 		}
 	});
 	$("#buttonset_show_caption").controlgroup();
@@ -79,6 +93,16 @@ $(function () {
 		cond_order_clear();
 	});
 });
+
+function __btn_submit (__this, to) {
+	$("#p").val(to);
+	if ($("#confid").get(0)) $("#confid").val(__this.attr("data-confid")); 
+	if ($("#filename").get(0)) $("#filename").val(__this.attr("data-filename")); 
+	if ($("#__token_ignore").get(0)) $("#__token_ignore").val(__this.attr("data-token_ignore") || 0); 
+	if ($("#mode").get(0)) $("#mode").val(__this.attr("data-mode") || 0); 
+	if (__this.hasClass("upload")) $("#f0").attr("enctype", "multipart/form-data");
+	$("#f0").submit();
+}
 
 function caption_display_sw () {
 	$(".caption").toggle($("#show_caption_1").prop("checked"));
@@ -106,7 +130,10 @@ function cond_order_set (f) {
 			$(sel).val("");
 			$("#order_max").val(eval($("#order_max").val()) - 1);
 		} else {
-			alert(f + " の欄にはすでに数字が入っています。");
+			Swal.fire({
+				"text": f + " の欄にはすでに数字が入っています。",
+				"icon": "error",
+			});
 		}
 	} else {
 		$(sel).val(eval($("#order_max").val()) + 1);

@@ -28,7 +28,9 @@ sub p022 {
 
 	passwd_write($CONF{"session"}->param("login_id"), $FORM{"passwd_new"});
 	my ($cookie_id) = get_cookie("FORM_MAILER_ADMIN_CACHE");
-	set_cookie("FORM_MAILER_ADMIN_CACHE", 30 * 86400, join("!!!", $CONF{"session"}->param("login_id"), $FORM{"passwd_new"})) if $cookie_id ne "";
+	set_cookie("FORM_MAILER_ADMIN_CACHE", [ $CONF{"session"}->param("login_id"), $FORM{"passwd_new"} ], {
+		"Expires" => 30 * 86400,
+	}) if $cookie_id ne "";
 
 	printhtml_admin("$p.html",
 		"errmsg" => \@errmsg,

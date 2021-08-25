@@ -32,6 +32,7 @@ input[type=checkbox] {
 
 input[type=text],
 input[type=tel],
+input[type=number],
 input[type=email],
 input[type=password],
 textarea,
@@ -48,6 +49,7 @@ input[type=password].login {
 }
 input[type=tel].num,
 input[type=email].num,
+input[type=number],
 input[type=text].num {
 	text-align: right;
 /*	padding-right: 2px;
@@ -190,13 +192,15 @@ span.rotate {
 	font-size: 1rem;
 	display: inline-block;
 	margin: 3px;
-	cursor: pointer;
 	border: 2px #669 solid;
 	border-radius: 0.6rem;
 	padding: 1px 6px;
 	background-color: #f6f6ff;
 }
-.btn_s:hover {
+.btn_s:not(:disabled) {
+	cursor: pointer;
+}
+.btn_s:not(:disabled):hover {
 	border-color: #666;
 	background-color: #ffd;
 }
@@ -296,9 +300,12 @@ span.ui-checkboxradio-icon {
 	margin: 0px;
 	padding-left: 30px;
 }
+.f_mailer_upload_area {
+	display: none;
+}
 
 /* PCモード */
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1124px) {
 /* @media screen and (min-width: 2px) { */
 
 	.sp,
@@ -331,7 +338,6 @@ span.ui-checkboxradio-icon {
 		-webkit-appearance: none;
 		display: inline-block;
 		margin: 5px;
-		cursor: pointer;
 		border: 3px #999 solid;
 		border-radius: 0.85rem;
 		padding: 4px 20px;
@@ -339,7 +345,10 @@ span.ui-checkboxradio-icon {
 		font-size: 17px;
 		min-width: 120px;
 	}
-	.btn:hover {
+	.btn:not(:disabled) {
+		cursor: pointer;
+	}
+	.btn:not(:disabled):hover {
 		border: 3px #666 solid;
 		background-color: #ffd;
 	}
@@ -366,10 +375,10 @@ span.ui-checkboxradio-icon {
 		padding-left: 30px;
 	}
 	#contents {
-		width: 1000px;
+		width: 1100px;
 	}
 	#contents #main {
-		width: 1000px;
+		width: 1100px;
 		margin: 20px 0 0;
 		min-height: 10rem;
 	}
@@ -381,7 +390,7 @@ span.ui-checkboxradio-icon {
 		cursor: pointer;
 		display: inline-block;
 		float: left;
-		width: 400px;
+		width: 450px;
 		height: 70px;
 		margin: 20px;
 		padding: 16px;
@@ -426,7 +435,7 @@ span.ui-checkboxradio-icon {
 }
 
 /* スマホモード */
-@media screen and (max-width: 1023px) {
+@media screen and (max-width: 1123px) {
 /* @media screen and (max-width: 1px) { */
 
 	input[type=text],
@@ -497,13 +506,15 @@ span.ui-checkboxradio-icon {
 		font-size: 1rem;
 		display: inline-block;
 		margin: 3px;
-		cursor: pointer;
 		border: 3px #999 solid;
 		border-radius: 0.85rem;
 		padding: 4px 10px;
 		background-color: #f0f0f0;
 	}
-	.btn:hover {
+	.btn:not(:disabled) {
+		cursor: pointer;
+	}
+	.btn:not(:disabled):hover {
 		border-color: #666;
 		background-color: #ffd;
 	}

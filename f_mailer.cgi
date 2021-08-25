@@ -2,7 +2,7 @@
 #BEGIN{ print "Content-type: text/html; charset=utf-8\n\n"; $| =1; open(STDERR, ">&STDOUT"); }
 
 use strict;
-use lib qw(./module ./lib);
+use lib qw(./ ./module ./lib);
 use vars qw($q %FORM %CONF %alt %ERRMSG);
 #use utf8;
 use Encode;
@@ -18,25 +18,31 @@ use String::Util qw(trim);
 use Digest::MD5  qw(md5_hex);
 use URI::Escape;
 use Carp 'verbose';
+use File::Copy;
 $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 sub d { die Dumper @_ }
 $ENV{"PATH"} = "/usr/bin:/usr/sbin:/usr/local/bin:/bin";
 require "f_mailer_lib.pl";
 require "f_mailer_ajax.pl";
 require "f_mailer_condcheck.pl";
+require "f_mailer_login.pl";
 umask 0;
+$CGI::LIST_CONTEXT_WARN = 0;
 
 $q = new CGI;
 %CONF = (setver(), sysconf_read());
 set_errmsg_init();
 
 %FORM = decoding($q);
+### 2021-01-13 PATH_INFOからCONFIDを取得
+login_init();
 error(get_errmsg("000")) unless keys %FORM;
 
 ### 設定ファイルのロード
 my %conf;
 if ($FORM{"CONFID"}) {
 	%conf = conf_read($FORM{"CONFID"});
+	$FORM{"TITLE"} = $conf{"TITLE"};
 } else {
 	error(get_errmsg("003"));
 }
@@ -50,7 +56,7 @@ if (-e qq|./data/confext/ext_$file.pl|) {
 }
 
 %CONF = (%CONF, %conf);
-$CONF{"CGISESSID"} = get_cookie("CGISESSID");
+$CONF{"CGISESSID"} = get_cookie("CGISESSID") || undef;
 $CONF{"session"} = new CGI::Session("driver:File", $CONF{"CGISESSID"}, { "Directory" => "./temp" });
 $CONF{"__token"} = get_sid();
 set_errmsg_init(); ### フォームの使用言語確定後ロード
@@ -67,8 +73,13 @@ ajax_token() if $FORM{"ajax_token"};
 
 %alt = setalt();
 
+### 2021-01-13 ログイン機能
+if (! $FORM{"ajax_checkvalues"} and ! $FORM{"ajax_delete"} and ! $FORM{"ajax_file_check"} and ! $FORM{"ajax_upload"}) {
+	login_proc();
+}
+
 if ($FORM{"FORM"}) {
-	%FORM = (%FORM, %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) });
+	%FORM = (%FORM, %{ $CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|) or {} });
 	form();
 }
 
@@ -119,6 +130,12 @@ sub error_formcheck {
 sub form {
 
 	output_form("FORM");
+
+}
+
+sub login_form {
+
+	output_form("LOGIN");
 
 }
 
@@ -173,12 +190,33 @@ sub sendmail_do {
 	### シリアル番号の取得
 	$FORM{"SERIAL"} = serial_increment($FORM{"CONFID"});
 
+	### ファイル書き出し処理
+	sendmail_file_output() if $CONF{"FILE_OUTPUT"};
+
+	### 2021-01-14 送信済みフラグファイルの書き出し
+	if ($CONF{"SEND_ONCE"}) {
+		if ($CONF{"USE_LOGIN"} == 2) {
+			open(my $fh, ">", qq|data/key/$FORM{"CONFID"}/done/KEY_$FORM{"KEY"}|)
+			 or error(get_errmsg("275", $!));
+			close($fh);
+		} elsif ($CONF{"USE_LOGIN"} == 1) {
+			open(my $fh, ">", qq|data/key/$FORM{"CONFID"}/done/ID_$FORM{"ID"}|)
+			 or error(get_errmsg("275", $!));
+		}
+	}
+
 	### v0.72より、Fromヘッダアドレスの優先切替対応
 	my $sendfrom = $CONF{"SENDFROM_EMAIL_FORCED"} ? ($FORM{"EMAIL"} || $CONF{"SENDFROM"}) : $CONF{"SENDFROM"};
 
 	### フォーム内容メールの送信処理
 	unless ($CONF{"DO_NOT_SEND"}) {
 		my($del_list_ref, %attachdata) = sendmail_get_attachdata();
+
+		### 2021-01-14 添付ファイルをメールに添付しないモードに対応
+		if (! $CONF{"DO_ATTACH"}) {
+			%attachdata = ();
+		}
+
 		my $format = $CONF{"MAIL_FORMAT_TYPE"} ? set_default_mail_format(type=>$CONF{"MAIL_FORMAT_TYPE"}) : $CONF{"FORMAT"};
 		$format =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
@@ -208,6 +246,35 @@ sub sendmail_do {
 				"fromname"	=> $str{"fromname"},
 				"envelope"	=> $envelope,
 			);
+		}
+
+		### 2021-01-14 添付ファイルをサーバ上に保存するモードに対応
+		if ($CONF{"DO_ATTACH"} =~ /^[02]$/) {
+			my $session_id = $CONF{"session"}->id();
+			if (@$del_list_ref) {
+				unless (-d qq|data/att/$FORM{"CONFID"}|) {
+					mkdir(qq|data/att/$FORM{"CONFID"}|, 0777)
+					 or error(get_errmsg("272", $!));
+				}
+			}
+			for my $orig (@$del_list_ref) {
+				(my $orig_s = $orig) =~ s|^./temp/$FORM{"CONFID"}_$session_id-||;
+				my $fmt = $CONF{"ATTACH_DOWNLOAD_FORMAT"};
+				$fmt =~ s/##SERIAL##/$FORM{"SERIAL"}/;
+				$fmt =~ s/##ID##/$FORM{"ID"}/;
+				$fmt =~ s/##FILENAME##/$orig_s/;
+				my($f_base, $ext) = $fmt =~ /^(.+?)(\.[^\.]+)?$/;
+				my $cnt = 0;
+				while (1) {
+					my $copy_to = $cnt > 0 ? qq|$f_base-$cnt$ext| : $fmt;
+					unless (-e qq|data/att/$FORM{"CONFID"}/$copy_to|) {
+						copy($orig, qq|data/att/$FORM{"CONFID"}/$copy_to|)
+						 or error(get_errmsg("273", qq|$orig => data/att/$FORM{"CONFID"}/$copy_to|, $!));
+						last;
+					}
+					$cnt++;
+				}
+			}
 		}
 	}
 
@@ -244,14 +311,12 @@ sub sendmail_do {
 		}
 	}
 
-	### ファイル書き出し処理
-	sendmail_file_output() if $CONF{"FILE_OUTPUT"};
-
 	### 2020-02-21 メール送信をスキップする場合のジャンプ先
 	DONE:
 
-	set_cookie($FORM{"CONFID"}, $CONF{"DENY_DUPL_SEND_MIN"}, 1)
-	 if $CONF{"DENY_DUPL_SEND"};
+	set_cookie($FORM{"CONFID"}, 1, {
+		"Expires" => $CONF{"DENY_DUPL_SEND_MIN"},
+	}) if $CONF{"DENY_DUPL_SEND"};
 
 	### セッションデータクリア
 	$CONF{"session"}->param(qq|formdata-$FORM{"CONFID"}|, {});
