@@ -190,8 +190,37 @@ sub sendmail_do {
 	### シリアル番号の取得
 	$FORM{"SERIAL"} = serial_increment($FORM{"CONFID"});
 
+	### 2021-05-15 添付しないモードのときはメールの値をURLに変換する
+#$FORM{"SERIAL"} = 2;
+#print "Content-type: text/html; charset=utf-8\n\n"; $| =1; open(STDERR, ">&STDOUT");
+#print $CONF{"ATTACH_DOWNLOAD_FORMAT"};
+#print $CONF{"DO_ATTACH"};
+	my %attach_url;
+	if ($CONF{"DO_ATTACH"} eq "0") {
+		for my $d(@{$CONF{"COND"}}) {
+			my ($f, $opt) = @$d;
+#print $f;
+#print Dumper($opt);
+			if ($opt->{"attach"}) {
+				my $fmt = $CONF{"ATTACH_DOWNLOAD_FORMAT"};
+				$fmt =~ s/##SERIAL##/$FORM{"SERIAL"}/g;
+				$fmt =~ s/##ID##/$FORM{"ID"}/g;
+				$fmt =~ s/##FILENAME##/${f}-$FORM{$f}/g;
+				if ($FORM{$f}) {
+#print qq|EXISTS: data/att/$FORM{"CONFID"}/| . uri_escape($fmt);
+					(my $uri = $ENV{"REQUEST_URI"}) =~ s/f_mailer\.cgi/f_mailer_att.cgi/;
+					$attach_url{$f} = ($ENV{"SERVER_PORT"} == 443 ? "https://" : "http://") . $ENV{"HTTP_HOST"} . $uri . qq|?c=$FORM{"CONFID"}&f=| . uri_escape($fmt);
+#				} else {
+#print qq|NOT EXISTS:data/att/$FORM{"CONFID"}/| . uri_escape($fmt);
+				}
+			}
+		}
+	}
+#d($attach_url);
+
+
 	### ファイル書き出し処理
-	sendmail_file_output() if $CONF{"FILE_OUTPUT"};
+	sendmail_file_output("attach_url"=>\%attach_url) if $CONF{"FILE_OUTPUT"};
 
 	### 2021-01-14 送信済みフラグファイルの書き出し
 	if ($CONF{"SEND_ONCE"}) {
@@ -213,12 +242,11 @@ sub sendmail_do {
 		my($del_list_ref, %attachdata) = sendmail_get_attachdata();
 
 		### 2021-01-14 添付ファイルをメールに添付しないモードに対応
-		if (! $CONF{"DO_ATTACH"}) {
+		if ($CONF{"DO_ATTACH"} eq "0") {
 			%attachdata = ();
 		}
-
-		my $format = $CONF{"MAIL_FORMAT_TYPE"} ? set_default_mail_format(type=>$CONF{"MAIL_FORMAT_TYPE"}) : $CONF{"FORMAT"};
-		$format =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
+		my $format = $CONF{"MAIL_FORMAT_TYPE"} ? set_default_mail_format(type=>$CONF{"MAIL_FORMAT_TYPE"}, "attach_url"=>\%attach_url) : $CONF{"FORMAT"};
+		$format =~ s/##([^#]+)##/$attach_url{$1} ? $attach_url{$1} : replace($1,"",\%FORM)/eg;
 		### 2007-8-4 タイトルにもフォーム埋め込み可能とする
 		my $subject = $CONF{"SUBJECT"};
 		$subject =~ s/##([^#]+)##/replace($1,"",\%FORM)/eg;
@@ -349,6 +377,8 @@ sub sendmail_do {
 
 sub sendmail_file_output {
 
+	my %opt = @_;
+
 	return unless @{$CONF{"OUTPUT_FIELDS"}};
 
 	my %dt = get_datetime_for_file_output();
@@ -368,6 +398,12 @@ sub sendmail_file_output {
 	foreach my $field(@{$CONF{"OUTPUT_FIELDS"}}) {
 		$FORM{$field} =~ s/\r\n/\n/g;
 		$FORM{$field} =~ s/\r/\n/g;
+
+		### 2021-05-16 ログ書き出しにもURL変換に対応する
+		if ($opt{"attach_url"}{$field}) {
+			$FORM{$field} = "=HYPERLINK(\"" . $opt{"attach_url"}{$field} . "\")";
+		}
+
 		if ($CONF{"OUTPUT_SEPARATOR"}) {
 			$FORM{$field} =~ s/"/""/g;
 			$FORM2{$field} = qq|"$FORM{$field}"|;
