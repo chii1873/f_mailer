@@ -413,6 +413,10 @@ sub sendmail_file_output {
 			$FORM2{$field} = $FORM{$field};
 			$FORM2{$field} =~ s/\n/$CONF{"NEWLINE_REPLACE"}/g;
 		}
+		### 2021-08-25 CSV出力のとき、0はじまりの整数の冒頭に「=」を付ける
+		if ($CONF{"OUTPUT_SEPARATOR"} eq "1" and $FORM{$field} =~ /^0\d*$/) {
+			$FORM2{$field} = qq|=$FORM2{$field}|;
+		}
 		$FORM2{$field} =~ s/\!\!\!/$CONF{"FIELD_SEPARATOR"} eq '' ? " " : $CONF{"FIELD_SEPARATOR"}/eg;
 	}
 	print $fh join(($CONF{"OUTPUT_SEPARATOR"} ? "," : "\t"),
