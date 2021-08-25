@@ -1,10 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="robots" content="noindex,nofollow">
 <title>##TITLE##</title>
-<link type="text/css" rel="stylesheet" href="css/style.css" />
-<link type="text/css" rel="stylesheet" href="css/style_custom.css" />
+<link type="text/css" rel="stylesheet" href="css/style.css">
+<link type="text/css" rel="stylesheet" href="css/style_custom.css">
 <script type="text/javascript" src="js/jquery-3.3.1.js"></script>
 <script type="text/javascript" src="js/sprintf.js"></script>
 <script type="text/javascript" src="js/f_mailer.js"></script>
@@ -18,8 +21,8 @@
 <div id="main">
 
 <p>
-	送信内容を確認します。<br />
-	内容が正しい場合は<span class="b">送信</span>ボタンを押してください。<br />
+	送信内容を確認します。<br>
+	内容が正しい場合は<span class="b">送信</span>ボタンを押してください。<br>
 	訂正する場合は<span class="b">戻る</span>ボタンで前のページへ戻って訂正してください。
 </p>
 
@@ -30,15 +33,17 @@
 <!-- ###### 以下のタグは必ず指定してください ###### -->
 <form action="f_mailer.cgi" method="post" id="f0">
 <fieldset>
-<input type="hidden" name="CONFID" value="##CONFID##" id="CONFID" />
-<input type="hidden" name="TEMP" value="##TEMP##" id="TEMP" />
-<input type="hidden" name="__token" value="" id="__token" />
-<input type="hidden" name="__token_ignore" value="" id="__token_ignore" />
-<input type="hidden" name="FORM" value="" id="FORM" />
-<input type="hidden" name="SEND_FORCED" value="1" id="SEND_FORCED" />
+<input type="hidden" name="CONFID" value="##CONFID##" id="CONFID">
+<input type="hidden" name="TEMP" value="##TEMP##" id="TEMP">
+<input type="hidden" name="__token" value="" id="__token">
+<input type="hidden" name="__token_ignore" value="" id="__token_ignore">
+<input type="hidden" name="FORM" value="" id="FORM">
+<input type="hidden" name="SEND_FORCED" value="1" id="SEND_FORCED">
 
-<input type="button" value="送　信" class="btn btn_send_default" />
-<input type="button" value="戻　る" class="btn btn_back_default" />
+<p>
+	<input type="button" value="送信" class="btn btn_send_default">
+	<input type="button" value="戻る" class="btn btn_back_default">
+</p>
 </fieldset>
 </form>
 <!-- ###### ここまで ############################### -->

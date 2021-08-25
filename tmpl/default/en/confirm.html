@@ -1,23 +1,29 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="robots" content="noindex,nofollow">
 <title>##TITLE##</title>
-<link type="text/css" rel="stylesheet" href="css/style.css" />
-<link type="text/css" rel="stylesheet" href="css/style_custom.css" />
+<link type="text/css" rel="stylesheet" href="css/style.css">
+<link type="text/css" rel="stylesheet" href="css/style_custom.css">
+<script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="js/sprintf.js"></script>
+<script type="text/javascript" src="js/f_mailer.js"></script>
 </head>
 <body>
 <div id="header">
 &nbsp;
 </div>
-
+<div id="page_title">##TITLE##</div>
+<div id="contents">
 <div id="main">
 
-<h2>##TITLE##</h2>
-
-<p>Please confirm the following.<br />
-Click <b>Send</b> button if okay.<br />
-Click <b>Back</b> button to make a correction.
+<p>
+	Please confirm the following.<br>
+	Click <strong>SEND</strong> button if okay.<br>
+	Click <strong>BACK</strong> button to make a correction.
 </p>
 
 <table class="tbl">
@@ -25,18 +31,24 @@ Click <b>Back</b> button to make a correction.
 </table>
 
 <!-- ###### 以下のタグは必ず指定してください ###### -->
-<form action="f_mailer.cgi" method="post">
+<form action="f_mailer.cgi" method="post" id="f0">
 <fieldset>
-<input type="hidden" name="CONFID" value="##CONFID##" />
-<input type="hidden" name="TEMP" value="##TEMP##" />
-<input type="hidden" name="SEND_FORCED" value="1" />
+<input type="hidden" name="CONFID" value="##CONFID##" id="CONFID">
+<input type="hidden" name="TEMP" value="##TEMP##" id="TEMP">
+<input type="hidden" name="__token" value="" id="__token">
+<input type="hidden" name="__token_ignore" value="" id="__token_ignore">
+<input type="hidden" name="FORM" value="" id="FORM">
+<input type="hidden" name="SEND_FORCED" value="1" id="SEND_FORCED">
 
-<input type="submit" value="Send" />
-<input type="button" value="Back" onclick="history.back()" />
+<p>
+	<input type="button" value="SEND" class="btn btn_send_default">
+	<input type="button" value="BACK" class="btn btn_back_default">
+</p>
 </fieldset>
 </form>
 <!-- ###### ここまで ############################### -->
 
+</div>
 </div>
 
 <div id="footer">
