@@ -1035,7 +1035,7 @@ STR
 		next if $CONF{"BLANK_SKIP"} and $FORM{$fname} eq '';
 		next if $skip{$fname};
 		my $name_dsp = $cond->{"alt"} || $fname;
-		my $value_dsp = $FORM{$fname};
+		my $value_dsp = $opt{"attach_url"}{$fname} || $FORM{$fname};
 
 		if ($opt{"type"} == 1) {
 			$value_dsp =~ s/\!\!\!|\n/\n$indent/g;

@@ -121,7 +121,7 @@ sub condcheck_init {
 				if ($f_value =~ /$cond/) {
 					push(@errmsg, set_errmsg(key=>"regex", f_name=>($alt_name or $f_name)));
 				}
-			},
+			};
 			push(@errmsg, set_errmsg(key=>"regex_eval_error",
 			 f_name=>($alt_name or $f_name), eval=>$@)) if $@;
 			($f_value, @errmsg);
@@ -133,7 +133,7 @@ sub condcheck_init {
 				if ($f_value !~ /$cond/) {
 					push(@errmsg, set_errmsg(key=>"regex2", f_name=>($alt_name or $f_name)));
 				}
-			},
+			};
 			push(@errmsg, set_errmsg(key=>"regex_eval_error",
 			 f_name=>($alt_name or $f_name), eval=>$@)) if $@;
 			($f_value, @errmsg);
