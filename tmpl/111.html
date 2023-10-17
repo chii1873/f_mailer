@@ -845,6 +845,10 @@
 		<label><input type="radio" name="OUTPUT_SEPARATOR" value="1" id="OUTPUT_SEPARATOR_1">カンマ区切り形式(CSV)</label><br>
 		<label><input type="radio" name="OUTPUT_SEPARATOR" value="0" id="OUTPUT_SEPARATOR_0">タブ区切り形式(TSV)</label><br>
 		<label><input type="radio" name="OUTPUT_SEPARATOR" value="2" id="OUTPUT_SEPARATOR_2">JSON形式</label>
+		<ul class="caption">
+			<li>カンマ区切り形式(CSV)を選択した場合、Excelにて文字化けせずに開けるように、ファイルにBOMを付加します。</li>
+			<li>カンマ区切り形式(CSV)を選択した場合、フィールド値が0から始まる整数だった場合は、=&quot;0123&quot; のように出力し、文字列として表示されるようにします。</li>
+		</ul>
 	</td>
 </tr>
 <tr>
