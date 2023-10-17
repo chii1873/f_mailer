@@ -866,6 +866,38 @@
 		</ul>
 	</td>
 </tr>
+<tr>
+	<th>自動削除<span class="fn">(OUTPUT_AUTO_DELETE)</span></th>
+	<td>
+		<select name="OUTPUT_AUTO_DELETE" id="OUTPUT_AUTO_DELETE">
+		<option value="0">削除しない</option>
+		<option value="1">1日経過したら削除する</option>
+		<option value="2">2日経過したら削除する</option>
+		<option value="3">3日経過したら削除する</option>
+		<option value="4">4日経過したら削除する</option>
+		<option value="5">5日経過したら削除する</option>
+		<option value="6">6日経過したら削除する</option>
+		<option value="7">7日経過したら削除する</option>
+		<option value="8">8日経過したら削除する</option>
+		<option value="9">9日経過したら削除する</option>
+		<option value="10">10日経過したら削除する</option>
+		<option value="15">15日経過したら削除する</option>
+		<option value="20">20日経過したら削除する</option>
+		<option value="30">30日経過したら削除する</option>
+		<option value="60">60日経過したら削除する</option>
+		<option value="90">90日経過したら削除する</option>
+		<option value="120">120日経過したら削除する</option>
+		<option value="180">180日経過したら削除する</option>
+		<option value="365">365日経過したら削除する</option>
+		</select>
+		<ul class="caption">
+			<li>一定期間を経過した送信データファイルを自動で削除するかどうかを指定します。</li>
+			<li>メールの送信前のタイミングで、最終更新日時が上記で指定した日数より前であった送信データファイルを削除します。</li>
+			<li>削除対象のファイルと、書き出すファイルが同じである場合は、ファイルの削除が先に行われ、その後新規1件だけのファイルが新たに生成されます。</li>
+			<li>送信データを書き出さない設定にしているときは自動削除は行われません。</li>
+		</ul>
+	</td>
+</tr>
 </table>
 
 </td></tr>

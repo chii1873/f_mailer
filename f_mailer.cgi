@@ -379,6 +379,18 @@ sub sendmail_file_output {
 
 	my %opt = @_;
 
+	### 2021-07-21 自動削除機能
+	if ($CONF{"OUTPUT_AUTO_DELETE"} > 0) {
+		my $time = time;
+		opendir(my $dir, qq|./data/output/$FORM{"CONFID"}|);
+		for my $file ( grep { -f qq|./data/output/$FORM{"CONFID"}/$_| } readdir($dir) ) {
+			my $mtime = (stat(qq|./data/output/$FORM{"CONFID"}/$file|))[9];
+			if (int(($time - $mtime) / 86400) >= $CONF{"OUTPUT_AUTO_DELETE"}) {
+				unlink(qq|./data/output/$FORM{"CONFID"}/$file|);
+			}
+		}
+	}
+
 	return unless @{$CONF{"OUTPUT_FIELDS"}};
 
 	my %dt = get_datetime_for_file_output();
