@@ -677,7 +677,8 @@ sub mk_errmsg {
 	}
 	my $errmsg = "";
 	if (@errmsg_list) {
-		$errmsg = qq|<ul$errmsg_ul_style$errmsg_ul_class$errmsg_ul_id>\n| . join("\n", map { qq|<li$errmsg_li_style$errmsg_li_class>$_</li>| } map { h($_) } @errmsg_list) .qq|\n</ul>|;
+#		$errmsg = qq|<ul$errmsg_ul_style$errmsg_ul_class$errmsg_ul_id>\n| . join("\n", map { qq|<li$errmsg_li_style$errmsg_li_class>$_</li>| } map { h($_) } @errmsg_list) .qq|\n</ul>|;
+		$errmsg = qq|<ul$errmsg_ul_style$errmsg_ul_class$errmsg_ul_id>\n| . join("\n", map { qq|<li$errmsg_li_style$errmsg_li_class>$_</li>| } map { $_ } @errmsg_list) .qq|\n</ul>|;
 	}
 	return $errmsg . $errmsg_js;
 
@@ -1122,7 +1123,7 @@ sub setver {
 ##############################################
 	my %PROD = (
 		prod_name => q{FORM MAILER},
-		version   => q{0.8pre210825},
+		version   => q{0.8pre231017},
 		a_email   => q{info@psl.ne.jp},
 		a_url     => q{https://www.psl.ne.jp/},
 		copyright => q{&copy;1997-2021},
